@@ -69,9 +69,9 @@
             font-size: inherit;
         }
         .copy-button {
-            position: absolute;
+            position: sticky;
             top: 0.5rem;
-            right: 0.5rem;
+            margin: 0 7px -35px auto;
             background-color: #334155; /* slate-700 */
             color: #cbd5e1; /* slate-300 */
             border: 1px solid #475569; /* slate-600 */
@@ -98,7 +98,7 @@
 <body class="bg-slate-900 text-white font-sans flex flex-col h-screen antialiased">
 
     <!-- Header -->
-    <header class="p-4 bg-slate-800 border-b border-slate-700 shadow-md flex-shrink-0 flex justify-between items-center">
+    <header class="p-1 bg-slate-800 border-b border-slate-700 shadow-md flex-shrink-0 flex justify-between items-center">
         <div class="text-left">
             <h1 class="text-xl font-bold text-white">Gemini AI Chatbox</h1>
             <div class="flex items-center gap-2">
@@ -122,13 +122,13 @@
     </header>
 
     <!-- Chat Log -->
-    <main id="chat-log" class="flex-1 overflow-y-auto p-4 md:p-6 space-y-4">
+    <main id="chat-log" class="flex-1 overflow-y-auto p-1 md:p-1 space-y-4">
         <!-- Messages will be dynamically inserted here -->
     </main>
     
     <!-- Footer with Input Area -->
-    <footer class="p-4 md:p-6 bg-slate-900 border-t border-slate-700 flex-shrink-0">
-        <div class="w-full max-w-[95%] mx-auto">
+    <footer class="p-1 md:p-1 bg-slate-900 border-t border-slate-700 flex-shrink-0">
+        <div class="w-full max-w-[100%] mx-auto">
             <!-- Typing Indicator -->
             <div id="typing-indicator" class="hidden flex items-end gap-2 justify-start mb-4">
                 <div class="flex-shrink-0">
@@ -144,10 +144,10 @@
             <div id="error-message" class="text-red-400 text-center text-sm mb-2 hidden p-3 bg-red-900/50 rounded-lg"></div>
         </div>
 
-        <form id="chat-form" class="w-full max-w-[95%] mx-auto">
-            <div class="relative flex items-center bg-slate-800 rounded-full border border-slate-700 focus-within:ring-2 focus-within:ring-blue-500 transition-all duration-200">
+        <form id="chat-form" class="w-full max-w-[100%] mx-auto">
+            <div class="relative flex items-center bg-slate-800 rounded-xl border border-slate-700 focus-within:ring-2 focus-within:ring-blue-500 transition-all duration-200">
                 <textarea id="chat-input" placeholder="Type your message..." rows="1" class="flex-1 bg-transparent text-white placeholder-slate-400 p-4 focus:outline-none disabled:opacity-50 w-full"></textarea>
-                <button id="send-button" type="submit" class="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-blue-600 text-white hover:bg-blue-500 disabled:bg-slate-600 disabled:cursor-not-allowed transition-colors">
+                <button id="send-button" type="submit" class="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-xl bg-blue-600 text-white hover:bg-blue-500 disabled:bg-slate-600 disabled:cursor-not-allowed transition-colors">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6"><path d="M3.478 2.405a.75.75 0 00-.926.94l2.432 7.905H13.5a.75.75 0 010 1.5H4.984l-2.432 7.905a.75.75 0 00.926.94 60.519 60.519 0 0018.445-8.986.75.75 0 000-1.218A60.517 60.517 0 003.478 2.405z"></path></svg>
                 </button>
             </div>
@@ -366,7 +366,6 @@
                 const wrapper = document.createElement('div');
                 wrapper.className = 'code-block-wrapper';
                 
-                const buttonWrapper = document.createElement('div');
                 const preWrapper = document.createElement('div');
 
                 block.parentNode.insertBefore(wrapper, block);
@@ -382,9 +381,8 @@
                     }).catch(err => { button.textContent = 'Failed!'; });
                 });
                 
-                buttonWrapper.appendChild(button);
                 preWrapper.appendChild(block);
-                wrapper.appendChild(buttonWrapper);
+                wrapper.appendChild(button);
                 wrapper.appendChild(preWrapper);
             });
         }
@@ -399,7 +397,8 @@
             const bubbleClasses = isUser ? ['bg-blue-600', 'rounded-br-none'] : ['bg-slate-700', 'rounded-bl-none'];
             messageWrapper.classList.add(isUser ? 'justify-end' : 'justify-start');
             const textDiv = document.createElement('div');
-            textDiv.classList.add('max-w-md', 'md:max-w-lg', 'lg:max-w-2xl', 'px-4', 'py-3', 'rounded-2xl', 'text-white', 'prose', ...bubbleClasses);
+            textDiv.classList.add('px-4', 'py-3', 'rounded-2xl', 'text-white', 'prose', ...bubbleClasses);
+            textDiv.style.maxWidth = '85vw';
             textDiv.innerHTML = marked.parse(text);
             const iconDiv = document.createElement('div');
             iconDiv.classList.add('flex-shrink-0');
@@ -581,19 +580,6 @@
             chatInput.style.height = 'auto';
             const newHeight = Math.min(chatInput.scrollHeight, 200); // Max height of 200px on input
             chatInput.style.height = (newHeight) + 'px';
-        });
-
-        chatInput.addEventListener('focus', () => {
-            const currentHeight = Math.min(chatInput.scrollHeight, 200);
-            const focusHeight = Math.max(120, currentHeight); // Expand to 120px or current height
-            chatInput.style.height = focusHeight + 'px';
-        });
-
-        chatInput.addEventListener('blur', () => {
-            // Let the input event handler manage the height on blur
-             chatInput.style.height = 'auto';
-             const newHeight = Math.min(chatInput.scrollHeight, 200);
-             chatInput.style.height = (newHeight) + 'px';
         });
 
         settingsButton.addEventListener('click', async () => {
