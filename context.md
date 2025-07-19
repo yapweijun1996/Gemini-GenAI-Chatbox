@@ -9,6 +9,7 @@ This is a single-file, serverless chat application built with vanilla HTML, CSS,
 *   **Persistent Chat History:** Chat history is stored locally in the user's browser using IndexedDB, allowing conversations to be saved between sessions.
 *   **Settings Configuration:** A modal allows users to configure their Gemini API key and select the AI model to use.
 *   **Markdown Rendering:** The chat log renders Markdown, including syntax highlighting for code blocks.
+*   **Image Uploads:** Users can attach and send images to the AI, which supports vision-enabled models.
 *   **Responsive Design:** The interface is styled with Tailwind CSS for a modern and responsive layout.
 
 ## Technology Stack
