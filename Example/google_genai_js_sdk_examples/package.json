@@ -1,0 +1,10 @@
+
+{
+  "name": "google-genai-js-examples",
+  "version": "1.0.0",
+  "main": "example_basic.js",
+  "license": "MIT",
+  "dependencies": {
+    "@google/generative-ai": "^0.1.0"
+  }
+}

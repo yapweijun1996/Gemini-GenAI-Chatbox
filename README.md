@@ -1,18 +1,20 @@
 # Gemini AI Chatbox
 
-Welcome to the Gemini AI Chatbox! This is a simple, single-page web application that allows you to chat with Google's Gemini AI. It's built with vanilla HTML, CSS, and JavaScript, making it a great project for learning about web development and API integration.
+Welcome to the Gemini AI Chatbox! This is a simple, single-page, serverless web application that allows you to chat with Google's Gemini AI. It's built entirely within a single `index.html` file using vanilla HTML, CSS (via Tailwind CSS CDN), and JavaScript, making it a great project for learning about web development and API integration without requiring any build steps.
 
 ## Features
 
-*   **Direct Google Gemini API Integration:** Chat directly with the Gemini AI.
-*   **Persistent Chat History:** Your conversations are saved in your browser, so you can pick up where you left off.
+*   **All-in-One `index.html`:** The entire application is self-contained in a single file for maximum portability.
+*   **Direct Google Gemini API Integration:** Chat directly with the Gemini AI from the client-side.
+*   **Persistent Chat History:** Your conversations are saved in your browser's IndexedDB, so you can pick up where you left off.
 *   **Easy API Key Setup:** A settings modal makes it simple to add and manage your Gemini API keys.
+*   **API Key Fallback:** If you provide multiple API keys, the app will automatically try the next one if a request fails.
 *   **Markdown Support:** The chat displays responses in Markdown, with code blocks and syntax highlighting.
-*   **Responsive Design:** The chatbox looks great on both desktop and mobile devices.
+*   **Responsive Design:** The chatbox looks great on both desktop and mobile devices thanks to Tailwind CSS.
 
 ## How to Use
 
-Since this is a simple project with no server-side components, you can run it directly in your web browser.
+Since this is a simple project with no server-side components or build process, you can run it directly in your web browser.
 
 1.  **Clone the repository:**
     ```bash
@@ -49,7 +51,7 @@ The HTML section defines the structure of the chatbox, including:
 
 ### CSS
 
-The CSS is written using Tailwind CSS classes directly in the HTML, with a small `<style>` block for custom styles like the scrollbar and Markdown formatting. This approach is great for rapid prototyping.
+The CSS is written using Tailwind CSS classes directly in the HTML, loaded from a CDN. A small `<style>` block is included for custom styles like the scrollbar and Markdown formatting. This approach is great for rapid prototyping and keeping everything in one file.
 
 ### JavaScript
 
@@ -57,14 +59,9 @@ The JavaScript code is located inside a `<script type="module">` tag at the end 
 
 *   **DOM Elements:** Variables are defined to get references to the important HTML elements.
 *   **State Management:** Variables like `apiKeys`, `currentKeyIndex`, and `isLoading` keep track of the application's state.
-*   **IndexedDB:** The application uses IndexedDB to store chat messages and settings. The `openDb`, `dbGet`, `dbPut`, and `dbClear` functions handle all database operations.
+*   **IndexedDB:** The application uses IndexedDB to store chat messages and settings. Helper functions `openDb`, `dbGet`, `dbPut`, `dbClear`, etc., handle all database operations.
 *   **Event Listeners:** Event listeners are set up for form submissions, button clicks, and input events to make the application interactive.
-*   **Core Logic:** The `handleSendMessage` and `sendMessageWithFallback` functions are the heart of the application, handling the process of sending a user's message to the Gemini API and displaying the response.
-
-## Potential Improvements
-
-*   **Code Organization:** Separate the HTML, CSS, and JavaScript into their own files (`index.html`, `style.css`, `script.js`) for better organization.
-*   **JavaScript Modules:** Break the JavaScript code into smaller, more focused modules (e.g., for database interactions, UI updates, and API communication).
+*   **Core Logic:** The `handleSendMessage` and `sendMessageWithFallback` functions are the heart of the application, handling the process of sending a user's message to the Gemini API and displaying the response, with a mechanism to rotate keys on failure.
 
 ## Demo
 
@@ -73,4 +70,3 @@ https://yapweijun1996.github.io/Gemini-GenAI-Chatbox/
 ## Preview
 
 <img width="1440" height="798" alt="Screenshot 2025-07-19 at 10 39 30 PM" src="https://github.com/user-attachments/assets/5b6a12e7-0bdf-4ff0-8877-7a0531ca2e75" />
-
