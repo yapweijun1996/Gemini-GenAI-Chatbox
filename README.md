@@ -65,3 +65,12 @@ The JavaScript code is located inside a `<script type="module">` tag at the end 
 
 *   **Code Organization:** Separate the HTML, CSS, and JavaScript into their own files (`index.html`, `style.css`, `script.js`) for better organization.
 *   **JavaScript Modules:** Break the JavaScript code into smaller, more focused modules (e.g., for database interactions, UI updates, and API communication).
+
+## Demo
+
+https://yapweijun1996.github.io/Gemini-GenAI-Chatbox/
+
+## Preview
+
+<img width="1440" height="798" alt="Screenshot 2025-07-19 at 10 39 30 PM" src="https://github.com/user-attachments/assets/5b6a12e7-0bdf-4ff0-8877-7a0531ca2e75" />
+
