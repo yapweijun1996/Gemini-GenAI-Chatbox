@@ -17,7 +17,8 @@
   "license": "ISC",
   "devDependencies": {
     "vite": "^7.0.5",
-    "vite-plugin-singlefile": "^2.3.0"
+    "vite-plugin-singlefile": "^2.3.0",
+    "vite-plugin-static-copy": "^3.1.1"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1"
