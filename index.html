@@ -39,14 +39,13 @@
         }
         /* Styling for code blocks to work with highlight.js */
         .prose pre {
+            position: relative;
             background-color: #282c34; /* Match atom-one-dark background */
             border: 1px solid #334155; /* slate-700 */
             border-radius: 0.5rem;
             padding: 1rem;
             overflow-x: auto;
             font-size: 0.9em;
-            display: flex;
-            flex-direction: column;
         }
         .prose code {
             background-color: #334155; /* slate-700 */
@@ -63,8 +62,9 @@
             font-size: inherit;
         }
         .copy-button {
-            align-self: flex-end;
-            margin-top: 0.75rem;
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
             background-color: #334155; /* slate-700 */
             color: #cbd5e1; /* slate-300 */
             border: 1px solid #475569; /* slate-600 */
