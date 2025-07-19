@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gemini AI Chatbox</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/ua-parser-js/dist/ua-parser.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+
+    <style>
+        #chat-log::-webkit-scrollbar { width: 8px; }
+        #chat-log::-webkit-scrollbar-track { background: #1e293b; }
+        #chat-log::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+        #chat-log::-webkit-scrollbar-thumb:hover { background: #64748b; }
+        textarea { 
+            resize: none; 
+            transition: height 0.2s ease-in-out;
+        }
+        
+        /* Markdown Styles */
+        .prose {
+            color: #e2e8f0; /* slate-200 */
+        }
+        .prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6 {
+            color: #f8fafc; /* slate-50 */
+            margin-top: 1.2em;
+            margin-bottom: 0.6em;
+        }
+        .prose a { color: #60a5fa; /* blue-400 */ text-decoration: underline; }
+        .prose strong { color: #f1f5f9; /* slate-100 */ }
+        .prose ul, .prose ol { margin-left: 1.5rem; }
+        .prose li { margin-bottom: 0.25em; }
+        .prose blockquote {
+            border-left: 4px solid #475569; /* slate-600 */
+            padding-left: 1rem;
+            margin-left: 0;
+            color: #94a3b8; /* slate-400 */
+            font-style: italic;
+        }
+        /* Styling for code blocks to work with highlight.js */
+        .prose pre {
+            background-color: #282c34; /* Match atom-one-dark background */
+            border: 1px solid #334155; /* slate-700 */
+            border-radius: 0.5rem;
+            padding: 1rem;
+            overflow-x: auto;
+            font-size: 0.9em;
+        }
+        .code-block-wrapper {
+            position: relative;
+            margin-top: 1.2em;
+            margin-bottom: 1.2em;
+        }
+        .prose code {
+            background-color: #334155; /* slate-700 */
+            color: #f1f5f9; /* slate-100 */
+            border-radius: 0.25rem;
+            padding: 0.1em 0.3em;
+            font-size: 0.9em;
+        }
+        /* Let highlight.js control the code styles inside <pre> */
+        .prose pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+            font-size: inherit;
+        }
+        .copy-button {
+            position: sticky;
+            top: 0.5rem;
+            margin: 0 7px -35px auto;
+            background-color: #334155; /* slate-700 */
+            color: #cbd5e1; /* slate-300 */
+            border: 1px solid #475569; /* slate-600 */
+            border-radius: 0.375rem;
+            padding: 0.25rem 0.5rem;
+            font-size: 0.75rem;
+            cursor: pointer;
+            opacity: 0.5;
+            transition: opacity 0.2s, background-color 0.2s, color 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            z-index: 10;
+        }
+        .code-block-wrapper:hover .copy-button {
+            opacity: 1;
+        }
+        .copy-button:hover {
+            background-color: #475569; /* slate-600 */
+            color: #f1f5f9; /* slate-100 */
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-white font-sans flex flex-col h-screen antialiased">
+
+    <!-- Header -->
+    <header class="p-1 bg-slate-800 border-b border-slate-700 shadow-md flex-shrink-0 flex justify-between items-center">
+        <div class="text-left">
+            <h1 class="text-xl font-bold text-white">Gemini AI Chatbox</h1>
+            <div class="flex items-center gap-2">
+                <p class="text-sm text-slate-400">Your context-aware, persistent AI assistant</p>
+                <span id="current-model" class="text-xs bg-slate-700 text-slate-300 px-2 py-0.5 rounded-full"></span>
+            </div>
+        </div>
+        <div class="flex items-center gap-2">
+            <button id="settings-button" class="p-2 rounded-full hover:bg-slate-700 transition-colors" aria-label="Settings">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.003.827c-.293.24-.438.613-.438.995s.145.755.438.995l1.003.827c.424.35.534.954.26 1.431l-1.296 2.247a1.125 1.125 0 0 1-1.37.49l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 0 1-.22.128c-.332.183-.582.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.063-.374-.313-.686-.645-.87a6.52 6.52 0 0 1-.22-.127c-.324-.196-.72-.257-1.075-.124l-1.217.456a1.125 1.125 0 0 1-1.37-.49l-1.296-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.292-.24.437-.613.437-.995s-.145-.755-.438-.995l-1.004-.827a1.125 1.125 0 0 1-.26-1.431l1.296-2.247a1.125 1.125 0 0 1 1.37-.49l1.217.456c.355.133.75.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.213-1.28Z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                </svg>
+            </button>
+            <button id="clear-chat-button" class="p-2 rounded-full hover:bg-slate-700 transition-colors" aria-label="Clear Chat">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                </svg>
+            </button>
+        </div>
+    </header>
+
+    <!-- Chat Log -->
+    <main id="chat-log" class="flex-1 overflow-y-auto p-1 md:p-1 space-y-4">
+        <!-- Messages will be dynamically inserted here -->
+    </main>
+    
+    <!-- Footer with Input Area -->
+    <footer class="p-1 md:p-1 bg-slate-900 border-t border-slate-700 flex-shrink-0">
+        <div class="w-full max-w-[100%] mx-auto">
+            <!-- Typing Indicator -->
+            <div id="typing-indicator" class="hidden flex items-end gap-2 justify-start mb-4">
+                <div class="flex-shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-8 h-8 text-slate-400"><path fill-rule="evenodd" d="M4.5 3.75a3 3 0 00-3 3v10.5a3 3 0 003 3h15a3 3 0 003-3V6.75a3 3 0 00-3-3h-15zm4.125 3.375a.75.75 0 000 1.5h6.75a.75.75 0 000-1.5h-6.75zm0 3.75a.75.75 0 000 1.5h6.75a.75.75 0 000-1.5h-6.75zm0 3.75a.75.75 0 000 1.5h6.75a.75.75 0 000-1.5h-6.75z" clip-rule="evenodd"></path></svg>
+                </div>
+                <div class="bg-slate-700 px-4 py-3 rounded-2xl rounded-bl-none flex items-center space-x-1.5">
+                    <span class="w-2 h-2 bg-slate-400 rounded-full animate-pulse [animation-delay:-0.3s]"></span>
+                    <span class="w-2 h-2 bg-slate-400 rounded-full animate-pulse [animation-delay:-0.15s]"></span>
+                    <span class="w-2 h-2 bg-slate-400 rounded-full animate-pulse"></span>
+                </div>
+            </div>
+            <!-- Error Message -->
+            <div id="error-message" class="text-red-400 text-center text-sm mb-2 hidden p-3 bg-red-900/50 rounded-lg"></div>
+        </div>
+
+        <form id="chat-form" class="w-full max-w-[100%] mx-auto">
+            <div class="relative flex items-center bg-slate-800 rounded-xl border border-slate-700 focus-within:ring-2 focus-within:ring-blue-500 transition-all duration-200">
+                <textarea id="chat-input" placeholder="Type your message..." rows="1" class="flex-1 bg-transparent text-white placeholder-slate-400 p-4 focus:outline-none disabled:opacity-50 w-full"></textarea>
+                <button id="send-button" type="submit" class="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-xl bg-blue-600 text-white hover:bg-blue-500 disabled:bg-slate-600 disabled:cursor-not-allowed transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6"><path d="M3.478 2.405a.75.75 0 00-.926.94l2.432 7.905H13.5a.75.75 0 010 1.5H4.984l-2.432 7.905a.75.75 0 00.926.94 60.519 60.519 0 0018.445-8.986.75.75 0 000-1.218A60.517 60.517 0 003.478 2.405z"></path></svg>
+                </button>
+            </div>
+        </form>
+    </footer>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="fixed inset-0 bg-black/70 flex items-center justify-center p-4 hidden z-50">
+        <div class="bg-slate-800 rounded-lg shadow-xl p-6 w-full max-w-md border border-slate-700">
+            <h2 class="text-xl font-bold mb-4">Settings</h2>
+            <div class="space-y-4">
+                <div>
+                    <label for="api-key-input" class="block text-sm font-medium text-slate-300 mb-2">Google Gemini API Keys</label>
+                    <textarea id="api-key-input" rows="4" class="w-full bg-slate-900 border border-slate-600 rounded-md p-2 text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Enter one or more API keys, each on a new line..."></textarea>
+                    <p class="text-xs text-slate-400 mt-2">Your keys are obfuscated and saved in your browser's IndexedDB. The app will automatically rotate to the next key if one fails.</p>
+                </div>
+                 <div>
+                    <label for="model-select" class="block text-sm font-medium text-slate-300 mb-2">AI Model</label>
+                    <select id="model-select" class="w-full bg-slate-900 border border-slate-600 rounded-md p-2 text-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        <option value="gemini-2.5-flash">Gemini 2.5 Flash (Fast & Recommended)</option>
+                        <option value="gemini-2.5-pro">Gemini 2.5 Pro</option>
+                    </select>
+                </div>
+            </div>
+            <div class="mt-6 flex justify-end gap-4">
+                <button id="cancel-settings-button" class="px-4 py-2 rounded-md bg-slate-600 hover:bg-slate-500 transition-colors">Cancel</button>
+                <button id="save-settings-button" class="px-4 py-2 rounded-md bg-blue-600 hover:bg-blue-500 transition-colors font-semibold">Save and Reload</button>
+            </div>
+        </div>
+    </div>
+
+
+    <script type="module">
+        import { GoogleGenAI } from "https://esm.sh/@google/genai@^1.10.0";
+
+        // --- Constants ---
+        const ENCRYPTION_KEY = "your-super-secret-key"; // A simple key for obfuscation
+
+        // --- DOM Elements ---
+        const chatLog = document.getElementById('chat-log');
+        const chatForm = document.getElementById('chat-form');
+        const chatInput = document.getElementById('chat-input');
+        const sendButton = document.getElementById('send-button');
+        const typingIndicator = document.getElementById('typing-indicator');
+        const errorMessageContainer = document.getElementById('error-message');
+        const settingsButton = document.getElementById('settings-button');
+        const clearChatButton = document.getElementById('clear-chat-button');
+        const settingsModal = document.getElementById('settings-modal');
+        const apiKeyInput = document.getElementById('api-key-input');
+        const saveSettingsButton = document.getElementById('save-settings-button');
+        const cancelSettingsButton = document.getElementById('cancel-settings-button');
+        const modelSelect = document.getElementById('model-select');
+        const currentModelSpan = document.getElementById('current-model');
+
+        // --- State ---
+        let apiKeys = [];
+        let currentKeyIndex = 0;
+        let isLoading = false;
+
+        // --- SVGs ---
+        const userIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-8 h-8 text-slate-400"><path fill-rule="evenodd" d="M18.685 19.097A9.723 9.723 0 0021.75 12c0-5.385-4.365-9.75-9.75-9.75S2.25 6.615 2.25 12a9.723 9.723 0 003.065 7.097A9.716 9.716 0 0012 21.75a9.716 9.716 0 006.685-2.653zm-12.54-1.285A7.486 7.486 0 0112 15a7.486 7.486 0 015.855 2.812A8.224 8.224 0 0112 20.25a8.224 8.224 0 01-5.855-2.438zM15.75 9a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" clip-rule="evenodd"></path></svg>`;
+        const aiIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-8 h-8 text-slate-400"><path fill-rule="evenodd" d="M4.5 3.75a3 3 0 00-3 3v10.5a3 3 0 003 3h15a3 3 0 003-3V6.75a3 3 0 00-3-3h-15zm4.125 3.375a.75.75 0 000 1.5h6.75a.75.75 0 000-1.5h-6.75zm0 3.75a.75.75 0 000 1.5h6.75a.75.75 0 000-1.5h-6.75zm0 3.75a.75.75 0 000 1.5h6.75a.75.75 0 000-1.5h-6.75z" clip-rule="evenodd"></path></svg>`;
+        const copyIcon = `<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>`;
+        const checkIcon = `<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>`;
+
+        // --- Sanitization ---
+        function sanitizeHTML(text) {
+            return text.replace(/&/g, '&')
+                       .replace(/</g, '<')
+                       .replace(/>/g, '>')
+                       .replace(/"/g, '"')
+                       .replace(/'/g, '&#039;');
+        }
+
+        // --- Encryption ---
+        function encrypt(text) {
+            let result = "";
+            for (let i = 0; i < text.length; i++) {
+                result += String.fromCharCode(text.charCodeAt(i) ^ ENCRYPTION_KEY.charCodeAt(i % ENCRYPTION_KEY.length));
+            }
+            return btoa(result);
+        }
+
+        function decrypt(encryptedText) {
+            let result = "";
+            const decodedText = atob(encryptedText);
+            for (let i = 0; i < decodedText.length; i++) {
+                result += String.fromCharCode(decodedText.charCodeAt(i) ^ ENCRYPTION_KEY.charCodeAt(i % ENCRYPTION_KEY.length));
+            }
+            return result;
+        }
+
+        // --- IndexedDB ---
+        const DB_NAME = "GeminiChatDB";
+        const DB_VERSION = 1;
+        const SETTINGS_STORE = "settings";
+        const MESSAGES_STORE = "messages";
+        let db;
+
+        function openDb() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(DB_NAME, DB_VERSION);
+                request.onerror = (event) => reject("Error opening DB");
+                request.onsuccess = (event) => {
+                    db = event.target.result;
+                    resolve(db);
+                };
+                request.onupgradeneeded = (event) => {
+                    const db = event.target.result;
+                    if (!db.objectStoreNames.contains(SETTINGS_STORE)) {
+                        db.createObjectStore(SETTINGS_STORE, { keyPath: "id" });
+                    }
+                    if (!db.objectStoreNames.contains(MESSAGES_STORE)) {
+                        const store = db.createObjectStore(MESSAGES_STORE, { keyPath: "id", autoIncrement: true });
+                        store.createIndex("timestamp", "timestamp", { unique: false });
+                    }
+                };
+            });
+        }
+
+        function dbGet(storeName, key) {
+            return new Promise((resolve, reject) => {
+                if (!db) return reject("DB not open");
+                const transaction = db.transaction([storeName], "readonly");
+                const store = transaction.objectStore(storeName);
+                const request = store.get(key);
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error);
+            });
+        }
+        
+        function dbGetAll(storeName) {
+             return new Promise((resolve, reject) => {
+                if (!db) return reject("DB not open");
+                const transaction = db.transaction([storeName], "readonly");
+                const store = transaction.objectStore(storeName);
+                const request = store.getAll();
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error);
+            });
+        }
+
+        function dbPut(storeName, value) {
+            return new Promise((resolve, reject) => {
+                if (!db) return reject("DB not open");
+                const transaction = db.transaction([storeName], "readwrite");
+                const store = transaction.objectStore(storeName);
+                const request = store.put(value);
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error);
+            });
+        }
+
+        function dbClear(storeName) {
+            return new Promise((resolve, reject) => {
+                if (!db) return reject("DB not open");
+                const transaction = db.transaction([storeName], "readwrite");
+                const store = transaction.objectStore(storeName);
+                const request = store.clear();
+                request.onsuccess = () => resolve();
+                request.onerror = () => reject(request.error);
+            });
+        }
+        
+        async function getSetting(key, defaultValue) {
+            const result = await dbGet(SETTINGS_STORE, key);
+            return result ? result.value : defaultValue;
+        }
+
+        async function saveSetting(key, value) {
+            await dbPut(SETTINGS_STORE, { id: key, value });
+        }
+        
+        async function getMessages() {
+            return await dbGetAll(MESSAGES_STORE);
+        }
+
+        async function saveMessage(message) {
+            await dbPut(MESSAGES_STORE, { ...message, timestamp: new Date() });
+        }
+        
+        async function clearMessages() {
+            await dbClear(MESSAGES_STORE);
+        }
+
+        // --- Helper Functions ---
+        function scrollToBottom() {
+            chatLog.scrollTop = chatLog.scrollHeight;
+        }
+
+        function showError(message) {
+            errorMessageContainer.innerHTML = `<p><strong>Oops! Something went wrong.</strong></p><p>${message}</p>`;
+            errorMessageContainer.classList.remove('hidden');
+        }
+        
+        function toggleLoading(state) {
+            isLoading = state;
+            sendButton.disabled = state;
+            chatInput.disabled = state;
+            if (state) {
+                typingIndicator.classList.remove('hidden');
+                scrollToBottom();
+            } else {
+                typingIndicator.classList.add('hidden');
+                chatInput.focus();
+            }
+        }
+
+        function addCopyButtons(container) {
+            const codeBlocks = container.querySelectorAll('pre');
+            codeBlocks.forEach(block => {
+                if (block.parentElement.parentElement?.classList.contains('code-block-wrapper')) {
+                    return;
+                }
+
+                const wrapper = document.createElement('div');
+                wrapper.className = 'code-block-wrapper';
+                
+                const preWrapper = document.createElement('div');
+
+                block.parentNode.insertBefore(wrapper, block);
+
+                const button = document.createElement('button');
+                button.className = 'copy-button';
+                button.innerHTML = `${copyIcon} Copy`;
+                button.addEventListener('click', () => {
+                    const code = block.querySelector('code')?.innerText || '';
+                    navigator.clipboard.writeText(code).then(() => {
+                        button.innerHTML = `${checkIcon} Copied!`;
+                        setTimeout(() => { button.innerHTML = `${copyIcon} Copy`; }, 2000);
+                    }).catch(err => { button.textContent = 'Failed!'; });
+                });
+                
+                preWrapper.appendChild(block);
+                wrapper.appendChild(button);
+                wrapper.appendChild(preWrapper);
+            });
+        }
+
+        function appendMessage(message) {
+            const { role, text } = message;
+            const messageId = `message-${Date.now()}-${Math.random()}`;
+            const messageWrapper = document.createElement('div');
+            messageWrapper.id = messageId;
+            messageWrapper.classList.add('flex', 'items-end', 'gap-2');
+            const isUser = role === 'user';
+            const bubbleClasses = isUser ? ['bg-blue-600', 'rounded-br-none'] : ['bg-slate-700', 'rounded-bl-none'];
+            messageWrapper.classList.add(isUser ? 'justify-end' : 'justify-start');
+            const textDiv = document.createElement('div');
+            textDiv.classList.add('px-4', 'py-3', 'rounded-2xl', 'text-white', 'prose', ...bubbleClasses);
+            textDiv.style.maxWidth = '85vw';
+            textDiv.innerHTML = marked.parse(text);
+            const iconDiv = document.createElement('div');
+            iconDiv.classList.add('flex-shrink-0');
+            iconDiv.innerHTML = isUser ? userIcon : aiIcon;
+            if (isUser) {
+                messageWrapper.appendChild(textDiv);
+                messageWrapper.appendChild(iconDiv);
+            } else {
+                messageWrapper.appendChild(iconDiv);
+                messageWrapper.appendChild(textDiv);
+            }
+            chatLog.appendChild(messageWrapper);
+            addCopyButtons(messageWrapper);
+            scrollToBottom();
+            return messageId;
+        }
+
+        // --- Core Logic ---
+        async function sendMessageWithFallback(text) {
+            let tries = 0;
+            const maxTries = apiKeys.length;
+
+            while (tries < maxTries) {
+                const keyToTry = apiKeys[currentKeyIndex];
+                console.log(`Attempting to use API key #${currentKeyIndex + 1}`);
+
+                try {
+                    const ai = new GoogleGenAI({ apiKey: keyToTry });
+                    const modelName = await getSetting('modelName', 'gemini-2.5-flash');
+                    const history = await getMessages();
+                    const chatHistory = history.map(msg => ({ role: msg.role, parts: [{text: msg.text}] }));
+                    
+                    const parser = new UAParser();
+                    const result = parser.getResult();
+                    const os = `${result.os.name} ${result.os.version}`;
+                    const browser = `${result.browser.name} ${result.browser.version}`;
+                    const now = new Date();
+                    const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+                    const localTime = now.toLocaleString();
+                    
+                    const systemInstruction = `You are a helpful and friendly conversational AI. Your name is Gemini.
+                    Current user context:
+                    - OS: ${os}
+                    - Browser: ${browser}
+                    - Current Time: ${localTime}
+                    - Timezone: ${timeZone}
+                    Always format your responses using Markdown. For code, use language-specific code blocks.`;
+
+                    const chat = ai.chats.create({
+                        model: modelName,
+                        config: { systemInstruction },
+                        history: chatHistory.slice(0, -1) // Exclude the last user message which is the current prompt
+                    });
+
+                    const stream = await chat.sendMessageStream({ message: text });
+                    
+                    console.log(`API key #${currentKeyIndex + 1} succeeded.`);
+                    
+                    // If successful, stream the response
+                    let aiMessageWrapperId;
+                    let accumulatedText = '';
+                    for await (const chunk of stream) {
+                        accumulatedText += chunk.text;
+                        if (!aiMessageWrapperId) {
+                            aiMessageWrapperId = appendMessage({ role: 'model', text: '...' });
+                        }
+                        const messageElement = document.getElementById(aiMessageWrapperId);
+                        if (messageElement) {
+                            messageElement.querySelector('.prose').innerHTML = marked.parse(accumulatedText + ' ▋');
+                            scrollToBottom();
+                        }
+                    }
+                    const finalElement = document.getElementById(aiMessageWrapperId);
+                    if (finalElement) {
+                       finalElement.querySelector('.prose').innerHTML = marked.parse(accumulatedText);
+                       addCopyButtons(finalElement);
+                    }
+                    await saveMessage({ role: 'model', text: accumulatedText });
+                    return; // Exit the function successfully
+
+                } catch (e) {
+                    console.warn(`API key #${currentKeyIndex + 1} failed.`, e);
+                    tries++;
+                    currentKeyIndex = (currentKeyIndex + 1) % apiKeys.length;
+                    await saveSetting('currentKeyIndex', currentKeyIndex);
+                }
+            }
+
+            throw new Error("All API keys failed. Please check your keys in the settings.");
+        }
+
+        async function handleSendMessage(event) {
+            event.preventDefault();
+            if (isLoading || apiKeys.length === 0) return;
+            
+            let text = chatInput.value;
+            if (!text.trim()) return;
+
+            // Sanitize and format the text
+            let sanitizedText = sanitizeHTML(text);
+            if (sanitizedText.includes('\n')) {
+                sanitizedText = '```\n' + sanitizedText + '\n```';
+            }
+
+            toggleLoading(true);
+            errorMessageContainer.classList.add('hidden');
+            
+            const userMessage = { role: 'user', text: sanitizedText };
+            appendMessage(userMessage);
+            await saveMessage(userMessage);
+
+            chatInput.value = '';
+            chatInput.style.height = 'auto';
+            
+            try {
+                await sendMessageWithFallback(sanitizedText);
+            } catch (e) {
+                showError(e.message);
+            } finally {
+                toggleLoading(false);
+            }
+        }
+        
+        async function initializeChat() {
+            toggleLoading(true);
+            chatInput.placeholder = "Initializing...";
+            
+            await openDb();
+            const encryptedKeys = await getSetting('apiKeys', []);
+            currentKeyIndex = await getSetting('currentKeyIndex', 0);
+            const modelName = await getSetting('modelName', 'gemini-2.5-flash');
+            
+            if (encryptedKeys.length === 0) {
+                showError("No API Keys found. Please add your key(s) in the settings.");
+                toggleLoading(true); 
+                chatInput.placeholder = "Please set API Key(s) in Settings.";
+                settingsModal.classList.remove('hidden');
+                apiKeyInput.focus();
+                return;
+            }
+
+            apiKeys = encryptedKeys.map(decrypt);
+
+            try {
+                // Load history to UI
+                const history = await getMessages();
+                chatLog.innerHTML = '';
+                history.forEach(appendMessage);
+                currentModelSpan.textContent = modelName;
+
+                if (history.length === 0) {
+                     const introMessage = { role: 'model', text: `Hello! I am Gemini, your personal AI assistant. Loaded ${apiKeys.length} API key(s). Your chat history will be saved. How can I help you today?` };
+                     appendMessage(introMessage);
+                     await saveMessage(introMessage);
+                }
+                
+                toggleLoading(false);
+                chatInput.placeholder = "Type your message...";
+
+            } catch (e) {
+                const errorText = e instanceof Error ? e.message : 'An unknown error occurred during initialization.';
+                showError(`Initialization failed: ${errorText}.`);
+                toggleLoading(true);
+                chatInput.placeholder = "Application is disabled.";
+            }
+        }
+
+        // --- Event Listeners ---
+        chatForm.addEventListener('submit', handleSendMessage);
+        
+        chatInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                chatForm.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+            }
+        });
+
+        chatInput.addEventListener('input', () => {
+            chatInput.style.height = 'auto';
+            const newHeight = Math.min(chatInput.scrollHeight, 200); // Max height of 200px on input
+            chatInput.style.height = (newHeight) + 'px';
+        });
+
+        settingsButton.addEventListener('click', async () => {
+            const encryptedKeys = await getSetting('apiKeys', []);
+            apiKeyInput.value = encryptedKeys.map(decrypt).join('\n');
+            modelSelect.value = await getSetting('modelName', 'gemini-2.5-flash');
+            settingsModal.classList.remove('hidden');
+        });
+
+        clearChatButton.addEventListener('click', async () => {
+             if (confirm("Are you sure you want to clear the entire chat history? This cannot be undone.")) {
+                await clearMessages();
+                location.reload();
+             }
+        });
+
+        cancelSettingsButton.addEventListener('click', () => {
+            settingsModal.classList.add('hidden');
+        });
+        
+        saveSettingsButton.addEventListener('click', async () => {
+            const rawKeys = apiKeyInput.value.split('\n').map(k => k.trim()).filter(k => k);
+            if (rawKeys.length > 0) {
+                const encryptedKeys = rawKeys.map(encrypt);
+                await saveSetting('apiKeys', encryptedKeys);
+                await saveSetting('modelName', modelSelect.value);
+                await saveSetting('currentKeyIndex', 0); // Reset index on save
+                settingsModal.classList.add('hidden');
+                location.reload();
+            } else {
+                alert("API Key(s) cannot be empty.");
+            }
+        });
+
+        // --- Initialization ---
+        marked.setOptions({
+          highlight: function(code, lang) {
+            const language = hljs.getLanguage(lang) ? lang : 'plaintext';
+            return hljs.highlight(code, { language, ignoreIllegals: true }).value;
+          }
+        });
+
+        initializeChat();
+    </script>
+</body>
+</html>
