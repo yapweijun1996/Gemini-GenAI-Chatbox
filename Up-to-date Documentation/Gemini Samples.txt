@@ -1,0 +1,1155 @@
+TITLE: Implementing a Gemini Agent with ADK and MCP Tooling in Python
+DESCRIPTION: This comprehensive Python example demonstrates how to build and run an AI agent using Google's ADK, integrating with an MCP server for tool-calling capabilities. It covers connecting to an MCP server to retrieve tools, defining a Gemini-powered agent, setting up session management, executing a prompt, and processing the agent's responses, including function calls and their results. The `GEMINI_API_KEY` environment variable is required for authentication.
+SOURCE: https://github.com/philschmid/gemini-samples/blob/main/examples/gemini-adk-mcp.ipynb#_snippet_1
+
+LANGUAGE: python
+CODE:
+```
+import os
+from google.genai import types
+from google.adk import Agent, Runner
+from google.adk.sessions import InMemorySessionService
+from google.adk.tools.mcp_tool.mcp_toolset import MCPToolset, StdioServerParameters
+
+os.environ["GOOGLE_API_KEY"] = os.getenv("GEMINI_API_KEY")
+
+async def mcp_agent():
+        # --- Step 1: Connect to MCP Server and Get Tools ---
+        tools, exit_stack = await MCPToolset.from_server(
+            connection_params=StdioServerParameters(
+            command="npx", 
+            args=["-y", "@philschmid/weather-mcp"], 
+             # connection_params=SseServerParams(url="http://remote-server:port/path", headers={...})
+            )
+        )
+
+        # --- Step 2: Define the Agent ---
+        root_agent = Agent(
+            model="gemini-2.0-flash",
+            name='weather_assistant',
+            instruction='Can read the weather in a specific city',
+            tools=tools, 
+            
+        )
+
+        # --- Step 3: Setup Session, Runner, and Execute ---
+        # Session saves the conversation history and state
+        session_service = InMemorySessionService()
+        session = session_service.create_session(
+            state={}, app_name='weather_app', user_id='user_fs'
+        )
+        # Runner is responsible for executing the agent
+        runner = Runner(
+            app_name='weather_app',
+            agent=root_agent,
+            session_service=session_service,
+        )
+
+        # --- Step 4: Run the agent ---
+        prompt = "What is the weather in Berlin tomorrow, 2025/04/15?"
+        user_content = types.Content(role='user', parts=[types.Part(text=prompt)])
+
+        events_async = runner.run_async(
+            session_id=session.id, user_id=session.user_id, new_message=user_content
+        )
+
+        async for event in events_async:
+            if event.content.parts[0].function_call:
+                print(f"Function call: {event.content.parts[0].function_call.args}")
+            elif event.content.parts[0].function_response:
+                print(f"Function response: {event.content.parts[0].function_response.response}")
+            else:
+                print(event.content.parts[0].text)
+   
+
+        # --- 5: Cleanup MCP server connection ---
+        if exit_stack:
+            await exit_stack.aclose()
+
+await mcp_agent()
+```
+
+----------------------------------------
+
+TITLE: Generating Structured Output with Gemini and Pydantic in Python
+DESCRIPTION: This code snippet demonstrates how to use Google Gemini to generate a list of cookie recipes with a predefined Pydantic schema. It imports necessary modules, defines Pydantic schemas for `Ingredient` and `Recipe`, initializes the Gemini client, and uses the `generate_content` method to generate the structured output based on the defined schema. The `response.parsed` attribute contains the parsed data.
+SOURCE: https://github.com/philschmid/gemini-samples/blob/main/examples/gemini-structured-outputs.ipynb#_snippet_1
+
+LANGUAGE: python
+CODE:
+```
+import os
+from google import genai
+from pydantic import BaseModel
+
+# create client
+client = genai.Client(api_key=os.getenv("GEMINI_API_KEY","xxx"))
+
+
+# Define Pydantic schemas 
+class Ingredient(BaseModel):
+  name: str
+  quantity: str
+  unit: str
+
+class Recipe(BaseModel):
+  recipe_name: str
+  ingredients: list[Ingredient]
+
+
+# Generate a list of cookie recipes
+response = client.models.generate_content(
+    model='gemini-2.0-flash-lite',
+    contents='List a few popular cookie recipes.',
+    config={
+        'response_mime_type': 'application/json',
+        'response_schema': list[Recipe],
+    },
+)
+# Use the parsed response
+recipes: list[Recipe] = response.parsed
+recipes
+```
+
+----------------------------------------
+
+TITLE: YouTube Video Analysis with Gemini 2.5 Pro
+DESCRIPTION: This snippet analyzes a YouTube video using Gemini 2.5 Pro. It takes a YouTube URL as input, constructs a prompt to summarize the video, and then calls the Gemini API to analyze the video content. The response, which includes a summary of the video's main points, key topics, call to action, and a general overview, is then printed to the console.
+SOURCE: https://github.com/philschmid/gemini-samples/blob/main/examples/gemini-analyze-transcribe-youtube.ipynb#_snippet_3
+
+LANGUAGE: python
+CODE:
+```
+from google.genai import types
+
+youtube_url = "https://www.youtube.com/watch?v=RDOMKIw1aF4" # Repalce with the youtube url you want to analyze
+
+prompt = """Analyze the following YouTube video content. Provide a concise summary covering:
+
+1.  **Main Thesis/Claim:** What is the central point the creator is making?
+2.  **Key Topics:** List the main subjects discussed, referencing specific examples or technologies mentioned (e.g., AI models, programming languages, projects).
+3.  **Call to Action:** Identify any explicit requests made to the viewer.
+4.  **Summary:** Provide a concise summary of the video content.
+
+Use the provided title, chapter timestamps/descriptions, and description text for your analysis."""
+
+# Analyze the video
+response = client.models.generate_content(
+    model="gemini-2.5-pro-exp-03-25",
+    contents=types.Content(
+        parts=[
+            types.Part(text=prompt),
+            types.Part(
+                file_data=types.FileData(file_uri=youtube_url)
+            )
+        ]
+    )
+)
+
+print(response.text)
+```
+
+----------------------------------------
+
+TITLE: Podcast Transcription with Gemini 2.5 Pro
+DESCRIPTION: This snippet transcribes a podcast episode using Gemini 2.5 Pro. It uploads an audio file, generates a structured prompt using a Jinja2 template, and then calls the Gemini API to generate a transcript with speaker identification, timestamps, and audio event detection. The transcript is then printed to the console.
+SOURCE: https://github.com/philschmid/gemini-samples/blob/main/examples/gemini-analyze-transcribe-youtube.ipynb#_snippet_2
+
+LANGUAGE: python
+CODE:
+```
+from jinja2 import Template
+
+
+# path to the file to upload
+file_path = "../assets/porsche.mp3" # Repalce with your own file path
+
+# Upload the file to the File API
+file = client.files.upload(file=file_path)
+
+# Generate a structured response using the Gemini API
+prompt_template = Template("""Generate a transcript of the episode. Include timestamps and identify speakers.
+
+Speakers are: 
+{% for speaker in speakers %}- {{ speaker }}{% if not loop.last %}\n{% endif %}{% endfor %}
+
+eg:
+[00:00] Brady: Hello there.
+[00:02] Tim: Hi Brady.
+
+It is important to include the correct speaker names. Use the names you identified earlier. If you really don't know the speaker's name, identify them with a letter of the alphabet, eg there may be an unknown speaker 'A' and another unknown speaker 'B'.
+
+If there is music or a short jingle playing, signify like so:
+[01:02] [MUSIC] or [01:02] [JINGLE]
+
+If you can identify the name of the music or jingle playing then use that instead, eg:
+[01:02] [Firework by Katy Perry] or [01:02] [The Sofa Shop jingle]
+
+If there is some other sound playing try to identify the sound, eg:
+[01:02] [Bell ringing]
+
+Each individual caption should be quite short, a few short sentences at most.
+
+Signify the end of the episode with [END].
+
+Don't use any markdown formatting, like bolding or italics.
+
+Only use characters from the English alphabet, unless you genuinely believe foreign characters are correct.
+
+It is important that you use the correct words and spell everything correctly. Use the context of the podcast to help.
+If the hosts discuss something like a movie, book or celebrity, make sure the movie, book, or celebrity name is spelled correctly.""")
+
+# Define the speakers and render the prompt
+speakers = ["John"]
+prompt = prompt_template.render(speakers=speakers)
+
+response = client.models.generate_content(
+    model="gemini-2.5-pro-exp-03-25",
+    contents=[prompt, file],
+)
+
+print(response.text)
+```
+
+----------------------------------------
+
+TITLE: Setting up Google API Key
+DESCRIPTION: This code snippet retrieves the Google AI API key from the environment variables or prompts the user to enter it if not found, ensuring secure access to the Gemini API.
+SOURCE: https://github.com/philschmid/gemini-samples/blob/main/examples/gemini-langchain.ipynb#_snippet_0
+
+LANGUAGE: python
+CODE:
+```
+import getpass
+import os
+
+if "GOOGLE_API_KEY" not in os.environ:
+    os.environ["GOOGLE_API_KEY"] = getpass.getpass("Enter your Google AI API key: ")
+```
+
+----------------------------------------
+
+TITLE: Generating File Edits with Gemini Model
+DESCRIPTION: Prepares an instruction and a target file path. It then uses the `client.models.generate_content` method to send the file content and the user instruction to the specified Gemini model (`model_id`), along with the `SYSTEM_PROMPT` to guide the model in generating edits in the `diff-fenced` format.
+SOURCE: https://github.com/philschmid/gemini-samples/blob/main/examples/gemini-file-editing.ipynb#_snippet_4
+
+LANGUAGE: python
+CODE:
+```
+# Instruction and file to edit
+instruction = "Update the budget for phase 2 to 10% more"
+file = "../assets/Project_Chimera_Status_Report_Oct2023.md"
+
+# Generate the edits based on the instruction
+response = client.models.generate_content(
+    model=model_id,
+    contents=f"```{file}\n{open(file).read()}\n```\n\nInstruction: {instruction}",
+    config={
+        "system_instruction":SYSTEM_PROMPT    
+    }
+    
+)
+```
+
+----------------------------------------
+
+TITLE: Agentic Loop for Function Calling
+DESCRIPTION: This code defines the main agentic loop `function_call_loop` for handling function calls within a Gemini interaction. It creates the conversation, makes initial requests, checks for function calls in the response, calls the identified function with arguments, builds a response with the tool results, and sends a follow-up request. The loop returns the final response from the model.
+SOURCE: https://github.com/philschmid/gemini-samples/blob/main/guides/function-calling.ipynb#_snippet_10
+
+LANGUAGE: python
+CODE:
+```
+# agentic loop to handle the function call
+def function_call_loop(prompt):
+    # create the conversation
+    contents = [types.Content(role="user", parts=[types.Part(text=prompt)])]
+    # initial request 
+    response = client.models.generate_content(
+        model=model_id,
+        config=config,
+        contents=contents
+    )
+    for part in response.candidates[0].content.parts:
+        # add response to the conversation
+        contents.append(types.Content(role="model", parts=[part]))
+        # check if the response is a function call
+        if part.function_call:
+            print("Tool call detected")
+            function_call = part.function_call
+            # Call the tool with arguments
+            print(f"Calling tool: {function_call.name} with args: {function_call.args}")
+            tool_result = call_function(function_call.name, **function_call.args)
+            # Build the response parts using the function result.
+            function_response_part = types.Part.from_function_response(
+                name=function_call.name,
+                response={"result": tool_result},
+            )
+            contents.append(types.Content(role="user", parts=[function_response_part]))
+            # Send follow-up with tool results, but remove the tools from the config
+            print(f"Calling LLM with tool results")
+            func_gen_response = client.models.generate_content(
+                model=model_id, config=config, contents=contents
+            )
+            # Add the reponse to the conversation
+            contents.append(types.Content(role="model", parts=[func_gen_response]))
+    # return the final response
+    return contents[-1].parts[0].text.strip()
+    
+
+function_call_loop("Whats the weather in Berlin today?")
+```
+
+----------------------------------------
+
+TITLE: Tool Calling/Function Calling with Gemini
+DESCRIPTION: This code demonstrates how to use tool calling/function calling with the Gemini model.  It defines a custom tool (get_weather), binds it to the model, and invokes the model with a query that triggers the tool. It then passes the tool results back to the model to get a final response.
+SOURCE: https://github.com/philschmid/gemini-samples/blob/main/examples/gemini-langchain.ipynb#_snippet_8
+
+LANGUAGE: python
+CODE:
+```
+from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_core.tools import tool
+from langchain_core.messages import ToolMessage
+
+# Define a tool
+@tool(description="Get the current weather in a given location")
+def get_weather(location: str) -> str:
+    return "It's sunny."
+
+# Initialize model and bind the tool
+llm = ChatGoogleGenerativeAI(model="gemini-2.0-flash")
+llm_with_tools = llm.bind_tools([get_weather])
+
+# Invoke with a query that should trigger the tool
+query = "What's the weather in San Francisco?"
+ai_msg = llm_with_tools.invoke(query)
+
+# Access tool calls in the response
+print(ai_msg.tool_calls)
+
+# Pass tool results back to the model
+tool_message = ToolMessage(
+    content=get_weather(*ai_msg.tool_calls[0]['args']),
+    tool_call_id=ai_msg.tool_calls[0]['id']
+)
+final_response = llm_with_tools.invoke([ai_msg, tool_message])
+print(final_response.content)
+```
+
+----------------------------------------
+
+TITLE: Setting Gemini API Key (Python)
+DESCRIPTION: This code snippet retrieves the Gemini API key from an environment variable or sets it manually. It's crucial for authenticating requests to the Gemini API.
+SOURCE: https://github.com/philschmid/gemini-samples/blob/main/guides/langgraph-react-agent.ipynb#_snippet_1
+
+LANGUAGE: python
+CODE:
+```
+import os 
+
+# Read your API key from the environment variable or set it manually
+api_key = os.getenv("GEMINI_API_KEY","xxx")
+```
+
+----------------------------------------
+
+TITLE: Implementing the Multi-Agent Pattern with Handoff Logic in Python
+DESCRIPTION: This Python example demonstrates a simplified multi-agent system where distinct agents (Hotel Agent, Restaurant Agent) collaborate using handoff logic. It defines structured output schemas for responses and an agent function to interact with the Gemini model, showcasing how agents can pass control based on the user's request.
+SOURCE: https://github.com/philschmid/gemini-samples/blob/main/guides/agentic-pattern.ipynb#_snippet_7
+
+LANGUAGE: Python
+CODE:
+```
+from google import genai
+from pydantic import BaseModel, Field
+
+# Configure the client (ensure GEMINI_API_KEY is set in your environment)
+client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
+
+# Define Structured Output Schemas
+class Response(BaseModel):
+    handoff: str = Field(default="", description="The name/role of the agent to hand off to. Available agents: 'Restaurant Agent', 'Hotel Agent'")
+    message: str = Field(description="The response message to the user or context for the next agent")
+
+# Agent Function
+def run_agent(agent_name: str, system_prompt: str, prompt: str) -> Response:
+    response = client.models.generate_content(
+        model='gemini-2.0-flash',
+        contents=prompt,
+        config = {'system_instruction': f'You are {agent_name}. {system_prompt}', 'response_mime_type': 'application/json', 'response_schema': Response}
+    )
+    return response.parsed
+
+
+# Define System Prompts for the agents
+hotel_system_prompt = "You are a Hotel Booking Agent. You ONLY handle hotel bookings. If the user asks about restaurants, flights, or anything else, respond with a short handoff message containing the original request and set the 'handoff' field to 'Restaurant Agent'. Otherwise, handle the hotel request and leave 'handoff' empty."
+restaurant_system_prompt = "You are a Restaurant Booking Agent. You handle restaurant recommendations and bookings based on the user's request provided in the prompt."
+
+# Prompt to be about a restaurant
+initial_prompt = "Can you book me a table at an Italian restaurant for 2 people tonight?"
+print(f"Initial User Request: {initial_prompt}")
+
+# Run the first agent (Hotel Agent) to force handoff logic
+output = run_agent("Hotel Agent", hotel_system_prompt, initial_prompt)
+
+# simulate a user interaction to change the prompt and handoff
+if output.handoff == "Restaurant Agent":
+    print("Handoff Triggered: Hotel to Restaurant")
+    output = run_agent("Restaurant Agent", restaurant_system_prompt, initial_prompt)
+elif output.handoff == "Hotel Agent":
+    print("Handoff Triggered: Restaurant to Hotel")
+    output = run_agent("Hotel Agent", hotel_system_prompt, initial_prompt)
+
+print(output.message)
+```
+
+----------------------------------------
+
+TITLE: Implementing Parallel Task Execution with Gemini API in Python
+DESCRIPTION: This snippet demonstrates how to execute multiple LLM calls concurrently using `asyncio` and the Google Gemini API. It defines an asynchronous function `generate_content` to interact with the Gemini model and then uses `asyncio.gather` to run several story idea generation prompts in parallel. Finally, it aggregates the individual results using another LLM call. This pattern is useful for improving latency or quality by processing independent subtasks simultaneously.
+SOURCE: https://github.com/philschmid/gemini-samples/blob/main/guides/agentic-pattern.ipynb#_snippet_2
+
+LANGUAGE: python
+CODE:
+```
+import os
+import asyncio
+import time
+from google import genai
+
+# Configure the client (ensure GEMINI_API_KEY is set in your environment)
+client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
+
+async def generate_content(prompt: str) -> str:
+        response = await client.aio.models.generate_content(
+            model="gemini-2.0-flash",
+            contents=prompt
+        )
+        return response.text.strip()
+
+async def parallel_tasks():
+    # Define Parallel Tasks
+    topic = "a friendly robot exploring a jungle"
+    prompts = [
+        f"Write a short, adventurous story idea about {topic}.",
+        f"Write a short, funny story idea about {topic}.",
+        f"Write a short, mysterious story idea about {topic}."
+    ]
+    # Run tasks concurrently and gather results
+    start_time = time.time()
+    tasks = [generate_content(prompt) for prompt in prompts]
+    results = await asyncio.gather(*tasks)
+    end_time = time.time()
+    print(f"Time taken: {end_time - start_time} seconds")
+
+    print("\n--- Individual Results ---")
+    for i, result in enumerate(results):
+        print(f"Result {i+1}: {result}\n")
+
+    # Aggregate results and generate final story
+    story_ideas = '\n'.join([f"Idea {i+1}: {result}" for i, result in enumerate(results)])
+    aggregation_prompt = f"Combine the following three story ideas into a single, cohesive summary paragraph:{story_ideas}"
+    aggregation_response = await client.aio.models.generate_content(
+        model="gemini-2.5-flash-preview-04-17",
+        contents=aggregation_prompt
+    )
+    return aggregation_response.text
+    
+
+result = await parallel_tasks()
+print(f"\n--- Aggregated Summary ---\n{result}")
+```
+
+----------------------------------------
+
+TITLE: Generating and Using JSON Schema with Gemini (Python)
+DESCRIPTION: This snippet demonstrates the end-to-end process of generating a JSON schema using the meta-prompt and then utilizing that schema for structured output generation with Gemini. It first calls the model with the meta-prompt to get a schema, extracts the JSON from the response, and then makes a second call to Gemini, configuring it to return content conforming to the newly generated schema.
+SOURCE: https://github.com/philschmid/gemini-samples/blob/main/examples/gemini-meta-prompt-structured-outputs.ipynb#_snippet_2
+
+LANGUAGE: python
+CODE:
+```
+from google import genai
+import re 
+import json
+response = client.models.generate_content(
+    model='gemini-2.0-flash',
+    contents=meta_prompt.format(user_input="Cookie Recipes with ingredients and and quantity"),
+)
+# Extract the JSON schema from the response
+match = re.search(r"```json\s*(.*?)\s*```", response.text, re.DOTALL)
+if match:
+    json_schema = json.loads(match.group(1).strip())
+else:
+    json_schema = None
+
+
+# generate a recipe based on the schema
+recipe = client.models.generate_content(
+    model='gemini-2.0-flash',
+    contents="Cookie Recipes",
+    config={
+        'response_mime_type': 'application/json',
+        'response_schema': json_schema,
+    },
+)
+
+print(json.loads(recipe.text))
+```
+
+----------------------------------------
+
+TITLE: Creating Agent and Executor with Langchain
+DESCRIPTION: This snippet demonstrates how to create an agent and executor using Langchain to handle function calling with a weather API. It initializes a prompt template, creates an agent using `create_tool_calling_agent`, and executes it using `AgentExecutor`. The verbose flag enables detailed logging.
+SOURCE: https://github.com/philschmid/gemini-samples/blob/main/guides/function-calling.ipynb#_snippet_22
+
+LANGUAGE: python
+CODE:
+```
+from langchain.agents import create_tool_calling_agent, AgentExecutor
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+
+# Initialize the prompt template
+prompt = ChatPromptTemplate.from_messages([
+    ("system", "You are a helpful assistant that use tools to access and retrieve information from a weather API. Today is 2025-03-04."),
+    ("human", "{input}"),
+    MessagesPlaceholder(variable_name="agent_scratchpad"),
+    
+])
+
+# Create the agent and executor with out llm, tools and prompt
+agent = create_tool_calling_agent(llm_with_tools, [get_weather_forecast],prompt)
+agent_executor = AgentExecutor(agent=agent, tools=[get_weather_forecast], verbose=True)
+
+# Run our query 
+res = agent_executor.invoke({"input": "What is the weather in Berlin today?"})
+print(res["output"])
+```
+
+----------------------------------------
+
+TITLE: Gemini Embeddings with Vector Store
+DESCRIPTION: This example demonstrates how to use Gemini embeddings with a vector store. It initializes the embeddings, creates an in-memory vector store, and then retrieves similar documents based on a query.
+SOURCE: https://github.com/philschmid/gemini-samples/blob/main/examples/gemini-langchain.ipynb#_snippet_13
+
+LANGUAGE: python
+CODE:
+```
+from langchain_google_genai import GoogleGenerativeAIEmbeddings
+from langchain_core.vectorstores import InMemoryVectorStore
+
+# Initialize embeddings
+embeddings = GoogleGenerativeAIEmbeddings(model="models/gemini-embedding-exp-03-07")
+
+text = "LangChain is the framework for building context-aware reasoning applications"
+
+# Create vector store and retriever
+vectorstore = InMemoryVectorStore.from_texts([text], embedding=embeddings)
+retriever = vectorstore.as_retriever()
+
+# Retrieve similar documents
+retrieved_documents = retriever.invoke("What is LangChain?")
+print(retrieved_documents[0].page_content)
+```
+
+----------------------------------------
+
+TITLE: Implementing LLM Self-Correction with Reflection Pattern in Python
+DESCRIPTION: This code illustrates the Reflection pattern, where an LLM iteratively refines its output based on self-critique. It defines `generate_poem` to create a poem and `evaluate` to critique it, checking for rhyming, line count, and creativity. A `while` loop simulates the reflection process, feeding feedback from the `evaluate` function back into `generate_poem` until the poem passes the evaluation or a maximum number of iterations is reached.
+SOURCE: https://github.com/philschmid/gemini-samples/blob/main/guides/agentic-pattern.ipynb#_snippet_3
+
+LANGUAGE: python
+CODE:
+```
+import os
+import json
+from google import genai
+from pydantic import BaseModel
+import enum
+
+# Configure the client (ensure GEMINI_API_KEY is set in your environment)
+client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
+
+class EvaluationStatus(enum.Enum):
+    PASS = "PASS"
+    FAIL = "FAIL"
+
+class Evaluation(BaseModel):
+    evaluation: EvaluationStatus
+    feedback: str
+    reasoning: str
+
+# --- Initial Generation Function ---
+def generate_poem(topic: str, feedback: str = None) -> str:
+    prompt = f"Write a short, four-line poem about {topic}."
+    if feedback:
+        prompt += f"\nIncorporate this feedback: {feedback}"
+    
+    response = client.models.generate_content(
+        model='gemini-2.0-flash',
+        contents=prompt
+    )
+    poem = response.text.strip()
+    print(f"Generated Poem:\n{poem}")
+    return poem
+
+# --- Evaluation Function ---
+def evaluate(poem: str) -> Evaluation:
+    print("\n--- Evaluating Poem ---")
+    prompt_critique = f"""Critique the following poem. Does it rhyme well? Is it exactly four lines? \nIs it creative? Respond with PASS or FAIL and provide feedback.\n\nPoem:\n{poem}\n"""
+    response_critique = client.models.generate_content(
+        model='gemini-2.0-flash',
+        contents=prompt_critique,
+        config={
+            'response_mime_type': 'application/json',
+            'response_schema': Evaluation,
+        },
+    )
+    critique = response_critique.parsed
+    print(f"Evaluation Status: {critique.evaluation}")
+    print(f"Evaluation Feedback: {critique.feedback}")
+    return critique
+
+# Reflection Loop   
+max_iterations = 3
+current_iteration = 0
+topic = "a robot learning to paint"
+
+# simulated poem which will not pass the evaluation
+current_poem = "With circuits humming, cold and bright,\nA metal hand now holds a brush"
+
+while current_iteration < max_iterations:
+    current_iteration += 1
+    print(f"\n--- Iteration {current_iteration} ---")
+    evaluation_result = evaluate(current_poem)
+
+    if evaluation_result.evaluation == EvaluationStatus.PASS:
+        print("\nFinal Poem:")
+        print(current_poem)
+        break
+    else:
+        current_poem = generate_poem(topic, feedback=evaluation_result.feedback)
+        if current_iteration == max_iterations:
+            print("\nMax iterations reached. Last attempt:")
+            print(current_poem)
+```
+
+----------------------------------------
+
+TITLE: Multi-Turn Conversation Prompt with Tool Output for Gemma 3
+DESCRIPTION: This comprehensive snippet illustrates the full multi-turn conversation flow, including the initial instructions, the user's query, Gemma's `tool_code` response, and the subsequent `tool_output` from the executed function. This complete prompt is then sent back to the model to generate the final user-facing answer.
+SOURCE: https://github.com/philschmid/gemini-samples/blob/main/examples/gemma-function-calling.ipynb#_snippet_3
+
+LANGUAGE: Prompt Template
+CODE:
+```
+<bos><start_of_turn>user
+At each turn, if you decide to invoke any of the function(s), it should be wrapped with ```tool_code```. The python methods described below are imported and available, you can only use defined methods. The generated code should be readable and efficient. The response to a method will be wrapped in ```tool_output``` use it to call more tools or generate a helpful, friendly response. When using a ```tool_call``` think step by step why and how it should be used.
+
+The following Python methods are available:
+
+```python
+def convert(amount: float, currency: str, new_currency: str) -> float:
+    """Convert the currency with the latest exchange rate
+
+    Args:
+      amount: The amount of currency to convert
+      currency: The currency to convert from
+      new_currency: The currency to convert to
+    """
+```
+
+User: {{user_message}}<end_of_turn>
+<start_of_turn>model
+Okay, I need to convert $200,000 to EUR. I will use the `convert` function for this.
+```tool_code
+convert(amount=200000.0, currency="USD", new_currency="EUR")
+```<end_of_turn>
+<start_of_turn>user
+```tool_output
+180000.0
+```<end_of_turn>
+<start_of_turn>model
+
+```
+
+----------------------------------------
+
+TITLE: Defining Sequential Tasks for Customer Support Analysis (Python)
+DESCRIPTION: This snippet defines three sequential tasks for the agents: `analysis_task` for the `data_analyst`, `optimization_task` for the `process_optimizer`, and `report_task` for the `report_writer`. Each task has a detailed description of its objective and an `expected_output` to guide the agents and ensure a structured workflow.
+SOURCE: https://github.com/philschmid/gemini-samples/blob/main/examples/gemini-crewai.ipynb#_snippet_4
+
+LANGUAGE: Python
+CODE:
+```
+from crewai import Task
+
+# Task 1: Analyze Data
+analysis_task = Task(
+    description=(
+        """Fetch and analyze the latest customer support interaction data (tickets, feedback, call logs) 
+        focusing on the last quarter. Identify the top 3-5 recurring issues, quantify their frequency 
+        and impact (e.g., resolution time, customer sentiment). Use the Customer Support Data Fetcher tool."""
+    ),
+    expected_output=(
+        """A summary report detailing the key findings from the customer support data analysis, including:
+- Top 3-5 recurring issues with frequency.
+- Average resolution times for these issues.
+- Key customer pain points mentioned in feedback.
+- Any notable trends in sentiment or support agent observations."""
+    ),
+    agent=data_analyst # Assign task to the data_analyst agent
+)
+
+# Task 2: Identify Bottlenecks and Suggest Improvements
+optimization_task = Task(
+    description=(
+        """Based on the data analysis report provided by the Data Analyst, identify the primary bottlenecks 
+        in the support processes contributing to the identified issues (especially the top recurring ones). 
+        Propose 2-3 concrete, actionable process improvements to address these bottlenecks. 
+        Consider potential impact and ease of implementation."""
+    ),
+    expected_output=(
+        """A concise list identifying the main process bottlenecks (e.g., lack of documentation for agents, 
+        complex escalation path, UI issues) linked to the key problems. 
+A list of 2-3 specific, actionable recommendations for process improvement 
+(e.g., update agent knowledge base, simplify password reset UI, implement proactive monitoring)."""
+    ),
+    agent=process_optimizer # Assign task to the process_optimizer agent
+    # This task implicitly uses the output of analysis_task as context
+)
+
+# Task 3: Compile COO Report
+report_task = Task(
+    description=(
+        """Compile the findings from the Data Analyst and the recommendations from the Process Optimization Specialist 
+        into a single, concise executive report for the COO. The report should clearly state:
+1. The most critical customer support issues identified (with brief data points).
+2. The key process bottlenecks causing these issues.
+3. The recommended process improvements.
+Ensure the report is easy to understand, focuses on actionable insights, and is formatted professionally."""
+    ),
+    expected_output=(
+        """A well-structured executive report (max 1 page) summarizing the critical support issues, 
+        underlying process bottlenecks, and clear, actionable recommendations for the COO. 
+        Use clear headings and bullet points."""
+    ),
+    agent=report_writer # Assign task to the report_writer agent
+)
+```
+
+----------------------------------------
+
+TITLE: Data Manipulation with Gemini API
+DESCRIPTION: This code snippet sends a prompt to the Gemini API to add a 'TotalValue' column to the data, calculating it differently for 'BUY' and 'SELL' actions. It then generates a response from the Gemini model using the file and prompt, configuring the model to use the `code_execution` tool.
+SOURCE: https://github.com/philschmid/gemini-samples/blob/main/examples/gemini-code-executor-data-analysis.ipynb#_snippet_2
+
+LANGUAGE: python
+CODE:
+```
+prompt =  """Add a 'TotalValue' column. For 'BUY' actions, calculate it as (Quantity * PricePerShare) + Commission. For 'SELL' actions, calculate it as (Quantity * PricePerShare) - Commission. 
+Return a helpful message and the return as a csv file."""
+
+# Generate the response
+response = client.models.generate_content(
+    model="gemini-2.5-flash-preview-04-17",
+    contents=[file, prompt],
+    config={"tools": [{"code_execution": {}}]}
+)
+```
+
+----------------------------------------
+
+TITLE: Executing the Customer Support Analysis Crew (Python)
+DESCRIPTION: This code initiates the execution of the `support_analysis_crew` using the `kickoff` method. It provides an initial input, though the first task's tool simulates data regardless of this specific input. After the crew completes its work, the final report generated by the agents is printed to the console.
+SOURCE: https://github.com/philschmid/gemini-samples/blob/main/examples/gemini-crewai.ipynb#_snippet_6
+
+LANGUAGE: Python
+CODE:
+```
+# Start the crew's work
+print("--- Starting Customer Support Analysis Crew ---")
+# The 'inputs' dictionary provides initial context if needed by the first task.
+# In this case, the tool simulates data fetching regardless of the input.
+result = support_analysis_crew.kickoff(inputs={'data_query': 'last quarter support data'})
+
+print("--- Crew Execution Finished ---")
+print("--- Final Report for COO ---")
+print(result)
+```
+
+----------------------------------------
+
+TITLE: Full Agentic Example with Gemini and MCP (Python)
+DESCRIPTION: This snippet demonstrates a complete agentic loop using Gemini and an Airbnb MCP server.  It initializes the Gemini client and MCP server connection. The `agent_loop` function takes a user prompt, retrieves tools from the MCP server, converts them to Gemini tools, and then iterates, calling tools based on the model's responses.  It handles tool execution, manages conversation history, and returns the final response from the model.
+SOURCE: https://github.com/philschmid/gemini-samples/blob/main/examples/gemini-mcp-example.ipynb#_snippet_2
+
+LANGUAGE: python
+CODE:
+```
+from typing import List
+from google import genai
+from google.genai import types
+from mcp import ClientSession, StdioServerParameters
+from mcp.client.stdio import stdio_client
+import os
+
+client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+model = "gemini-2.0-flash"
+
+# Create server parameters for stdio connection
+server_params = StdioServerParameters(
+    command="npx",  # Executable
+    args=[
+        "-y",
+        "@openbnb/mcp-server-airbnb",
+        "--ignore-robots-txt",
+    ],  # Optional command line arguments
+    env=None,  # Optional environment variables
+)
+
+async def agent_loop(prompt: str, client: genai.Client, session: ClientSession):
+    contents = [types.Content(role="user", parts=[types.Part(text=prompt)])]
+    # Initialize the connection
+    await session.initialize()
+    
+    # --- 1. Get Tools from Session and convert to Gemini Tool objects ---
+    mcp_tools = await session.list_tools()
+    tools = types.Tool(function_declarations=[
+        {
+            "name": tool.name,
+            "description": tool.description,
+            "parameters": tool.inputSchema,
+        }
+        for tool in mcp_tools.tools
+    ])
+    
+    # --- 2. Initial Request with user prompt and function declarations ---
+    response = await client.aio.models.generate_content(
+        model=model,  # Or your preferred model supporting function calling
+        contents=contents,
+        config=types.GenerateContentConfig(
+            temperature=0,
+            tools=[tools],
+        ),  # Example other config
+    )
+    
+    # --- 3. Append initial response to contents ---
+    contents.append(response.candidates[0].content)
+
+    # --- 4. Tool Calling Loop ---
+    turn_count = 0
+    max_tool_turns = 5
+    while response.function_calls and turn_count < max_tool_turns:
+        turn_count += 1
+        tool_response_parts: List[types.Part] = []
+
+        # --- 4.1 Process all function calls in order and return in this turn ---
+        for fc_part in response.function_calls:
+            tool_name = fc_part.name
+            args = fc_part.args or {}  # Ensure args is a dict
+            print(f"Attempting to call MCP tool: '{tool_name}' with args: {args}")
+
+            tool_response: dict
+            try:
+                # Call the session's tool executor
+                tool_result = await session.call_tool(tool_name, args)
+                print(f"MCP tool '{tool_name}' executed successfully.")
+                if tool_result.isError:
+                    tool_response = {"error": tool_result.content[0].text}
+                else:
+                    tool_response = {"result": tool_result.content[0].text}
+            except Exception as e:
+                tool_response = {"error":  f"Tool execution failed: {type(e).__name__}: {e}"}
+            
+            # Prepare FunctionResponse Part
+            tool_response_parts.append(
+                types.Part.from_function_response(
+                    name=tool_name, response=tool_response
+                )
+            )
+
+        # --- 4.2 Add the tool response(s) to history ---
+        contents.append(types.Content(role="user", parts=tool_response_parts))
+        print(f"Added {len(tool_response_parts)} tool response parts to history.")
+
+        # --- 4.3 Make the next call to the model with updated history ---
+        print("Making subsequent API call with tool responses...")
+        response = await client.aio.models.generate_content(
+            model=model,
+            contents=contents,  # Send updated history
+            config=types.GenerateContentConfig(
+                temperature=1.0,
+                tools=[tools],
+            ),  # Keep sending same config
+        )
+        contents.append(response.candidates[0].content)
+
+    if turn_count >= max_tool_turns and response.function_calls:
+        print(f"Maximum tool turns ({max_tool_turns}) reached. Exiting loop.")
+
+    print("MCP tool calling loop finished. Returning final response.")
+    # --- 5. Return Final Response ---
+    return response
+        
+async def run():
+    async with stdio_client(server_params) as (read, write):
+        async with ClientSession(
+            read,
+            write,
+        ) as session:
+            # Test prompt
+            prompt = "I want to book an apartment in Paris for 2 nights. 03/28 - 03/30"
+            print(f"Running agent loop with prompt: {prompt}")
+            # Run agent loop
+            res = await agent_loop(prompt, client, session)
+            return res
+res = await run()
+print(res.text)
+```
+
+----------------------------------------
+
+TITLE: Defining AI Agents for Customer Support Analysis (Python)
+DESCRIPTION: This code defines three distinct AI agents: `data_analyst`, `process_optimizer`, and `report_writer`. Each agent is assigned a specific role, goal, backstory, and the configured `gemini_llm`. The `data_analyst` is equipped with the `support_data_tool` to perform its data fetching and analysis tasks.
+SOURCE: https://github.com/philschmid/gemini-samples/blob/main/examples/gemini-crewai.ipynb#_snippet_3
+
+LANGUAGE: Python
+CODE:
+```
+from crewai import Agent
+
+# Agent 1: Data Analyst
+data_analyst = Agent(
+    role='Customer Support Data Analyst',
+    goal='Analyze customer support data to identify trends, recurring issues, and key pain points.',
+    backstory=(
+        """You are an expert data analyst specializing in customer support operations. 
+        Your strength lies in identifying patterns and quantifying problems from raw support data."""
+    ),
+    verbose=True,
+    allow_delegation=False, # This agent focuses on its specific task
+    tools=[support_data_tool], # Assign the data fetching tool
+    llm=gemini_llm # Use the configured Gemini LLM
+)
+
+# Agent 2: Process Optimizer
+process_optimizer = Agent(
+    role='Process Optimization Specialist',
+    goal='Identify bottlenecks and inefficiencies in current support processes based on the data analysis. Propose actionable improvements.',
+    backstory=(
+        """You are a specialist in optimizing business processes, particularly in customer support. 
+        You excel at pinpointing root causes of delays and inefficiencies and suggesting concrete solutions."""
+    ),
+    verbose=True,
+    allow_delegation=False,
+    # No specific tools needed, relies on the analysis context provided by the data_analyst
+    llm=gemini_llm
+)
+
+# Agent 3: Report Writer
+report_writer = Agent(
+    role='Executive Report Writer',
+    goal='Compile the analysis and improvement suggestions into a concise, clear, and actionable report for the COO.',
+    backstory=(
+        """You are a skilled writer adept at creating executive summaries and reports. 
+        You focus on clarity, conciseness, and highlighting the most critical information and recommendations for senior leadership."""
+    ),
+    verbose=True,
+    allow_delegation=False,
+    llm=gemini_llm
+)
+```
+
+----------------------------------------
+
+TITLE: Implementing Routing with Gemini API and Pydantic in Python
+DESCRIPTION: This snippet illustrates the routing workflow pattern. An initial LLM acts as a router, classifying a user query into predefined categories (weather, science, unknown) using a structured output schema defined by Pydantic. Based on the classification, the query is then handed off to a specialized LLM call for a more targeted response, optimizing resource usage and implementing separation of concerns.
+SOURCE: https://github.com/philschmid/gemini-samples/blob/main/guides/agentic-pattern.ipynb#_snippet_1
+
+LANGUAGE: Python
+CODE:
+```
+import os
+import json
+from google import genai
+from pydantic import BaseModel
+import enum
+
+# Configure the client (ensure GEMINI_API_KEY is set in your environment)
+client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
+
+# Define Routing Schema
+class Category(enum.Enum):
+    WEATHER = "weather"
+    SCIENCE = "science"
+    UNKNOWN = "unknown"
+
+class RoutingDecision(BaseModel):
+    category: Category
+    reasoning: str
+
+# Step 1: Route the Query
+user_query = "What's the weather like in Paris?"
+# user_query = "Explain quantum physics simply."
+# user_query = "What is the capital of France?"
+
+prompt_router = f"""
+Analyze the user query below and determine its category.
+Categories:
+- weather: For questions about weather conditions.
+- science: For questions about science.
+- unknown: If the category is unclear.
+
+Query: {user_query}
+"""
+
+# Use client.models.generate_content with config for structured output
+response_router = client.models.generate_content(
+    model= 'gemini-2.0-flash-lite',
+    contents=prompt_router,
+    config={
+        'response_mime_type': 'application/json',
+        'response_schema': RoutingDecision,
+    },
+)
+print(f"Routing Decision: Category={response_router.parsed.category}, Reasoning={response_router.parsed.reasoning}")
+
+# Step 2: Handoff based on Routing
+final_response = ""
+if response_router.parsed.category == Category.WEATHER:
+    weather_prompt = f"Provide a brief weather forecast for the location mentioned in: '{user_query}'"
+    weather_response = client.models.generate_content(
+        model='gemini-2.0-flash',
+        contents=weather_prompt
+    )
+    final_response = weather_response.text
+elif response_router.parsed.category == Category.SCIENCE:
+    science_response = client.models.generate_content(
+        model="gemini-2.5-flash-preview-04-17",
+        contents=user_query
+    )
+    final_response = science_response.text
+else:
+    unknown_response = client.models.generate_content(
+        model="gemini-2.0-flash-lite",
+        contents=f"The user query is: {prompt_router}, but could not be answered. Here is the reasoning: {response_router.parsed.reasoning}. Write a helpful response to the user for him to try again."
+    )
+    final_response = unknown_response.text
+print(f"\nFinal Response: {final_response}")
+```
+
+----------------------------------------
+
+TITLE: Sending Tool Output Back to Gemma 3 for Final Response
+DESCRIPTION: This Python snippet sends the `tool_output` generated from the local function execution back to the Gemma 3 model within the ongoing chat session. This allows the model to process the result of the tool call and generate a final, user-friendly natural language response based on the executed function's outcome.
+SOURCE: https://github.com/philschmid/gemini-samples/blob/main/examples/gemma-function-calling.ipynb#_snippet_10
+
+LANGUAGE: Python
+CODE:
+```
+response = chat.send_message(call_response)
+print(response.text)
+```
+
+----------------------------------------
+
+TITLE: Configuring Gemini for Function Calling
+DESCRIPTION: This code configures the Gemini model for function calling by creating a `GenerateContentConfig` object. It sets the system instruction, specifies the `get_weather_forecast` function as a tool, and disables automatic function calling. This configuration allows the model to identify when to call the function but requires manual handling of the function call and response.
+SOURCE: https://github.com/philschmid/gemini-samples/blob/main/guides/function-calling.ipynb#_snippet_12
+
+LANGUAGE: python
+CODE:
+```
+from google.genai.types import GenerateContentConfig
+
+# Generation Config
+config = GenerateContentConfig(
+    system_instruction="You are a helpful assistant that can help with weather related questions. Today is 2025-03-04.", # to give the LLM context on the current date.
+    tools=[get_weather_forecast], # define the functions that the LLM can use
+    automatic_function_calling={"disable": True} # Disable for now. 
+)
+```
+
+----------------------------------------
+
+TITLE: Structured Output with Gemini
+DESCRIPTION: This example demonstrates how to obtain structured output from the Gemini model using Pydantic models. It defines a Person model with name and height, initializes the model for structured output, and invokes it to extract information about a person.
+SOURCE: https://github.com/philschmid/gemini-samples/blob/main/examples/gemini-langchain.ipynb#_snippet_10
+
+LANGUAGE: python
+CODE:
+```
+from langchain_core.pydantic_v1 import BaseModel, Field
+from langchain_google_genai import ChatGoogleGenerativeAI
+
+# Define the desired structure
+class Person(BaseModel):
+    '''Information about a person.'''
+    name: str = Field(..., description="The person's name")
+    height_m: float = Field(..., description="The person's height in meters")
+
+# Initialize the model
+llm = ChatGoogleGenerativeAI(model="gemini-2.0-flash", temperature=0)
+structured_llm = llm.with_structured_output(Person)
+
+# Invoke the model with a query asking for structured information
+result = structured_llm.invoke("Who was the 16th president of the USA, and how tall was he in meters?")
+print(result)  # Output: name='Abraham Lincoln' height_m=1.93
+```
+
+----------------------------------------
+
+TITLE: Compare Similarity using Gemini and Cosine Similarity in Python
+DESCRIPTION: This code snippet demonstrates how to calculate the cosine similarity between a query embedding and a set of document embeddings using the Gemini API. It takes a query and a list of documents, embeds them using `query_embeddings.embed_query` and `doc_embeddings.embed_documents`, respectively, and then calculates the cosine similarity between the query embedding and each document embedding. Finally, it prints the similarity score for each document.
+SOURCE: https://github.com/philschmid/gemini-samples/blob/main/examples/gemini-langchain.ipynb#_snippet_16
+
+LANGUAGE: Python
+CODE:
+```
+q_embed = query_embeddings.embed_query("What is the capital of France?")
+d_embed = doc_embeddings.embed_documents(["The capital of France is Paris.", "Philipp likes to eat pizza."])
+
+for i, d in enumerate(d_embed):
+    similarity = cosine_similarity([q_embed], [d])[0][0]
+    print(f"Document {i+1} similarity: {similarity}")
+```
+
+----------------------------------------
+
+TITLE: Defining a Tool with LangChain Decorator
+DESCRIPTION: This code defines the `get_weather_forecast` function as a tool using the `@tool` decorator from LangChain. It retrieves weather data for a given location and date using the Open-Meteo API and returns a dictionary with the time and temperature for each hour.  The `@tool` decorator makes the function discoverable and usable within LangChain workflows.
+SOURCE: https://github.com/philschmid/gemini-samples/blob/main/guides/function-calling.ipynb#_snippet_18
+
+LANGUAGE: python
+CODE:
+```
+from geopy.geocoders import Nominatim
+import requests
+from langchain.tools import tool
+
+geolocator = Nominatim(user_agent="weather-app") 
+
+@tool
+def get_weather_forecast(location: str, date: str) -> str:
+    """Retrieves the weather using Open-Meteo API for a given location (city) and a date (yyyy-mm-dd). Returns a list dictionary with the time and temperature for each hour."
+    
+    Args:
+        location (str): The city and state, e.g., San Francisco, CA
+        date (str): The forecasting date for when to get the weather format (yyyy-mm-dd)
+    Returns:
+        Dict[str, float]: A dictionary with the time as key and the temperature as value
+    """
+    location = geolocator.geocode(location)
+    if location:
+        try:
+            response = requests.get(f"https://api.open-meteo.com/v1/forecast?latitude={location.latitude}&longitude={location.longitude}&hourly=temperature_2m&start_date={date}&end_date={date}")
+            data = response.json()
+            return {time: temp for time, temp in zip(data["hourly"]["time"], data["hourly"]["temperature_2m"])}
+        except Exception as e:
+            return {"error": str(e)}
+    else:
+        return {"error": "Location not found"}
+```

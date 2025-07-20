@@ -1,0 +1,1149 @@
+TITLE: Initialize Google Gen AI SDK for Vertex AI Integration
+DESCRIPTION: This example demonstrates how to initialize the SDK to work with Vertex AI. It requires specifying 'vertexai: true' along with your Google Cloud project ID and location to connect to the Vertex AI service.
+SOURCE: https://googleapis.github.io/js-genai/release_docs/index
+
+LANGUAGE: JavaScript
+CODE:
+```
+import { GoogleGenAI } from '@google/genai';
+
+const ai = new GoogleGenAI({
+    vertexai: true,
+    project: 'your_project',
+    location: 'your_location'
+});
+```
+
+----------------------------------------
+
+TITLE: Configure GoogleGenAI for Gemini Developer API with v1alpha API Version
+DESCRIPTION: Illustrates how to initialize the GoogleGenAI client to use the `v1alpha` API endpoints for the Gemini Developer API, requiring an API key for authentication.
+SOURCE: https://googleapis.github.io/js-genai/release_docs/index
+
+LANGUAGE: javascript
+CODE:
+```
+const ai = new GoogleGenAI({
+    apiKey: 'GEMINI_API_KEY',
+    apiVersion: 'v1alpha'
+});
+```
+
+----------------------------------------
+
+TITLE: Optional temperature Property
+DESCRIPTION: Controls the randomness of predictions. Higher values (e.g., 1.0) make the output more random, while lower values (e.g., 0.1) make it more deterministic and focused.
+SOURCE: https://googleapis.github.io/js-genai/release_docs/interfaces/types.GenerationConfig
+
+LANGUAGE: APIDOC
+CODE:
+```
+temperature?: number
+Optional. Controls the randomness of predictions.
+```
+
+----------------------------------------
+
+TITLE: Specify Tools for Google GenAI Model Interaction
+DESCRIPTION: Provides a list of tools that the model can utilize to interact with external systems. These tools allow the model to perform actions or access information outside its inherent capabilities, extending its functionality to real-world applications.
+SOURCE: https://googleapis.github.io/js-genai/release_docs/interfaces/types.GenerateContentConfig
+
+LANGUAGE: APIDOC
+CODE:
+```
+tools?: ToolListUnion
+
+Code that enables the system to interact with external systems to
+perform an action outside of the knowledge and scope of the model.
+```
+
+----------------------------------------
+
+TITLE: Initialize Google Gen AI SDK for Browser-side Gemini API
+DESCRIPTION: This snippet illustrates the initialization process for browser-based applications. While the code is identical to server-side initialization, it's crucial to avoid exposing API keys directly in client-side code for security reasons.
+SOURCE: https://googleapis.github.io/js-genai/release_docs/index
+
+LANGUAGE: JavaScript
+CODE:
+```
+import { GoogleGenAI } from '@google/genai';
+const ai = new GoogleGenAI({apiKey: 'GEMINI_API_KEY'});
+```
+
+----------------------------------------
+
+TITLE: Set GOOGLE_API_KEY Environment Variable for Gemini API
+DESCRIPTION: For Node.js environments, you can configure the SDK by setting the 'GOOGLE_API_KEY' environment variable. This allows the SDK to pick up the API key automatically without explicit code configuration.
+SOURCE: https://googleapis.github.io/js-genai/release_docs/index
+
+LANGUAGE: Shell
+CODE:
+```
+export GOOGLE_API_KEY='your-api-key'
+```
+
+----------------------------------------
+
+TITLE: Initialize GoogleGenAI SDK for Gemini or Vertex AI
+DESCRIPTION: This snippet demonstrates how to initialize the Google GenAI SDK. It includes examples for connecting to the Gemini API using an API key and for connecting to the Vertex AI API by specifying project and location details. The choice of API depends on the `vertexai` option.
+SOURCE: https://googleapis.github.io/js-genai/release_docs/classes/client.GoogleGenAI
+
+LANGUAGE: TypeScript
+CODE:
+```
+import {GoogleGenAI} from '@google/genai';
+const ai = new GoogleGenAI({apiKey: 'GEMINI_API_KEY'});
+```
+
+LANGUAGE: TypeScript
+CODE:
+```
+import {GoogleGenAI} from '@google/genai';
+const ai = new GoogleGenAI({
+  vertexai: true,
+  project: 'PROJECT_ID',
+  location: 'PROJECT_LOCATION'
+});
+```
+
+----------------------------------------
+
+TITLE: Optional responseJsonSchema Property
+DESCRIPTION: Output schema of the generated response. This is an alternative to `response_schema` that accepts JSON Schema. If set, `response_schema` must be omitted, but `response_mime_type` is required. While the full JSON Schema may be sent, not all features are supported. Specifically, only a subset of JSON Schema properties are supported, including `$id`, `$defs`, `$ref`, `type`, `format`, `title`, `description`, `enum`, `items`, `properties`, and `required`. Cyclic references are unrolled to a limited degree.
+SOURCE: https://googleapis.github.io/js-genai/release_docs/interfaces/types.GenerationConfig
+
+LANGUAGE: APIDOC
+CODE:
+```
+responseJsonSchema?: unknown
+Optional. Output schema of the generated response. This is an alternative to `response_schema` that accepts [JSON Schema](https://json-schema.org/). If set, `response_schema` must be omitted, but `response_mime_type` is required. While the full JSON Schema may be sent, not all features are supported. Specifically, only the following properties are supported: - `$id` - `$defs` - `$ref` - `$anchor` - `type` - `format` - `title` - `description` - `enum` (for strings and numbers) - `items` - `prefixItems` - `minItems` - `maxItems` - `minimum` - `maximum` - `anyOf` - `oneOf` (interpreted the same as `anyOf`) - `properties` - `additionalProperties` - `required` The non-standard `propertyOrdering` property may also be set. Cyclic references are unrolled to a limited degree and, as such, may only be used within non-required properties. (Nullable properties are not sufficient.) If `$ref` is set on a sub-schema, no other properties, except for than those starting as a `$`, may be set.
+```
+
+----------------------------------------
+
+TITLE: Optional topK Property
+DESCRIPTION: If specified, top-k sampling will be used. This method samples from the top 'k' most likely next tokens, limiting the vocabulary considered for generation.
+SOURCE: https://googleapis.github.io/js-genai/release_docs/interfaces/types.GenerationConfig
+
+LANGUAGE: APIDOC
+CODE:
+```
+topK?: number
+Optional. If specified, top-k sampling will be used.
+```
+
+----------------------------------------
+
+TITLE: Define ToolUnion Type Alias
+DESCRIPTION: The `ToolUnion` type alias represents a union of two distinct tool types: `Tool` and `CallableTool`. This allows functions or parameters to accept either type interchangeably, providing flexibility in how tools are defined and used within the `@google/genai` library. It is defined in `src/types.ts`.
+SOURCE: https://googleapis.github.io/js-genai/release_docs/types/types.ToolUnion
+
+LANGUAGE: APIDOC
+CODE:
+```
+ToolUnion: Tool | CallableTool
+```
+
+----------------------------------------
+
+TITLE: Structure of `contents` Argument for `generateContent`
+DESCRIPTION: Explains how the `contents` argument for the `generateContent` method can be structured, detailing the handling of a single `Content` instance versus an array of `Content` instances by the SDK.
+SOURCE: https://googleapis.github.io/js-genai/release_docs/index
+
+LANGUAGE: APIDOC
+CODE:
+```
+generateContent:
+  contents (argument):
+    - Type: Content | Content[]
+    - If singular Content: SDK wraps it in an array.
+    - If Content[]: No transformation.
+```
+
+----------------------------------------
+
+TITLE: Initialize Google Gen AI SDK from Environment Variables
+DESCRIPTION: When the necessary environment variables (e.g., 'GOOGLE_API_KEY' or Vertex AI related variables) are set in a Node.js environment, the SDK can be initialized without any parameters, automatically detecting the configuration.
+SOURCE: https://googleapis.github.io/js-genai/release_docs/index
+
+LANGUAGE: JavaScript
+CODE:
+```
+import {GoogleGenAI} from '@google/genai';
+
+const ai = new GoogleGenAI();
+```
+
+----------------------------------------
+
+TITLE: Optional responseSchema Property
+DESCRIPTION: The `Schema` object allows the definition of input and output data types. These types can be objects, but also primitives and arrays. It represents a select subset of an OpenAPI 3.0 schema object. If set, a compatible `response_mime_type` must also be set, such as `application/json` for JSON responses.
+SOURCE: https://googleapis.github.io/js-genai/release_docs/interfaces/types.GenerationConfig
+
+LANGUAGE: APIDOC
+CODE:
+```
+responseSchema?: Schema
+Optional. The `Schema` object allows the definition of input and output data types. These types can be objects, but also primitives and arrays. Represents a select subset of an [OpenAPI 3.0 schema object](https://spec.openapis.org/oas/v3.0.3#schema). If set, a compatible response_mime_type must also be set. Compatible mimetypes: `application/json`: Schema for JSON response.
+```
+
+----------------------------------------
+
+TITLE: Optional presencePenalty Property
+DESCRIPTION: Positive penalties. This parameter influences the likelihood of new tokens appearing in the generated text based on their existing presence, discouraging repetition.
+SOURCE: https://googleapis.github.io/js-genai/release_docs/interfaces/types.GenerationConfig
+
+LANGUAGE: APIDOC
+CODE:
+```
+presencePenalty?: number
+Optional. Positive penalties.
+```
+
+----------------------------------------
+
+TITLE: Optional stopSequences Property
+DESCRIPTION: Stop sequences. These are strings that, if encountered in the generated output, will cause the generation process to stop immediately.
+SOURCE: https://googleapis.github.io/js-genai/release_docs/interfaces/types.GenerationConfig
+
+LANGUAGE: APIDOC
+CODE:
+```
+stopSequences?: string[]
+Optional. Stop sequences.
+```
+
+----------------------------------------
+
+TITLE: Generate Content Stream API Definition
+DESCRIPTION: Defines the `generateContentStream` function, its parameters, and return type for streaming content generation. This function yields responses in chunks and supports various model name formats for Vertex AI and Gemini APIs, similar to `generateContent`.
+SOURCE: https://googleapis.github.io/js-genai/release_docs/classes/models.Models
+
+LANGUAGE: APIDOC
+CODE:
+```
+generateContentStream(params: GenerateContentParameters): Promise<AsyncGenerator<GenerateContentResponse, any, unknown>>
+  Makes an API request to generate content with a given model and yields the response in chunks.
+  For the `model` parameter, supported formats for Vertex AI API include:
+    - The Gemini model ID, for example: 'gemini-2.0-flash'
+    - The full resource name starts with 'projects/', for example: 'projects/my-project-id/locations/us-central1/publishers/google/models/gemini-2.0-flash'
+    - The partial resource name with 'publishers/', for example: 'publishers/google/models/gemini-2.0-flash' or 'publishers/meta/models/llama-3.1-405b-instruct-maas'
+    - `/` separated publisher and model name, for example: 'google/gemini-2.0-flash' or 'meta/llama-3.1-405b-instruct-maas'
+  For the `model` parameter, supported formats for Gemini API include:
+    - The Gemini model ID, for example: 'gemini-2.0-flash'
+    - The model name starts with 'models/', for example: 'models/gemini-2.0-flash'
+    - For tuned models, the model name starts with 'tunedModels/', for example: 'tunedModels/1234567890123456789'
+  Some models support multimodal input and output.
+  Parameters:
+    params: GenerateContentParameters
+      The parameters for generating content with streaming response.
+  Returns: Promise<AsyncGenerator<GenerateContentResponse, any, unknown>>
+    The response from generating content.
+```
+
+----------------------------------------
+
+TITLE: Call generateContent for Text Generation
+DESCRIPTION: Shows how to call the `generateContent` function to generate text using a specified model ('gemini-2.0-flash') and a text prompt. It includes an optional configuration to request a specific number of candidate responses.
+SOURCE: https://googleapis.github.io/js-genai/release_docs/classes/models.Models
+
+LANGUAGE: javascript
+CODE:
+```
+const response = await ai.models.generateContent({
+  model: 'gemini-2.0-flash',
+  contents: 'why is the sky blue?',
+  config: {
+    candidateCount: 2,
+  }
+});
+console.log(response);
+```
+
+----------------------------------------
+
+TITLE: Configure Google Cloud Authentication for SDK
+DESCRIPTION: This command creates local authentication credentials for your user account, which is a prerequisite for Vertex AI users to interact with Google Cloud services.
+SOURCE: https://googleapis.github.io/js-genai/release_docs/index
+
+LANGUAGE: Shell
+CODE:
+```
+gcloud auth application-default login
+```
+
+----------------------------------------
+
+TITLE: GoogleGenAI Class API Documentation
+DESCRIPTION: Comprehensive API reference for the `GoogleGenAI` class, detailing its constructor, parameters, return types, and available properties for accessing various GenAI services.
+SOURCE: https://googleapis.github.io/js-genai/release_docs/classes/client.GoogleGenAI
+
+LANGUAGE: APIDOC
+CODE:
+```
+Class GoogleGenAI
+	Description: The Google GenAI SDK. Provides access to the GenAI features through either the Gemini API or the Vertex AI API.
+	Remarks:
+		- The GoogleGenAIOptions.vertexai value determines which of the API services to use.
+		- When using the Gemini API, a GoogleGenAIOptions.apiKey must also be set.
+		- When using Vertex AI, GoogleGenAIOptions.project and GoogleGenAIOptions.location must also be set.
+
+	Constructors:
+		new GoogleGenAI(options: GoogleGenAIOptions): GoogleGenAI
+			Parameters:
+				options: GoogleGenAIOptions - Configuration options for the SDK.
+			Returns: GoogleGenAI - An initialized instance of the GoogleGenAI SDK.
+
+	Properties:
+		Readonly authTokens: Tokens - Manages authentication tokens.
+		Readonly batches: Batches - Provides access to batch operations.
+		Readonly caches: Caches - Manages cached data.
+		Readonly chats: Chats - Provides access to chat functionalities.
+		Readonly files: Files - Manages files.
+		Readonly live: Live - Provides access to live features.
+		Readonly models: Models - Manages models.
+		Readonly operations: Operations - Manages long-running operations.
+		Readonly tunings: Tunings - Manages model tunings.
+		Readonly vertexai: boolean - Indicates if Vertex AI is being used.
+```
+
+----------------------------------------
+
+TITLE: Define GenerateContentConfig Interface for Content Generation
+DESCRIPTION: This API documentation defines the `GenerateContentConfig` interface, used to specify optional parameters for content generation requests. It includes properties for controlling aspects like safety settings, output token limits, temperature, and tool usage. This configuration is crucial for fine-tuning the behavior of generative AI models.
+SOURCE: https://googleapis.github.io/js-genai/release_docs/interfaces/types.GenerateContentConfig
+
+LANGUAGE: APIDOC
+CODE:
+```
+interface GenerateContentConfig {
+  abortSignal?: AbortSignal;
+  audioTimestamp?: boolean;
+  automaticFunctionCalling?: AutomaticFunctionCallingConfig;
+  cachedContent?: string;
+  candidateCount?: number;
+  frequencyPenalty?: number;
+  httpOptions?: HttpOptions;
+  labels?: Record<string, string>;
+  logprobs?: number;
+  maxOutputTokens?: number;
+  mediaResolution?: MediaResolution;
+  modelSelectionConfig?: ModelSelectionConfig;
+  presencePenalty?: number;
+  responseJsonSchema?: unknown;
+  responseLogprobs?: boolean;
+  responseMimeType?: string;
+  responseModalities?: string[];
+  responseSchema?: unknown;
+  routingConfig?: GenerationConfigRoutingConfig;
+  safetySettings?: SafetySetting[];
+  seed?: number;
+  speechConfig?: SpeechConfigUnion;
+  stopSequences?: string[];
+  systemInstruction?: ContentUnion;
+  temperature?: number;
+  thinkingConfig?: ThinkingConfig;
+  toolConfig?: ToolConfig;
+  tools?: ToolListUnion;
+  topK?: number;
+  topP?: number;
+}
+```
+
+----------------------------------------
+
+TITLE: Set Generation Seed
+DESCRIPTION: Sets a fixed random seed for text generation, enabling reproducible model responses for identical requests. By default, the model uses a random seed, leading to varied outputs.
+SOURCE: https://googleapis.github.io/js-genai/release_docs/interfaces/types.GenerateContentConfig
+
+LANGUAGE: APIDOC
+CODE:
+```
+seed?: number
+  Description: When `seed` is fixed to a specific number, the model makes a best effort to provide the same response for repeated requests. By default, a random number is used.
+```
+
+----------------------------------------
+
+TITLE: Set TopK Parameter for Google GenAI Model Sampling
+DESCRIPTION: Controls the diversity of token selection by sampling from the 'top_k' tokens with the highest probabilities. A lower 'topK' value results in less random and more focused responses, while a higher value increases randomness and creativity. It works in conjunction with 'topP' and 'temperature' for fine-tuned control.
+SOURCE: https://googleapis.github.io/js-genai/release_docs/interfaces/types.GenerateContentConfig
+
+LANGUAGE: APIDOC
+CODE:
+```
+topK?: number
+
+For each token selection step, the `top_k` tokens with the
+highest probabilities are sampled. Then tokens are further filtered based
+on `top_p` with the final token selected using temperature sampling. Use
+a lower number for less random responses and a higher number for more
+random responses.
+```
+
+----------------------------------------
+
+TITLE: Define ThinkingConfig Interface
+DESCRIPTION: Defines the `ThinkingConfig` interface, which specifies configuration options for AI model thinking features. It includes properties to control whether to include thoughts in the response and to set a thinking budget in tokens.
+SOURCE: https://googleapis.github.io/js-genai/release_docs/interfaces/types.ThinkingConfig
+
+LANGUAGE: APIDOC
+CODE:
+```
+Interface: ThinkingConfig
+  Description: The thinking features configuration.
+  Properties:
+    includeThoughts?: boolean
+      Description: Indicates whether to include thoughts in the response. If true, thoughts are returned only if the model supports thought and thoughts are available.
+    thinkingBudget?: number
+      Description: Indicates the thinking budget in tokens. 0 is DISABLED. -1 is AUTOMATIC. The default values and allowed ranges are model dependent.
+```
+
+----------------------------------------
+
+TITLE: Fetch Model Information with Google GenAI Models API
+DESCRIPTION: Fetches detailed information about a specific model by its name using the Google GenAI Models API. This method requires `GetModelParameters` and returns a `Promise<Model>` containing the model's details.
+SOURCE: https://googleapis.github.io/js-genai/release_docs/classes/models.Models
+
+LANGUAGE: APIDOC
+CODE:
+```
+get(params: GetModelParameters): Promise<Model>
+
+Fetches information about a model by name.
+
+Parameters:
+  params: GetModelParameters
+
+Returns Promise<Model>
+```
+
+LANGUAGE: JavaScript
+CODE:
+```
+const modelInfo = await ai.models.get({model: 'gemini-2.0-flash'});
+```
+
+----------------------------------------
+
+TITLE: Configure Thinking Features for Google GenAI Model
+DESCRIPTION: Specifies the configuration for the model's 'thinking' features. This property enables advanced capabilities that allow the model to perform internal reasoning or planning before generating a response, potentially improving the quality and relevance of outputs.
+SOURCE: https://googleapis.github.io/js-genai/release_docs/interfaces/types.GenerateContentConfig
+
+LANGUAGE: APIDOC
+CODE:
+```
+thinkingConfig?: ThinkingConfig
+
+The thinking features configuration.
+```
+
+----------------------------------------
+
+TITLE: Define GoogleGenAIOptions TypeScript Interface
+DESCRIPTION: This code snippet defines the `GoogleGenAIOptions` interface in TypeScript, outlining the available configuration properties for the Google Gen AI SDK. It specifies the type and optionality of each parameter, providing a clear structure for SDK initialization.
+SOURCE: https://googleapis.github.io/js-genai/release_docs/interfaces/client.GoogleGenAIOptions
+
+LANGUAGE: TypeScript
+CODE:
+```
+interface GoogleGenAIOptions {
+    apiKey?: string;
+    apiVersion?: string;
+    googleAuthOptions?: GoogleAuthOptions<JSONClient>;
+    httpOptions?: HttpOptions;
+    location?: string;
+    project?: string;
+    vertexai?: boolean;
+}
+```
+
+----------------------------------------
+
+TITLE: API Reference: GenerationConfig Interface
+DESCRIPTION: Defines configuration options for controlling the behavior of text generation models, including output token limits, temperature, and penalty parameters. This interface specifies properties such as `maxOutputTokens`, `temperature`, and various penalty settings to fine-tune generation.
+SOURCE: https://googleapis.github.io/js-genai/release_docs/interfaces/types.GenerationConfig
+
+LANGUAGE: APIDOC
+CODE:
+```
+Interface GenerationConfig:
+  Description: Generation config.
+  Properties:
+    audioTimestamp?: boolean
+      Description: Optional. If enabled, audio timestamp will be included in the request to the model.
+    candidateCount?: number
+      Description: Optional. Number of candidates to generate.
+    frequencyPenalty?: number
+      Description: Optional. Frequency penalties.
+    logprobs?: number
+      Description: Optional. Logit probabilities.
+    maxOutputTokens?: number
+      Description: Optional. The maximum number of output tokens to generate per message.
+    mediaResolution?: MediaResolution
+      Description: Optional. If specified, the media resolution specified will be used.
+    modelSelectionConfig?: ModelSelectionConfig
+    presencePenalty?: number
+    responseJsonSchema?: unknown
+    responseLogprobs?: boolean
+    responseMimeType?: string
+    responseModalities?: Modality[]
+    responseSchema?: Schema
+    routingConfig?: GenerationConfigRoutingConfig
+    seed?: number
+    speechConfig?: SpeechConfig
+    stopSequences?: string[]
+    temperature?: number
+    thinkingConfig?: GenerationConfigThinkingConfig
+    topK?: number
+    topP?: number
+```
+
+----------------------------------------
+
+TITLE: Configure Speech Generation
+DESCRIPTION: Configures parameters specifically for speech generation capabilities. This setting is used when the generative model is capable of producing speech output.
+SOURCE: https://googleapis.github.io/js-genai/release_docs/interfaces/types.GenerateContentConfig
+
+LANGUAGE: APIDOC
+CODE:
+```
+speechConfig?: SpeechConfigUnion
+  Description: The speech generation configuration.
+```
+
+----------------------------------------
+
+TITLE: Stream Content Generation with generateContentStream
+DESCRIPTION: Illustrates how to use `generateContentStream` to generate content in chunks. It shows how to configure the maximum output tokens and then iterate over the asynchronous generator to process each response chunk as it becomes available.
+SOURCE: https://googleapis.github.io/js-genai/release_docs/classes/models.Models
+
+LANGUAGE: javascript
+CODE:
+```
+const response = await ai.models.generateContentStream({
+  model: 'gemini-2.0-flash',
+  contents: 'why is the sky blue?',
+  config: {
+    maxOutputTokens: 200,
+  }
+});
+for await (const chunk of response) {
+  console.log(chunk);
+}
+```
+
+----------------------------------------
+
+TITLE: ComputeTokensParameters Interface Definition and Property Details
+DESCRIPTION: This API documentation defines the `ComputeTokensParameters` interface, which specifies the required and optional parameters for computing tokens. It includes fields for optional configuration, the input content, and the identifier of the generative model to be used.
+SOURCE: https://googleapis.github.io/js-genai/release_docs/interfaces/types.ComputeTokensParameters
+
+LANGUAGE: APIDOC
+CODE:
+```
+Interface: ComputeTokensParameters
+Description: Parameters for computing tokens.
+
+interface ComputeTokensParameters {
+    config?: ComputeTokensConfig;
+    contents: ContentListUnion;
+    model: string;
+}
+
+Properties:
+  config?: ComputeTokensConfig
+    Description: Optional parameters for the request.
+  contents: ContentListUnion
+    Description: Input content.
+  model: string
+    Description: ID of the model to use. For a list of models, see `Google models <https://cloud.google.com/vertex-ai/generative-ai/docs/learn/models>`.
+```
+
+----------------------------------------
+
+TITLE: API Reference: EmbedContentConfig Interface Definition
+DESCRIPTION: Defines the structure and available properties for the `EmbedContentConfig` interface, used to customize the behavior of the `embed_content` method. Each property is optional and provides specific control over the embedding process, including request management, input processing, and output formatting.
+SOURCE: https://googleapis.github.io/js-genai/release_docs/interfaces/types.EmbedContentConfig
+
+LANGUAGE: APIDOC
+CODE:
+```
+interface EmbedContentConfig {
+  abortSignal?: AbortSignal; // Abort signal which can be used to cancel the request. NOTE: AbortSignal is a client-only operation. Using it to cancel an operation will not cancel the request in the service. You will still be charged usage for any applicable operations.
+  autoTruncate?: boolean; // Vertex API only. Whether to silently truncate inputs longer than the max sequence length. If this option is set to false, oversized inputs will lead to an INVALID_ARGUMENT error, similar to other text APIs.
+  httpOptions?: HttpOptions; // Used to override HTTP request options.
+  mimeType?: string; // Vertex API only. The MIME type of the input.
+  outputDimensionality?: number; // Reduced dimension for the output embedding. If set, excessive values in the output embedding are truncated from the end. Supported by newer models since 2024 only. You cannot set this value if using the earlier model (`models/embedding-001`).
+  taskType?: string; // Type of task for which the embedding will be used.
+  title?: string; // Title for the text. Only applicable when TaskType is `RETRIEVAL_DOCUMENT`.
+}
+```
+
+----------------------------------------
+
+TITLE: Define Response JSON Schema
+DESCRIPTION: Defines an optional JSON Schema for the generated response, enabling structured and validated output. This alternative to `response_schema` requires `response_mime_type` and supports a specific subset of JSON Schema features for output formatting.
+SOURCE: https://googleapis.github.io/js-genai/release_docs/interfaces/types.GenerateContentConfig
+
+LANGUAGE: APIDOC
+CODE:
+```
+responseJsonSchema?: unknown
+  Description: Optional. Output schema of the generated response. This is an alternative to `response_schema` that accepts [JSON Schema](https://json-schema.org/). If set, `response_schema` must be omitted, but `response_mime_type` is required. While the full JSON Schema may be sent, not all features are supported. Specifically, only the following properties are supported: - `$id` - `$defs` - `$ref` - `$anchor` - `type` - `format` - `title` - `description` - `enum` (for strings and numbers) - `items` - `prefixItems` - `minItems` - `maxItems` - `minimum` - `maximum` - `anyOf` - `oneOf` (interpreted the same as `anyOf`) - `properties` - `additionalProperties` - `required` The non-standard `propertyOrdering` property may also be set. Cyclic references are unrolled to a limited degree and, as such, may only be used within non-required properties. (Nullable properties are not sufficient.) If `$ref` is set on a sub-schema, no other properties, except for than those starting as a `$`, may be set.
+```
+
+----------------------------------------
+
+TITLE: GoogleGenAIOptions API Reference
+DESCRIPTION: This section provides detailed API documentation for the `GoogleGenAIOptions` interface, describing each property's purpose, type, and any specific remarks or usage constraints. It covers parameters like `apiKey`, `apiVersion`, authentication options, HTTP settings, and project/location configurations for both Gemini and Vertex AI clients.
+SOURCE: https://googleapis.github.io/js-genai/release_docs/interfaces/client.GoogleGenAIOptions
+
+LANGUAGE: APIDOC
+CODE:
+```
+GoogleGenAIOptions Interface:
+  apiKey?: string
+    Description: The API Key, required for Gemini API clients.
+    Remarks: Required on browser runtimes.
+  apiVersion?: string
+    Description: Optional. The API version to use.
+    Remarks: If unset, the default API version will be used.
+  googleAuthOptions?: GoogleAuthOptions<JSONClient>
+    Description: Optional. Authentication options defined by the by google-auth-library for Vertex AI clients.
+    Remarks: Only supported on Node runtimes, ignored on browser runtimes. See GoogleAuthOptions interface in google-auth-library-nodejs.
+  httpOptions?: HttpOptions
+    Description: Optional. A set of customizable configuration for HTTP requests.
+  location?: string
+    Description: Optional. The Google Cloud project location for Vertex AI clients.
+    Remarks: Only supported on Node runtimes, ignored on browser runtimes.
+  project?: string
+    Description: Optional. The Google Cloud project ID for Vertex AI clients.
+    Remarks: Only supported on Node runtimes, ignored on browser runtimes.
+  vertexai?: boolean
+    Description: Optional. Determines whether to use the Vertex AI or the Gemini API.
+    Remarks: When true, the Vertex AI API will used. When false, the Gemini API will be used. If unset, default SDK behavior is to use the Gemini API service.
+```
+
+----------------------------------------
+
+TITLE: Call embedContent with Specific Model and Content
+DESCRIPTION: Demonstrates how to call the `embedContent` function using `ai.models.embedContent` with a specified model ('text-embedding-004') and a list of text contents. It also shows how to configure the output dimensionality of the embeddings.
+SOURCE: https://googleapis.github.io/js-genai/release_docs/classes/models.Models
+
+LANGUAGE: javascript
+CODE:
+```
+const response = await ai.models.embedContent({
+ model: 'text-embedding-004',
+ contents: [
+   'What is your name?',
+   'What is your favorite color?',
+ ],
+ config: {
+   outputDimensionality: 64,
+ },
+});
+console.log(response);
+```
+
+----------------------------------------
+
+TITLE: Generate Images with Google GenAI Models API
+DESCRIPTION: Generates an image based on a text description and configuration using the Google GenAI Models API. This method requires `GenerateImagesParameters` as input and returns a `Promise<GenerateImagesResponse>` containing the generated image data.
+SOURCE: https://googleapis.github.io/js-genai/release_docs/classes/models.Models
+
+LANGUAGE: APIDOC
+CODE:
+```
+generateImages(
+  params: GenerateImagesParameters,
+): Promise<GenerateImagesResponse>
+
+Generates an image based on a text description and configuration.
+
+Parameters:
+  params: GenerateImagesParameters - The parameters for generating images.
+
+Returns Promise<GenerateImagesResponse> - The response from the API.
+```
+
+LANGUAGE: JavaScript
+CODE:
+```
+const response = await client.models.generateImages({
+ model: 'imagen-3.0-generate-002',
+ prompt: 'Robot holding a red skateboard',
+ config: {
+   numberOfImages: 1,
+   includeRaiReason: true,
+ },
+});
+console.log(response?.generatedImages?.[0]?.image?.imageBytes);
+```
+
+----------------------------------------
+
+TITLE: Define Model Interface for Machine Learning Models
+DESCRIPTION: Defines the structure of a trained machine learning model, including its various properties such as checkpoints, token limits, and metadata. This interface is part of the `@google/genai` library and provides comprehensive details about a model's configuration and capabilities.
+SOURCE: https://googleapis.github.io/js-genai/release_docs/interfaces/types.Model
+
+LANGUAGE: APIDOC
+CODE:
+```
+Interface Model:
+  description: A trained machine learning model.
+  properties:
+    checkpoints:
+      type: Checkpoint[]
+      optional: true
+      description: The checkpoints of the model.
+    defaultCheckpointId:
+      type: string
+      optional: true
+      description: The default checkpoint id of a model version.
+    description:
+      type: string
+      optional: true
+      description: Description of the model.
+    displayName:
+      type: string
+      optional: true
+      description: Display name of the model.
+    endpoints:
+      type: Endpoint[]
+      optional: true
+      description: List of deployed models created from this base model. Note that a model could have been deployed to endpoints in different locations.
+    inputTokenLimit:
+      type: number
+      optional: true
+      description: The maximum number of input tokens that the model can handle.
+    labels:
+      type: Record<string, string>
+      optional: true
+      description: Labels with user-defined metadata to organize your models.
+    name:
+      type: string
+      optional: true
+      description: Resource name of the model.
+    outputTokenLimit:
+      type: number
+      optional: true
+      description: The maximum number of output tokens that the model can generate.
+    supportedActions:
+      type: string[]
+      optional: true
+      description: List of actions that are supported by the model.
+    tunedModelInfo:
+      type: TunedModelInfo
+      optional: true
+      description: Information about the tuned model from the base model.
+    version:
+      type: string
+      optional: true
+      description: Version ID of the model. A new version is committed when a new model version is uploaded or trained under an existing model ID. The version ID is an auto-incrementing decimal number in string representation.
+```
+
+----------------------------------------
+
+TITLE: APIDOC: ModelSelectionConfig Interface Details
+DESCRIPTION: Detailed API documentation for the ModelSelectionConfig interface, outlining its purpose, properties, their types, and descriptions. This interface is used to configure preferences for model selection.
+SOURCE: https://googleapis.github.io/js-genai/release_docs/interfaces/types.ModelSelectionConfig
+
+LANGUAGE: APIDOC
+CODE:
+```
+Interface: ModelSelectionConfig
+  Description: Config for model selection.
+  Properties:
+    featureSelectionPreference?: FeatureSelectionPreference
+      Description: Options for feature selection preference.
+      Source: src/types.ts:1160
+```
+
+----------------------------------------
+
+TITLE: TypeScript Interface: ModelSelectionConfig Definition
+DESCRIPTION: Defines the structure of the ModelSelectionConfig interface, used for configuring model selection preferences. It specifies the available properties and their types.
+SOURCE: https://googleapis.github.io/js-genai/release_docs/interfaces/types.ModelSelectionConfig
+
+LANGUAGE: TypeScript
+CODE:
+```
+interface ModelSelectionConfig {
+    featureSelectionPreference?: FeatureSelectionPreference;
+}
+```
+
+----------------------------------------
+
+TITLE: Interface: ListModelsConfig
+DESCRIPTION: Defines the structure and properties for the ListModelsConfig interface within the Google Cloud Generative AI SDK.
+SOURCE: https://googleapis.github.io/js-genai/release_docs/modules/types
+
+LANGUAGE: APIDOC
+CODE:
+```
+interface ListModelsConfig
+```
+
+----------------------------------------
+
+TITLE: Embed Content API Definition
+DESCRIPTION: Defines the `embedContent` function, its parameters, and return type for calculating content embeddings. This function supports only text input.
+SOURCE: https://googleapis.github.io/js-genai/release_docs/classes/models.Models
+
+LANGUAGE: APIDOC
+CODE:
+```
+embedContent(params: EmbedContentParameters): Promise<EmbedContentResponse>
+  Calculates embeddings for the given contents. Only text is supported.
+  Parameters:
+    params: EmbedContentParameters
+      The parameters for embedding contents.
+  Returns: Promise<EmbedContentResponse>
+    The response from the API.
+```
+
+----------------------------------------
+
+TITLE: APIDOC & Example: @google/genai Models.computeTokens Method
+DESCRIPTION: Calculates the number of tokens in a given content. This method is not supported by the Gemini Developer API.
+SOURCE: https://googleapis.github.io/js-genai/release_docs/classes/models.Models
+
+LANGUAGE: APIDOC
+CODE:
+```
+computeTokens(params: ComputeTokensParameters): Promise<ComputeTokensResponse>
+  Parameters:
+  + params: ComputeTokensParameters (The parameters for computing tokens.)
+  Returns: Promise<ComputeTokensResponse> (The response from the API.)
+```
+
+LANGUAGE: JavaScript
+CODE:
+```
+const response = await ai.models.computeTokens({
+ model: 'gemini-2.0-flash',
+ contents: 'What is your name?'
+});
+console.log(response);
+```
+
+----------------------------------------
+
+TITLE: GoogleGenAI Class and Submodules Overview
+DESCRIPTION: Provides an overview of the `GoogleGenAI` class and its key submodules, detailing their purpose and primary functionalities within the SDK for interacting with various AI capabilities.
+SOURCE: https://googleapis.github.io/js-genai/release_docs/index
+
+LANGUAGE: APIDOC
+CODE:
+```
+GoogleGenAI:
+  Submodules:
+    ai.models: Query models (generateContent, generateImages, ...), examine metadata.
+    ai.caches: Create and manage caches to reduce costs for repeated large prompt prefixes.
+    ai.chats: Create local stateful chat objects for multi-turn interactions.
+    ai.files: Upload files to the API and reference them in prompts, handles large files.
+    ai.live: Start a live session for real-time interaction (text + audio + video input, text/audio output).
+```
+
+----------------------------------------
+
+TITLE: APIDOC & Example: @google/genai Models.editImage Method
+DESCRIPTION: Modifies an image based on a given prompt, reference images, and configuration settings.
+SOURCE: https://googleapis.github.io/js-genai/release_docs/classes/models.Models
+
+LANGUAGE: APIDOC
+CODE:
+```
+editImage(params: EditImageParameters): Promise<EditImageResponse>
+  Parameters:
+  + params: EditImageParameters (The parameters for editing an image.)
+  Returns: Promise<EditImageResponse> (The response from the API.)
+```
+
+LANGUAGE: JavaScript
+CODE:
+```
+const response = await client.models.editImage({
+ model: 'imagen-3.0-capability-001',
+ prompt: 'Generate an image containing a mug with the product logo [1] visible on the side of the mug.',
+ referenceImages: [subjectReferenceImage],
+ config: {
+   numberOfImages: 1,
+   includeRaiReason: true
+ }
+});
+console.log(response?.generatedImages?.[0]?.image?.imageBytes);
+```
+
+----------------------------------------
+
+TITLE: Upscale Image with Google GenAI Models API
+DESCRIPTION: Upscales an image based on an input image, desired upscale factor, and configuration using the Google GenAI Models API. This feature is currently supported only in Vertex AI. It requires `UpscaleImageParameters` and returns a `Promise<UpscaleImageResponse>`.
+SOURCE: https://googleapis.github.io/js-genai/release_docs/classes/models.Models
+
+LANGUAGE: APIDOC
+CODE:
+```
+upscaleImage(params: UpscaleImageParameters): Promise<UpscaleImageResponse>
+
+Upscales an image based on an image, upscale factor, and configuration.
+Only supported in Vertex AI currently.
+
+Parameters:
+  params: UpscaleImageParameters - The parameters for upscaling an image.
+
+Returns Promise<UpscaleImageResponse> - The response from the API.
+```
+
+LANGUAGE: JavaScript
+CODE:
+```
+const response = await client.models.upscaleImage({
+ model: 'imagen-3.0-generate-002',
+ image: image,
+ upscaleFactor: 'x2',
+ config: {
+   includeRaiReason: true,
+ },
+});
+console.log(response?.generatedImages?.[0]?.image?.imageBytes);
+```
+
+----------------------------------------
+
+TITLE: ListModelsParameters Interface API Reference
+DESCRIPTION: Detailed API reference for the `ListModelsParameters` interface, including its definition and properties. This interface is used to pass optional configuration parameters when calling model listing functions.
+SOURCE: https://googleapis.github.io/js-genai/release_docs/interfaces/types.ListModelsParameters
+
+LANGUAGE: TypeScript
+CODE:
+```
+interface ListModelsParameters {
+    config?: ListModelsConfig;
+}
+
+Properties:
+  config:
+    Type: ListModelsConfig
+    Optional: true
+    Description: Optional configuration for listing models.
+```
+
+----------------------------------------
+
+TITLE: TypeScript ListModelsConfig Interface Structure
+DESCRIPTION: The TypeScript definition for the `ListModelsConfig` interface, outlining its optional properties and their types. This interface is used to specify parameters when making requests to list models.
+SOURCE: https://googleapis.github.io/js-genai/release_docs/interfaces/types.ListModelsConfig
+
+LANGUAGE: TypeScript
+CODE:
+```
+interface ListModelsConfig {
+    abortSignal?: AbortSignal;
+    filter?: string;
+    httpOptions?: HttpOptions;
+    pageSize?: number;
+    pageToken?: string;
+    queryBase?: boolean;
+}
+```
+
+----------------------------------------
+
+TITLE: Example: Deleting a File with Files.delete
+DESCRIPTION: This code snippet demonstrates how to use the `ai.files.delete` method to remove a specific file. It takes an object with the file's name as input.
+SOURCE: https://googleapis.github.io/js-genai/release_docs/classes/files.Files
+
+LANGUAGE: JavaScript
+CODE:
+```
+await ai.files.delete({name: file.name});
+```
+
+----------------------------------------
+
+TITLE: API Documentation for createPartFromText Function
+DESCRIPTION: Documents the `createPartFromText` function, which converts a string into a `Part` object. This function is part of the `@google/genai` library and is defined in `src/types.ts`.
+SOURCE: https://googleapis.github.io/js-genai/release_docs/functions/types.createPartFromText
+
+LANGUAGE: APIDOC
+CODE:
+```
+createPartFromText(text: string): Part
+  Description: Creates a `Part` object from a `text` string.
+  Parameters:
+    text: string
+  Returns: Part
+  Source: src/types.ts:942
+```
+
+----------------------------------------
+
+TITLE: Example: Retrieving File Information with Files.get
+DESCRIPTION: This snippet demonstrates how to fetch details for a specific file using `ai.files.get`. It configures the request with the file name and then logs the retrieved file's name.
+SOURCE: https://googleapis.github.io/js-genai/release_docs/classes/files.Files
+
+LANGUAGE: JavaScript
+CODE:
+```
+const config: GetFileParameters = {
+  name: fileName,
+};
+file = await ai.files.get(config);
+console.log(file.name);
+```
+
+----------------------------------------
+
+TITLE: Define Stop Sequences
+DESCRIPTION: Defines a list of strings that, if encountered in the generated text, will cause the model to cease further generation. This feature is useful for controlling the length and content of the model's output.
+SOURCE: https://googleapis.github.io/js-genai/release_docs/interfaces/types.GenerateContentConfig
+
+LANGUAGE: APIDOC
+CODE:
+```
+stopSequences?: string[]
+  Description: List of strings that tells the model to stop generating text if one of the strings is encountered in the response.
+```
+
+----------------------------------------
+
+TITLE: Send a Message and Get a Single Response
+DESCRIPTION: Demonstrates how to use the `sendMessage` method of the `Chat` class to send a message to the AI model and receive a single, complete response. This method waits for the full response before returning.
+SOURCE: https://googleapis.github.io/js-genai/release_docs/classes/chats.Chat
+
+LANGUAGE: JavaScript
+CODE:
+```
+const chat = ai.chats.create({model: 'gemini-2.0-flash'});
+const response = await chat.sendMessage({
+  message: 'Why is the sky blue?'
+});
+console.log(response.text);
+```
+
+----------------------------------------
+
+TITLE: Files.get Method API Reference
+DESCRIPTION: Details the `get` method, used to retrieve information about a specific file from the service. It accepts parameters to identify the file and returns a Promise that resolves to a `File` object.
+SOURCE: https://googleapis.github.io/js-genai/release_docs/classes/files.Files
+
+LANGUAGE: APIDOC
+CODE:
+```
+get(params: GetFileParameters): Promise<File>
+  Description: Retrieves the file information from the service.
+  Parameters:
+    params: GetFileParameters
+      The parameters for the get request
+  Returns: Promise<File>
+    The Promise that resolves to the types.File object requested.
+  Defined in src/files.ts:228
+```
+
+----------------------------------------
+
+TITLE: CountTokensParameters Interface Definition
+DESCRIPTION: Defines the parameters required for counting tokens using the `@google/genai` library, including configuration, input content, and the model ID.
+SOURCE: https://googleapis.github.io/js-genai/release_docs/interfaces/types.CountTokensParameters
+
+LANGUAGE: APIDOC
+CODE:
+```
+interface CountTokensParameters {
+  config?: CountTokensConfig; // Configuration for counting tokens.
+  contents: ContentListUnion; // Input content.
+  model: string; // ID of the model to use. For a list of models, see `Google models <https://cloud.google.com/vertex-ai/generative-ai/docs/learn/models>`_.
+}
+```
+
+----------------------------------------
+
+TITLE: EmbedContentParameters Interface Definition and Properties
+DESCRIPTION: This snippet provides the TypeScript definition and detailed documentation for the `EmbedContentParameters` interface. It specifies the parameters required for the `embed_content` method in the `@google/genai` library, including descriptions for its `config`, `contents`, and `model` properties.
+SOURCE: https://googleapis.github.io/js-genai/release_docs/interfaces/types.EmbedContentParameters
+
+LANGUAGE: TypeScript
+CODE:
+```
+interface EmbedContentParameters {
+    config?: EmbedContentConfig;
+    contents: ContentListUnion;
+    model: string;
+}
+```
+
+LANGUAGE: APIDOC
+CODE:
+```
+Interface: EmbedContentParameters
+  Description: Parameters for the embed_content method.
+
+  Properties:
+    config?: EmbedContentConfig
+      Description: Configuration that contains optional parameters.
+    contents: ContentListUnion
+      Description: The content to embed. Only the `parts.text` fields will be counted.
+    model: string
+      Description: ID of the model to use. For a list of models, see `Google models <https://cloud.google.com/vertex-ai/generative-ai/docs/learn/models>`_.
+```
+
+----------------------------------------
+
+TITLE: APIDOC: Class EmbedContentResponse Definition
+DESCRIPTION: Defines the complete structure of the EmbedContentResponse class, including its constructor and properties. This class represents the response object returned by the embed_content method, providing content embeddings and optional metadata.
+SOURCE: https://googleapis.github.io/js-genai/release_docs/classes/types.EmbedContentResponse
+
+LANGUAGE: APIDOC
+CODE:
+```
+Class EmbedContentResponse
+  Description: Response for the embed_content method.
+  Defined in: src/types.ts:2412
+
+  Constructors:
+    constructor(): EmbedContentResponse
+      Description: Initializes a new instance of the EmbedContentResponse class.
+
+  Properties:
+    embeddings?: ContentEmbedding[]
+      Description: The embeddings for each request, in the same order as provided in the batch request.
+      Defined in: src/types.ts:2416
+
+    metadata?: EmbedContentMetadata
+      Description: Vertex API only. Metadata about the request.
+      Defined in: src/types.ts:2419
+```
+
+----------------------------------------
+
+TITLE: API Reference: createPartFromExecutableCode Function
+DESCRIPTION: Detailed API documentation for the `createPartFromExecutableCode` function, including its signature, parameters, and return type, as defined in the `@google/genai` library.
+SOURCE: https://googleapis.github.io/js-genai/release_docs/functions/types.createPartFromExecutableCode
+
+LANGUAGE: APIDOC
+CODE:
+```
+createPartFromExecutableCode:
+  Signature: createPartFromExecutableCode(code: string, language: Language): Part
+  Description: Creates a Part object from the code and language of an ExecutableCode object.
+  Parameters:
+    code: string - The code string.
+    language: Language - The language of the executable code.
+  Returns: Part - A Part object.
+```
+
+----------------------------------------
+
+TITLE: Install Google Gen AI SDK via npm
+DESCRIPTION: This command installs the Google Gen AI SDK package using npm, making it available for use in your JavaScript and TypeScript projects.
+SOURCE: https://googleapis.github.io/js-genai/release_docs/index
+
+LANGUAGE: Shell
+CODE:
+```
+npm install @google/genai
+```

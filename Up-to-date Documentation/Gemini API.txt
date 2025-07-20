@@ -1,0 +1,284 @@
+TITLE: Generating Content from Text
+DESCRIPTION: This Python snippet shows how to generate content from a text prompt using the GeminiClient. It calls the generate_content method with a simple text prompt and prints the response text.
+SOURCE: https://github.com/hanaokayuzu/gemini-api/blob/master/README.md#_snippet_5
+
+LANGUAGE: python
+CODE:
+```
+async def main():
+    response = await client.generate_content("Hello World!")
+    print(response.text)
+
+asyncio.run(main())
+```
+
+----------------------------------------
+
+TITLE: Continuing Previous Conversations in Python
+DESCRIPTION: This code demonstrates how to continue a previous conversation by retrieving and passing the `ChatSession`'s metadata to `GeminiClient.start_chat`. It shows how to save the metadata and load it to create a new `ChatSession` that continues the previous conversation. The example sends a message to the new session and prints the response.
+SOURCE: https://github.com/hanaokayuzu/gemini-api/blob/master/README.md#_snippet_8
+
+LANGUAGE: python
+CODE:
+```
+async def main():
+    # Start a new chat session
+    chat = client.start_chat()
+    response = await chat.send_message("Fine weather today")
+
+    # Save chat's metadata
+    previous_session = chat.metadata
+
+    # Load the previous conversation
+    previous_chat = client.start_chat(metadata=previous_session)
+    response = await previous_chat.send_message("What was my previous message?")
+    print(response)
+
+asyncio.run(main())
+```
+
+----------------------------------------
+
+TITLE: Starting a Chat Session and Sending Messages in Python
+DESCRIPTION: This code demonstrates how to start a chat session using `GeminiClient.start_chat()` and send messages to the model. It showcases how the conversation history is automatically managed and updated after each turn. The example sends two messages, including files, and prints the responses.
+SOURCE: https://github.com/hanaokayuzu/gemini-api/blob/master/README.md#_snippet_7
+
+LANGUAGE: python
+CODE:
+```
+async def main():
+    chat = client.start_chat()
+    response1 = await chat.send_message(
+        "Introduce the contents of these two files. Is there any connection between them?",
+        files=["assets/sample.pdf", Path("assets/banner.png")],
+    )
+    print(response1.text)
+    response2 = await chat.send_message(
+        "Use image generation tool to modify the banner with another font and design."
+    )
+    print(response2.text, response2.images, sep="\n\n----------------------------------\n\n")
+
+asyncio.run(main())
+```
+
+----------------------------------------
+
+TITLE: Installing Gemini-API package using pip
+DESCRIPTION: This command installs or updates the gemini_webapi package using pip, the Python package installer. The -U flag ensures that the package is upgraded to the latest version if it is already installed.
+SOURCE: https://github.com/hanaokayuzu/gemini-api/blob/master/README.md#_snippet_0
+
+LANGUAGE: bash
+CODE:
+```
+pip install -U gemini_webapi
+```
+
+----------------------------------------
+
+TITLE: Initializing Gemini Client with Cookies
+DESCRIPTION: This Python snippet initializes the GeminiClient with secure cookie values obtained from a browser session. It demonstrates how to import the necessary packages, set the cookie values, and initialize the client with optional parameters such as timeout, auto_close, close_delay, and auto_refresh.
+SOURCE: https://github.com/hanaokayuzu/gemini-api/blob/master/README.md#_snippet_3
+
+LANGUAGE: python
+CODE:
+```
+import asyncio
+from gemini_webapi import GeminiClient
+
+# Replace "COOKIE VALUE HERE" with your actual cookie values.
+# Leave Secure_1PSIDTS empty if it's not available for your account.
+Secure_1PSID = "COOKIE VALUE HERE"
+Secure_1PSIDTS = "COOKIE VALUE HERE"
+
+async def main():
+    # If browser-cookie3 is installed, simply use `client = GeminiClient()`
+    client = GeminiClient(Secure_1PSID, Secure_1PSIDTS, proxy=None)
+    await client.init(timeout=30, auto_close=False, close_delay=300, auto_refresh=True)
+
+asyncio.run(main())
+```
+
+----------------------------------------
+
+TITLE: Generating Content with Files
+DESCRIPTION: This Python snippet demonstrates how to generate content with file inputs using the GeminiClient. It passes a list of file paths (strings or pathlib.Path objects) to the generate_content method along with a text prompt.
+SOURCE: https://github.com/hanaokayuzu/gemini-api/blob/master/README.md#_snippet_6
+
+LANGUAGE: python
+CODE:
+```
+async def main():
+    response = await client.generate_content(
+            "Introduce the contents of these two files. Is there any connection between them?",
+            files=["assets/sample.pdf", Path("assets/banner.png")],
+        )
+    print(response.text)
+
+asyncio.run(main())
+```
+
+----------------------------------------
+
+TITLE: Selecting Language Model
+DESCRIPTION: This Python snippet demonstrates how to specify the language model to use with the GeminiClient. It imports the Model enum from gemini_webapi.constants and passes the desired model to the generate_content and start_chat methods.
+SOURCE: https://github.com/hanaokayuzu/gemini-api/blob/master/README.md#_snippet_4
+
+LANGUAGE: python
+CODE:
+```
+from gemini_webapi.constants import Model
+
+async def main():
+    response1 = await client.generate_content(
+        "What's you language model version? Reply version number only.",
+        model=Model.G_2_0_FLASH,
+    )
+    print(f"Model version ({Model.G_2_0_FLASH.model_name}): {response1.text}")
+
+    chat = client.start_chat(model="gemini-2.0-flash-thinking")
+    response2 = await chat.send_message("What's you language model version? Reply version number only.")
+    print(f"Model version (gemini-2.0-flash-thinking): {response2.text}")
+
+asyncio.run(main())
+```
+
+----------------------------------------
+
+TITLE: Generating Images with Imagen3 in Python
+DESCRIPTION: This code demonstrates how to generate images with Imagen3 using natural language. It shows how to save the generated images to local storage by calling `Image.save()`. The example sends a request to generate pictures of cats and saves each image with a specified path and filename.
+SOURCE: https://github.com/hanaokayuzu/gemini-api/blob/master/README.md#_snippet_11
+
+LANGUAGE: python
+CODE:
+```
+async def main():
+    response = await client.generate_content("Generate some pictures of cats")
+    for i, image in enumerate(response.images):
+        await image.save(path="temp/", filename=f"cat_{i}.png", verbose=True)
+        print(image, "\n\n----------------------------------\n")
+
+asyncio.run(main())
+```
+
+----------------------------------------
+
+TITLE: Checking and Switching Reply Candidates in Gemini API
+DESCRIPTION: This code snippet shows how to check all reply candidates from a Gemini response and choose one to continue the conversation. It starts a chat, sends a message, iterates through the candidates, and allows the user to choose a specific candidate for a follow-up response.
+SOURCE: https://github.com/hanaokayuzu/gemini-api/blob/master/README.md#_snippet_13
+
+LANGUAGE: Python
+CODE:
+```
+async def main():
+    # Start a conversation and list all reply candidates
+    chat = client.start_chat()
+    response = await chat.send_message("Recommend a science fiction book for me.")
+    for candidate in response.candidates:
+        print(candidate, "\n\n----------------------------------\n")
+
+    if len(response.candidates) > 1:
+        # Control the ongoing conversation flow by choosing candidate manually
+        new_candidate = chat.choose_candidate(index=1)  # Choose the second candidate here
+        followup_response = await chat.send_message("Tell me more about it.")  # Will generate contents based on the chosen candidate
+        print(new_candidate, followup_response, sep="\n\n----------------------------------\n\n")
+    else:
+        print("Only one candidate available.")
+
+asyncio.run(main())
+```
+
+----------------------------------------
+
+TITLE: Retrieving Images in Response in Python
+DESCRIPTION: This code demonstrates how to retrieve images from the API's output, which are stored as a list of `Image` objects. It shows how to access the image title, URL, and description by calling `image.title`, `image.url`, and `image.alt` respectively. The example sends a request for pictures of cats and prints information about each image.
+SOURCE: https://github.com/hanaokayuzu/gemini-api/blob/master/README.md#_snippet_10
+
+LANGUAGE: python
+CODE:
+```
+async def main():
+    response = await client.generate_content("Send me some pictures of cats")
+    for image in response.images:
+        print(image, "\n\n----------------------------------\n")
+
+asyncio.run(main())
+```
+
+----------------------------------------
+
+TITLE: Accessing Gemini Extensions with Gemini API
+DESCRIPTION: This code snippet demonstrates how to access Gemini extensions in the API by using natural language or the '@' symbol followed by the extension keyword. It requires the Gemini extensions to be activated on the Gemini website and the user to be signed in to Gemini Apps.
+SOURCE: https://github.com/hanaokayuzu/gemini-api/blob/master/README.md#_snippet_12
+
+LANGUAGE: Python
+CODE:
+```
+async def main():
+    response1 = await client.generate_content("@Gmail What's the latest message in my mailbox?")
+    print(response1, "\n\n----------------------------------\n")
+
+    response2 = await client.generate_content("@Youtube What's the latest activity of Taylor Swift?")
+    print(response2, "\n\n----------------------------------\n")
+
+asyncio.run(main())
+```
+
+----------------------------------------
+
+TITLE: Retrieving Model's Thought Process in Python
+DESCRIPTION: This code demonstrates how to retrieve the model's thought process when using models with thinking capabilities. The model's thought process is populated in `ModelOutput.thoughts`. The example sends a question to the model and prints both the thought process and the text response.
+SOURCE: https://github.com/hanaokayuzu/gemini-api/blob/master/README.md#_snippet_9
+
+LANGUAGE: python
+CODE:
+```
+async def main():
+    response = await client.generate_content(
+            "What's 1+1?", model="gemini-2.0-flash-thinking"
+        )
+    print(response.thoughts)
+    print(response.text)
+
+asyncio.run(main())
+```
+
+----------------------------------------
+
+TITLE: Installing browser-cookie3 for cookie import
+DESCRIPTION: This command installs or updates the browser-cookie3 package using pip. This package allows Gemini-API to automatically import cookies from local browsers, enabling authentication. The -U flag ensures that the package is upgraded to the latest version if it is already installed.
+SOURCE: https://github.com/hanaokayuzu/gemini-api/blob/master/README.md#_snippet_1
+
+LANGUAGE: bash
+CODE:
+```
+pip install -U browser-cookie3
+```
+
+----------------------------------------
+
+TITLE: Controlling Log Level in Gemini API
+DESCRIPTION: This code snippet demonstrates how to set the log level of the gemini_webapi package. The log level can be set to DEBUG, INFO, WARNING, ERROR, or CRITICAL. The default value is INFO.
+SOURCE: https://github.com/hanaokayuzu/gemini-api/blob/master/README.md#_snippet_14
+
+LANGUAGE: Python
+CODE:
+```
+from gemini_webapi import set_log_level
+
+set_log_level("DEBUG")
+```
+
+----------------------------------------
+
+TITLE: Docker Compose Volume Configuration
+DESCRIPTION: This YAML snippet configures a Docker Compose service with a volume mount. It persists Gemini cookies in a local directory to prevent re-authentication when the container rebuilds.
+SOURCE: https://github.com/hanaokayuzu/gemini-api/blob/master/README.md#_snippet_2
+
+LANGUAGE: yaml
+CODE:
+```
+services:
+    main:
+        volumes:
+            - ./gemini_cookies:/usr/local/lib/python3.12/site-packages/gemini_webapi/utils/temp
+```

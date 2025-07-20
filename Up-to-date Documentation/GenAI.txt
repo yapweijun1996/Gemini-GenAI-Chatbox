@@ -1,0 +1,1469 @@
+TITLE: API Interface: TuningExample
+DESCRIPTION: Represents a single example used within a tuning dataset. Each example consists of an output value and a corresponding text input.
+SOURCE: https://github.com/googleapis/js-genai/blob/main/api-report/genai-node.api.md#_snippet_258
+
+LANGUAGE: TypeScript
+CODE:
+```
+export interface TuningExample {
+    output?: string;
+    textInput?: string;
+}
+```
+
+----------------------------------------
+
+TITLE: Live Class API Documentation
+DESCRIPTION: Provides comprehensive API documentation for the Live class, including its constructor and the connect method. It details parameters, return types, experimental status, and usage examples for establishing live API sessions.
+SOURCE: https://github.com/googleapis/js-genai/blob/main/docs/classes/live.Live.html#_snippet_0
+
+LANGUAGE: APIDOC
+CODE:
+```
+Class Live
+  `Experimental`
+
+  Live class encapsulates the configuration for live interaction with the Generative Language API. It embeds ApiClient for general API settings.
+
+  Constructors:
+    constructor(apiClient: ApiClient, auth: Auth, webSocketFactory: WebSocketFactory)
+      `Experimental`
+      Parameters:
+        - apiClient: ApiClient
+        - auth: Auth
+        - webSocketFactory: WebSocketFactory
+      Returns: Live
+
+  Methods:
+    connect(params: LiveConnectParameters): Promise<Session>
+      `Experimental`
+      Establishes a connection to the specified model with the given configuration and returns a Session object representing that connection.
+      Parameters:
+        - params: LiveConnectParameters - The parameters for establishing a connection to the model.
+      Returns: Promise<Session> - A live session.
+      Remarks:
+        If using the Gemini API, Live is currently only supported behind API version `v1alpha`. Ensure that the API version is set to `v1alpha` when initializing the SDK if relying on the Gemini API.
+      Example:
+        const session = await ai.live.connect({
+          model: 'gemini-2.0-flash-exp',
+          config: {
+            responseModalities: [Modality.AUDIO],
+          },
+          callbacks: {
+            onopen: () => {
+              console.log('Connected to the socket.');
+            },
+            onmessage: (e: MessageEvent) => {
+              console.log('Received message from the server: %s\n', debug(e.data));
+            },
+            onerror: (e: ErrorEvent) => {
+              console.log('Error occurred: %s\n', debug(e.error));
+            },
+            onclose: (e: CloseEvent) => {
+              console.log('Connection closed.');
+            },
+          },
+        });
+```
+
+----------------------------------------
+
+TITLE: Quickstart: Generate Content with Gemini API Key
+DESCRIPTION: A basic example demonstrating how to initialize the GoogleGenAI client with an API key and generate content. It uses environment variables for the API key and logs the response text.
+SOURCE: https://github.com/googleapis/js-genai/blob/main/README.md#_snippet_1
+
+LANGUAGE: typescript
+CODE:
+```
+import {GoogleGenAI} from '@google/genai';
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+
+const ai = new GoogleGenAI({apiKey: GEMINI_API_KEY});
+
+async function main() {
+  const response = await ai.models.generateContent({
+    model: 'gemini-2.0-flash-001',
+    contents: 'Why is the sky blue?',
+  });
+  console.log(response.text);
+}
+
+main();
+```
+
+----------------------------------------
+
+TITLE: SupervisedTuningDataStats Interface API Reference
+DESCRIPTION: Defines statistics related to supervised tuning data, including reasons for dropped examples, total character and token counts, truncated example counts, and tuning step counts. This interface provides a summary of the data used for tuning.
+SOURCE: https://github.com/googleapis/js-genai/blob/main/api-report/genai-node.api.md#_snippet_239
+
+LANGUAGE: APIDOC
+CODE:
+```
+SupervisedTuningDataStats:
+  droppedExampleReasons?: string[]
+  totalBillableCharacterCount?: string
+  totalBillableTokenCount?: string
+  totalTruncatedExampleCount?: string
+  totalTuningCharacterCount?: string
+  truncatedExampleIndices?: string[]
+  tuningDatasetExampleCount?: string
+  tuningStepCount?: string
+```
+
+----------------------------------------
+
+TITLE: API Interface: TuningDataset
+DESCRIPTION: Defines a dataset used for model tuning. It can either contain a list of tuning examples directly or reference a dataset stored in Google Cloud Storage via a GCS URI.
+SOURCE: https://github.com/googleapis/js-genai/blob/main/api-report/genai-node.api.md#_snippet_256
+
+LANGUAGE: TypeScript
+CODE:
+```
+export interface TuningDataset {
+    examples?: TuningExample[];
+    gcsUri?: string;
+}
+```
+
+----------------------------------------
+
+TITLE: Files API - File Management
+DESCRIPTION: Provides methods for uploading, downloading, getting, listing, and deleting files. It handles file operations within the generative AI context.
+SOURCE: https://github.com/googleapis/js-genai/blob/main/api-report/genai-node.api.md#_snippet_50
+
+LANGUAGE: APIDOC
+CODE:
+```
+Files Class:
+  Manages file operations for the generative AI service.
+
+  Methods:
+  - upload(params: types.UploadFileParameters): Promise<types.File>
+    Uploads a file to the service.
+    Parameters:
+      params: An object containing file upload details.
+        - fileUri: URI of the file to upload.
+        - displayName: Optional display name for the file.
+        - mimeType: Optional MIME type of the file.
+    Returns: A Promise that resolves with the File object representing the uploaded file.
+
+  - download(params: types.DownloadFileParameters): Promise<void>
+    Downloads a file from the service.
+    Parameters:
+      params: An object containing file download details.
+        - fileUri: URI of the file to download.
+        - destination: Path or stream to save the downloaded file.
+    Returns: A Promise that resolves when the download is complete.
+
+  - get(params: types.GetFileParameters): Promise<types.File>
+    Retrieves metadata for a specific file.
+    Parameters:
+      params: An object containing file retrieval details.
+        - name: The resource name of the file (e.g., 'files/123').
+    Returns: A Promise that resolves with the File object.
+
+  - list(params?: types.ListFilesParameters): Promise<Pager<types.File>>
+    Lists files associated with the project or user.
+    Parameters:
+      params: Optional parameters for listing files (e.g., page size, filter).
+    Returns: A Promise that resolves with a Pager object for iterating through files.
+
+  - delete(params: types.DeleteFileParameters): Promise<types.DeleteFileResponse>
+    Deletes a file from the service.
+    Parameters:
+      params: An object containing file deletion details.
+        - name: The resource name of the file to delete.
+    Returns: A Promise that resolves with the deletion response.
+
+  Dependencies:
+  - Requires an initialized ApiClient.
+  - Uses types defined in the 'types' module.
+```
+
+----------------------------------------
+
+TITLE: Google GenAI Caches API Documentation
+DESCRIPTION: Comprehensive documentation for the Caches class in the Google GenAI JavaScript SDK. Covers methods for creating, retrieving, updating, deleting, and listing cached content resources, including parameters, return types, and usage examples.
+SOURCE: https://github.com/googleapis/js-genai/blob/main/docs/classes/caches.Caches.html#_snippet_0
+
+LANGUAGE: APIDOC
+CODE:
+```
+Caches Class API Documentation for @google/genai
+
+Constructor:
+new Caches(apiClient: ApiClient)
+  - Initializes the Caches module.
+  - Parameters:
+    - apiClient: ApiClient - The API client instance.
+  - Returns: Caches - An instance of the Caches class.
+  - Defined in caches.ts:17
+
+Methods:
+
+create:
+create(params: CreateCachedContentParameters): Promise<CachedContent>
+  - Creates a cached contents resource.
+  - Parameters:
+    - params: CreateCachedContentParameters - The parameters for the create request.
+  - Returns: Promise<CachedContent> - The created cached content.
+  - Example:
+    const contents = ...; // Initialize the content to cache.
+    const response = await ai.caches.create({
+      model: 'gemini-2.0-flash',
+      config: {
+        'contents': contents,
+        'displayName': 'test cache',
+        'systemInstruction': 'What is the sum of the two pdfs?',
+        'ttl': '86400s',
+      }
+    });
+  - Defined in caches.ts:66
+
+delete:
+delete(params: DeleteCachedContentParameters): Promise<DeleteCachedContentResponse>
+  - Deletes cached content.
+  - Parameters:
+    - params: DeleteCachedContentParameters - The parameters for the delete request.
+  - Returns: Promise<DeleteCachedContentResponse> - The empty response returned by the API.
+  - Example:
+    await ai.caches.delete({name: 'gemini-1.5-flash'});
+  - Defined in caches.ts:242
+
+get:
+get(params: GetCachedContentParameters): Promise<CachedContent>
+  - Gets cached content configurations.
+  - Parameters:
+    - params: GetCachedContentParameters - The parameters for the get request.
+  - Returns: Promise<CachedContent> - The cached content.
+  - Example:
+    await ai.caches.get({name: 'gemini-1.5-flash'});
+  - Defined in caches.ts:154
+
+list:
+list(params?: ListCachedContentsParameters): Promise<Pager<CachedContent>>
+  - Lists cached content configurations.
+  - Parameters:
+    - params: ListCachedContentsParameters = {} - The parameters for the list request.
+  - Returns: Promise<Pager<CachedContent>> - The paginated results of the list of cached contents.
+  - Example:
+    const cachedContents = await ai.caches.list({config: {'pageSize': 2}});
+    for (const cachedContent of cachedContents) {
+      console.log(cachedContent);
+    }
+  - Defined in caches.ts:35
+```
+
+----------------------------------------
+
+TITLE: CreateFileResponse Class API
+DESCRIPTION: API documentation for the CreateFileResponse class, detailing its constructors and properties.
+SOURCE: https://github.com/googleapis/js-genai/blob/main/docs/classes/types.CreateFileResponse.html#_snippet_0
+
+LANGUAGE: APIDOC
+CODE:
+```
+Class CreateFileResponse
+  Response for the create file method.
+
+  Constructors:
+    constructor()
+      Creates a new instance of CreateFileResponse.
+      Returns: CreateFileResponse
+
+  Properties:
+    sdkHttpResponse?: HttpResponse
+      Used to retain the full HTTP response.
+      Type: HttpResponse (optional)
+```
+
+----------------------------------------
+
+TITLE: Session Class API
+DESCRIPTION: Comprehensive API documentation for the Session class, which establishes and manages connections to the API. It includes details on its constructor, properties, and methods for sending client content and managing the connection lifecycle.
+SOURCE: https://github.com/googleapis/js-genai/blob/main/docs/classes/live.Session.html#_snippet_0
+
+LANGUAGE: APIDOC
+CODE:
+```
+Class Session
+
+Represents a connection to the API.
+
+Constructors:
+
+constructor(conn: WebSocket, apiClient: ApiClient): Session
+  Experimental
+  Parameters:
+    conn: WebSocket
+    apiClient: ApiClient
+  Returns: Session
+
+Properties:
+
+conn: WebSocket
+  Readonly, Experimental
+
+Methods:
+
+close(): void
+  Experimental
+  Terminates the WebSocket connection.
+  Returns: void
+  Example:
+    const session = await ai.live.connect({  model: 'gemini-2.0-flash-exp',  config: {
+    responseModalities: [Modality.AUDIO],
+  }});
+  session.close();
+
+sendClientContent(params: LiveSendClientContentParameters): void
+  Experimental
+  Send a message over the established connection.
+  Parameters:
+    params: LiveSendClientContentParameters
+      Contains two optional properties, `turns` and `turnComplete`.
+      `turns` will be converted to a `Content[]`
+      `turnComplete: true` [default] indicates that you are done sending content and expect a response. If `turnComplete: false`, the server will wait for additional messages before starting generation.
+  Returns: void
+  Remarks:
+    There are two ways to send messages to the live API: `sendClientContent` and `sendRealtimeInput`.
+    `sendClientContent` messages are added to the model context in order. Having a conversation using `sendClientContent` messages is roughly equivalent to using the `Chat.sendMessageStream`, except that the state of the `chat` history is stored on the API server instead of locally.
+    Because of `sendClientContent`'s order guarantee, the model cannot respond as quickly to `sendClientContent` messages as to `sendRealtimeInput` messages. This makes the biggest difference when sending objects that have significant preprocessing time (typically images).
+    The `sendClientContent` message sends a `Content[]` which has more options than the `Blob` sent by `sendRealtimeInput`.
+    So the main use-cases for `sendClientContent` over `sendRealtimeInput` are:
+    * Sending anything that can't be represented as a `Blob` (text, `sendClientContent({turns="Hello?"})`).
+    * Managing turns when not using audio input and voice activity detection. (`sendClientContent({turnComplete:true})` or the short form `sendClientContent()`)
+    * Prefilling a conversation context
+        sendClientContent({
+          turns: [
+            Content({role:user, parts:...}),
+            Content({role:user, parts:...}),
+            ...
+          ]
+        })
+
+```
+
+----------------------------------------
+
+TITLE: API Class: Tokens Module
+DESCRIPTION: Represents a module for managing authentication tokens within the API client. It provides a constructor to initialize with an API client and a method to create new authentication tokens.
+SOURCE: https://github.com/googleapis/js-genai/blob/main/api-report/genai-node.api.md#_snippet_244
+
+LANGUAGE: TypeScript
+CODE:
+```
+export class Tokens extends BaseModule {
+    constructor(apiClient: ApiClient);
+    create(params: types.CreateAuthTokenParameters): Promise<types.AuthToken>;
+}
+```
+
+----------------------------------------
+
+TITLE: GoogleGenAI API Overview
+DESCRIPTION: Details the structure of the GoogleGenAI SDK, explaining how to access API features through various submodules. Each submodule bundles related API methods for specific functionalities.
+SOURCE: https://github.com/googleapis/js-genai/blob/main/docs/index.html#_snippet_6
+
+LANGUAGE: APIDOC
+CODE:
+```
+GoogleGenAI Class Overview:
+
+All API features are accessed through an instance of the `GoogleGenAI` class. The SDK organizes related API methods into distinct submodules for easier management and access.
+
+Submodules:
+
+- `ai.models`:
+  - Purpose: Query models for content generation (`generateContent`, `generateImages`, etc.) and retrieve model metadata.
+  - Example Usage: `ai.models.generateContent({...})`
+
+- `ai.caches`:
+  - Purpose: Create and manage caches to reduce costs when repeatedly using the same large prompt prefixes.
+  - Example Usage: `ai.caches.createCache({...})`
+
+- `ai.chats`:
+  - Purpose: Create local stateful chat objects to simplify multi-turn conversational interactions.
+  - Example Usage: `ai.chats.startChat({...})`
+
+- `ai.files`:
+  - Purpose: Upload files to the API and reference them in prompts. This is useful for reducing bandwidth for repeated file usage or handling files too large for inline prompts.
+  - Example Usage: `ai.files.uploadFile({...})`
+
+- `ai.live`:
+  - Purpose: Start a live session for real-time interaction, supporting text, audio, and video input, with text or audio output.
+  - Example Usage: `ai.live.startSession({...})`
+```
+
+----------------------------------------
+
+TITLE: API Interface: TuningJob
+DESCRIPTION: Describes a comprehensive model tuning job. It includes details such as the base model, creation and end times, error status, experiment details, labels, name, partner model tuning specifications, pipeline job reference, service account, start time, current state, supervised tuning specifications, the resulting tuned model, its display name, and tuning data statistics.
+SOURCE: https://github.com/googleapis/js-genai/blob/main/api-report/genai-node.api.md#_snippet_259
+
+LANGUAGE: TypeScript
+CODE:
+```
+export interface TuningJob {
+    baseModel?: string;
+    createTime?: string;
+    description?: string;
+    distillationSpec?: DistillationSpec;
+    encryptionSpec?: EncryptionSpec;
+    endTime?: string;
+    error?: GoogleRpcStatus;
+    experiment?: string;
+    labels?: Record<string, string>;
+    name?: string;
+    partnerModelTuningSpec?: PartnerModelTuningSpec;
+    pipelineJob?: string;
+    serviceAccount?: string;
+    startTime?: string;
+    state?: JobState;
+    supervisedTuningSpec?: SupervisedTuningSpec;
+    tunedModel?: TunedModel;
+    tunedModelDisplayName?: string;
+    tuningDataStats?: TuningDataStats;
+    updateTime?: string;
+}
+```
+
+----------------------------------------
+
+TITLE: Files Class API Documentation
+DESCRIPTION: Provides methods to interact with files in the Gemini API, including retrieving, listing, and uploading file resources. This class extends BaseModule and requires an ApiClient instance.
+SOURCE: https://github.com/googleapis/js-genai/blob/main/docs/classes/files.Files.html#_snippet_0
+
+LANGUAGE: APIDOC
+CODE:
+```
+Files Class API Documentation
+
+Class Hierarchy:
+* BaseModule
+    * Files
+
+Constructor:
+* new Files(apiClient: ApiClient): Files
+    Parameters:
+        apiClient: ApiClient
+    Returns: Files
+    Overrides: BaseModule.constructor
+
+Methods:
+
+get:
+* get(params: GetFileParameters): Promise<File>
+    Retrieves the file information from the service.
+    Parameters:
+        params: GetFileParameters
+            The parameters for the get request
+    Returns: Promise<File>
+        The Promise that resolves to the types.File object requested.
+    Example:
+        const config: GetFileParameters = {  name: fileName,};
+        file = await ai.files.get(config);
+        console.log(file.name);
+
+list:
+* list(params?: ListFilesParameters): Promise<Pager<File>>
+    Lists all current project files from the service.
+    Parameters:
+        params: ListFilesParameters = {}
+            The parameters for the list request
+    Returns: Promise<Pager<File>>
+        The paginated results of the list of files
+    Example:
+        const listResponse = await ai.files.list({config: {'pageSize': 10}});
+        for await (const file of listResponse) {
+          console.log(file.name);
+        }
+
+upload:
+* upload(params: UploadFileParameters): Promise<File>
+    Uploads a file asynchronously to the Gemini API. This method is not available in Vertex AI.
+    Supported upload sources:
+    * Node.js: File path (string) or Blob object.
+    * Browser: Blob object (e.g., File).
+    Parameters:
+        params: UploadFileParameters
+            Optional parameters specified in the `common.UploadFileParameters` interface.
+    Returns: Promise<File>
+        A promise that resolves to a `types.File` object.
+    Remarks:
+        The `mimeType` can be specified in the `config` parameter. If omitted:
+        * For file path (string) inputs, the `mimeType` will be inferred from the file extension.
+        * For Blob object inputs, the `mimeType` will be set to the Blob's `type` property.
+    Throws:
+        An error if called on a Vertex AI client.
+        An error if the `mimeType` is not provided and can not be inferred.
+        An error occurs if a suitable upload location cannot be established.
+    Example:
+        const file = await ai.files.upload({file: 'file.txt', config: { mimeType: 'text/plain' }});
+        console.log(file.name);
+
+```
+
+----------------------------------------
+
+TITLE: API Documentation: @google/genai Models Module
+DESCRIPTION: API reference for the 'models' module, detailing classes and their members. Includes navigation links to specific classes and related modules.
+SOURCE: https://github.com/googleapis/js-genai/blob/main/docs/modules/models.html#_snippet_1
+
+LANGUAGE: APIDOC
+CODE:
+```
+Module: models
+
+Classes:
+  Models: ../classes/models.Models.html
+
+Settings:
+  ThemeOSLightDark
+
+Navigation:
+  [@google/genai](../modules.html)
+```
+
+----------------------------------------
+
+TITLE: Support models.get() for Getting Model Information in JS GenAI
+DESCRIPTION: This feature introduces support for the `models.get()` method, allowing developers to retrieve detailed information about specific models. This provides a standardized way to query model capabilities and metadata programmatically.
+SOURCE: https://github.com/googleapis/js-genai/blob/main/CHANGELOG.md#_snippet_31
+
+LANGUAGE: APIDOC
+CODE:
+```
+models.get(): Support for retrieving model information.
+```
+
+----------------------------------------
+
+TITLE: GoogleGenAI Class API
+DESCRIPTION: Documentation for the GoogleGenAI class, including its purpose, initialization options for Gemini API and Vertex AI, constructor, and properties.
+SOURCE: https://github.com/googleapis/js-genai/blob/main/docs/classes/client.GoogleGenAI.html#_snippet_0
+
+LANGUAGE: APIDOC
+CODE:
+```
+Class GoogleGenAI
+=================
+
+The Google GenAI SDK.
+
+#### Remarks
+
+Provides access to the GenAI features through either the [Gemini API](https://cloud.google.com/vertex-ai/docs/reference/rest) or the [Vertex AI API](https://cloud.google.com/vertex-ai/docs/reference/rest).
+
+The [GoogleGenAIOptions.vertexai](../interfaces/client.GoogleGenAIOptions.html#vertexai) value determines which of the API services to use.
+
+When using the Gemini API, a [GoogleGenAIOptions.apiKey](../interfaces/client.GoogleGenAIOptions.html#apikey) must also be set, when using Vertex AI [GoogleGenAIOptions.project](../interfaces/client.GoogleGenAIOptions.html#project) and [GoogleGenAIOptions.location](../interfaces/client.GoogleGenAIOptions.html#location) must also be set.
+
+#### Example (Gemini API)
+
+Initializing the SDK for using the Gemini API:
+
+```javascript
+import {GoogleGenAI} from '@google/genai';
+const ai = new GoogleGenAI({apiKey: 'GEMINI_API_KEY'});
+```
+
+#### Example (Vertex AI API)
+
+Initializing the SDK for using the Vertex AI API:
+
+```javascript
+import {GoogleGenAI} from '@google/genai';
+const ai = new GoogleGenAI({
+  vertexai: true,
+  project: 'PROJECT_ID',
+  location: 'PROJECT_LOCATION'
+});
+```
+
+### Constructors
+
+*   `constructor(options: GoogleGenAIOptions): GoogleGenAI`
+    *   Parameters:
+        *   `options`: `GoogleGenAIOptions` - Configuration options for the SDK.
+    *   Returns: `GoogleGenAI` - An instance of the GoogleGenAI client.
+    *   Defined in client.ts:126
+
+### Properties
+
+*   `readonly caches`: `Caches` - Access to caching functionalities.
+    *   Defined in client.ts:123
+*   `readonly chats`: `Chats` - Access to chat functionalities.
+    *   Defined in client.ts:122
+*   `readonly files`: `Files` - Access to file functionalities.
+    *   Defined in client.ts:124
+*   `readonly live`: `Live` - Access to live functionalities.
+    *   Defined in client.ts:121
+*   `readonly models`: `Models` - Access to model functionalities.
+    *   Defined in client.ts:120
+*   `readonly vertexai`: `boolean` - Flag indicating if Vertex AI is being used.
+    *   Defined in client.ts:118
+```
+
+----------------------------------------
+
+TITLE: Pager Class API Reference
+DESCRIPTION: Comprehensive API documentation for the Pager class, detailing its constructors, accessors, and methods for managing paginated data.
+SOURCE: https://github.com/googleapis/js-genai/blob/main/docs/classes/pagers.Pager.html#_snippet_1
+
+LANGUAGE: APIDOC
+CODE:
+```
+Class Pager<T>
+==============
+
+Pager class for iterating through paginated results.
+
+#### Type Parameters
+
+*   T
+
+#### Implements
+
+*   AsyncIterable<T>
+
+#### Constructors
+
+*   new Pager<T>(
+    name: PagedItem,
+    request: (params: PagedItemConfig) => Promise<PagedItemResponse<T>>,
+    response: PagedItemResponse<T>,
+    params: PagedItemConfig
+  ): Pager<T>
+    *   Parameters:
+        *   name: PagedItem - The type of paged item (e.g., `batch_jobs`).
+        *   request: function - A function that makes the API request for the next page.
+        *   response: PagedItemResponse<T> - The initial response from the API.
+        *   params: PagedItemConfig - Configuration parameters for the API request.
+    *   Returns: Pager<T>
+
+#### Accessors
+
+*   get name(): PagedItem
+    *   Returns the type of paged item (for example, `batch_jobs`).
+    *   Returns: PagedItem
+
+*   get page(): T[]
+    *   Returns the current page, which is a list of items.
+    *   Remarks: The first page is retrieved when the pager is created. The returned list of items could be a subset of the entire list.
+    *   Returns: T[]
+
+*   get pageLength(): number
+    *   Returns the total number of items in the current page.
+    *   Returns: number
+
+*   get pageSize(): number
+    *   Returns the length of the page fetched each time by this pager.
+    *   Remarks: The number of items in the page is less than or equal to the page length.
+    *   Returns: number
+
+*   get params(): PagedItemConfig
+    *   Returns the parameters when making the API request for the next page.
+    *   Remarks: Parameters contain a set of optional configs that can be used to customize the API request. For example, the `pageToken` parameter contains the token to request the next page.
+    *   Returns: PagedItemConfig
+
+#### Methods
+
+*   [asyncIterator](): AsyncIterator<T>
+    *   Returns an async iterator that support iterating through all items retrieved from the API.
+    *   Remarks: The iterator will automatically fetch the next page if there are more items to fetch from the API.
+    *   Example:
+        ```javascript
+        const pager = await ai.files.list({config: {pageSize: 10}});
+        for await (const file of pager) {
+          console.log(file.name);
+        }
+        ```
+    *   Returns: AsyncIterator<T>
+
+*   getItem(index: number): T
+    *   Returns the item at the given index.
+    *   Parameters:
+        *   index: number - The index of the item to retrieve.
+    *   Returns: T
+```
+
+----------------------------------------
+
+TITLE: Chats Class API Documentation
+DESCRIPTION: API reference for the Chats class, including its constructor and the create method for managing chat sessions.
+SOURCE: https://github.com/googleapis/js-genai/blob/main/docs/classes/chats.Chats.html#_snippet_0
+
+LANGUAGE: APIDOC
+CODE:
+```
+Class Chats
+
+A utility class to create a chat session.
+
+Constructors:
+
+constructor(modelsModule: Models, apiClient: ApiClient): Chats
+  Parameters:
+    modelsModule: Models - The Models module instance.
+    apiClient: ApiClient - The ApiClient instance.
+  Returns: Chats - An instance of the Chats class.
+
+Methods:
+
+create(params: CreateChatParameters): Chat
+  Creates a new chat session.
+  Parameters:
+    params: CreateChatParameters - Parameters for creating a chat session.
+  Returns: Chat - A new chat session.
+  Remarks:
+    The config in the params will be used for all requests within the chat session unless overridden by a per-request `config`.
+  See:
+    types.SendMessageParameters#config
+  Example:
+    const chat = ai.chats.create({  model: 'gemini-2.0-flash'  config: {    temperature: 0.5,    maxOutputTokens: 1024,  }});
+```
+
+----------------------------------------
+
+TITLE: Tokens API Client
+DESCRIPTION: Provides a class for interacting with token-related APIs, specifically for creating authentication tokens. It requires an ApiClient instance for making requests and returns a promise resolving to authentication token information.
+SOURCE: https://github.com/googleapis/js-genai/blob/main/api-report/genai.api.md#_snippet_162
+
+LANGUAGE: TypeScript
+CODE:
+```
+export interface TokensInfo {
+    role?: string;
+    tokenIds?: string[];
+    tokens?: string[];
+}
+
+export class Tokens extends BaseModule {
+    constructor(apiClient: ApiClient);
+    create(params: types.CreateAuthTokenParameters): Promise<types.AuthToken>;
+}
+```
+
+----------------------------------------
+
+TITLE: Live Music API Interfaces
+DESCRIPTION: Defines the data structures and enumerations used for client-server communication in the live music generation API.
+SOURCE: https://github.com/googleapis/js-genai/blob/main/api-report/genai.api.md#_snippet_105
+
+LANGUAGE: APIDOC
+CODE:
+```
+LiveMusicClientMessage:
+  Represents a message sent from the client to the server.
+  Properties:
+    clientContent?: LiveMusicClientContent
+      Content provided by the client.
+    musicGenerationConfig?: LiveMusicGenerationConfig
+      Configuration for music generation.
+    playbackControl?: LiveMusicPlaybackControl
+      Controls playback actions like PLAY, PAUSE, STOP.
+    setup?: LiveMusicClientSetup
+      Client setup information.
+
+LiveMusicClientSetup:
+  Client-specific setup parameters.
+  Properties:
+    model?: string
+      The identifier for the music generation model.
+
+LiveMusicConnectParameters:
+  Parameters required to establish a connection.
+  Properties:
+    callbacks: LiveMusicCallbacks
+      Callback functions for handling events.
+    model: string
+      The music generation model to connect to.
+
+LiveMusicFilteredPrompt:
+  Represents a prompt that has been filtered by the server.
+  Properties:
+    filteredReason?: string
+      The reason why the prompt was filtered.
+    text?: string
+      The original text of the prompt.
+
+LiveMusicGenerationConfig:
+  Configuration options for music generation.
+  Properties:
+    bpm?: number
+      Beats per minute.
+    brightness?: number
+      Controls music brightness.
+    density?: number
+      Controls music density.
+    guidance?: number
+      Guidance scale for generation.
+    muteBass?: boolean
+      Mute bass track.
+    muteDrums?: boolean
+      Mute drums track.
+    onlyBassAndDrums?: boolean
+      Generate only bass and drums.
+    scale?: Scale
+      Musical scale to use.
+    seed?: number
+      Seed for random number generation.
+    temperature?: number
+      Controls randomness.
+    topK?: number
+      Top-K sampling parameter.
+
+LiveMusicPlaybackControl:
+  Enum for playback control commands.
+  Values:
+    PLAYBACK_CONTROL_UNSPECIFIED: Unspecified playback control.
+    PLAY: Start or resume playback.
+    PAUSE: Pause playback.
+    STOP: Stop playback.
+    RESET_CONTEXT: Reset the generation context.
+
+LiveMusicServerContent:
+  Content sent from the server.
+  Properties:
+    audioChunks?: AudioChunk[]
+      An array of audio data chunks.
+
+LiveMusicServerMessage:
+  Represents a message received from the server.
+  Properties:
+    audioChunk?: AudioChunk
+      An audio data chunk.
+    filteredPrompt?: LiveMusicFilteredPrompt
+      A filtered prompt from the server.
+    serverContent?: LiveServerContent
+      General server content.
+    setupComplete?: LiveMusicServerSetupComplete
+      Indicates completion of server setup.
+    toolCall?: LiveServerToolCall
+      Details of a tool call requested by the server.
+    toolCallCancellation?: LiveServerToolCallCancellation
+      Indicates cancellation of a tool call.
+    usageMetadata?: UsageMetadata
+      Metadata about resource usage.
+
+LiveMusicServerSetupComplete:
+  Indicates that the server setup is complete.
+  Properties:
+    sessionId?: string
+      The unique identifier for the session.
+
+LiveMusicSetConfigParameters:
+  Parameters for setting music generation configuration.
+  Properties:
+    musicGenerationConfig: LiveMusicGenerationConfig
+      The configuration object.
+
+LiveMusicSetWeightedPromptsParameters:
+  Parameters for setting weighted prompts.
+  Properties:
+    weightedPrompts: WeightedPrompt[]
+      An array of prompts with weights.
+
+LiveMusicSourceMetadata:
+  Metadata related to the source of music generation.
+  Properties:
+    clientContent?: LiveMusicClientContent
+      Client-provided content.
+    musicGenerationConfig?: LiveMusicGenerationConfig
+      Configuration used for generation.
+
+LiveSendClientContentParameters:
+  Parameters for sending client content.
+  Properties:
+    turnComplete?: boolean
+      Indicates if the client's turn is complete.
+    turns?: ContentListUnion
+      The content turns to send.
+
+LiveSendRealtimeInputParameters:
+  Parameters for sending real-time input.
+  Properties:
+    activityEnd?: ActivityEnd
+      Indicates the end of an activity.
+    activityStart?: ActivityStart
+      Indicates the start of an activity.
+    audio?: Blob_2
+      Audio data.
+    audioStreamEnd?: boolean
+      Flag indicating the end of an audio stream.
+    media?: BlobImageUnion
+      Media data (image or blob).
+    text?: string
+      Text input.
+    video?: BlobImageUnion
+      Video data.
+
+LiveSendToolResponseParameters:
+  Parameters for sending tool responses.
+  Properties:
+    functionResponses: FunctionResponse[] | FunctionResponse
+      The response(s) from a function call.
+
+LiveServerContent:
+  Content details provided by the server.
+  Properties:
+    generationComplete?: boolean
+      Flag indicating if generation is complete.
+    groundingMetadata?: GroundingMetadata
+      Metadata for grounding the output.
+    inputTranscription?: Transcription
+      Transcription of the input.
+    interrupted?: boolean
+      Flag indicating if the process was interrupted.
+    modelTurn?: Content
+      The model's generated content for the turn.
+    outputTranscription?: Transcription
+      Transcription of the output.
+    turnComplete?: boolean
+      Flag indicating if the server's turn is complete.
+    urlContextMetadata?: UrlContextMetadata
+      Metadata related to URL context.
+
+LiveServerGoAway:
+  Information about the server ending the connection.
+  Properties:
+    timeLeft?: string
+      Time remaining before disconnection.
+
+LiveServerMessage:
+  Represents a message received from the server, encompassing various types of data.
+  Properties:
+    goAway?: LiveServerGoAway
+      Server-initiated disconnection information.
+    serverContent?: LiveServerContent
+      General server-generated content.
+    sessionResumptionUpdate?: LiveServerSessionResumptionUpdate
+      Information about session resumption.
+    setupComplete?: LiveServerSetupComplete
+      Indicates server setup completion.
+    toolCall?: LiveServerToolCall
+      Details of a tool call requested by the server.
+    toolCallCancellation?: LiveServerToolCallCancellation
+      Indicates cancellation of a tool call.
+    usageMetadata?: UsageMetadata
+      Metadata about resource usage.
+
+LiveServerSessionResumptionUpdate:
+  Information related to resuming a session.
+  Properties:
+    lastConsumedClientMessageIndex?: string
+      Index of the last client message consumed.
+    newHandle?: string
+      A new handle for the resumed session.
+    resumable?: boolean
+      Indicates if the session is resumable.
+
+LiveServerSetupComplete:
+  Confirms that the server setup process has been completed.
+  Properties:
+    sessionId?: string
+      The unique identifier assigned to the session.
+
+LiveServerToolCall:
+  Specifies a tool call requested by the server.
+  Properties:
+    functionCalls?: FunctionCall[]
+      An array of function calls to be executed.
+
+LiveServerToolCallCancellation:
+  Indicates that a previously requested tool call should be cancelled.
+  Properties:
+    ids?: string[]
+      An array of identifiers for the tool calls to cancel.
+
+LogprobsResult:
+  Contains log probabilities for generated tokens.
+  Properties:
+    chosenCandidates?: LogprobsResultCandidate[]
+      Candidates chosen for the output.
+    topCandidates?: LogprobsResultTopCandidates[]
+      Top candidates for each token position.
+
+LogprobsResultCandidate:
+  Represents a single candidate token with its log probability.
+  Properties:
+    logProbability?: number
+      The log probability of the token.
+    token?: string
+      The token string.
+    tokenId?: number
+      The token identifier.
+
+LogprobsResultTopCandidates:
+  Contains a list of top candidates for a token position.
+  Properties:
+    candidates?: LogprobsResultCandidate[]
+      An array of candidate tokens.
+
+MaskReferenceConfig:
+  Configuration for mask referencing in image processing.
+  Properties:
+    maskDilation?: number
+      Dilation factor for the mask.
+    maskMode?: MaskReferenceMode
+      The mode for mask referencing.
+    segmentationClasses?: number[]
+      Classes included in the segmentation.
+
+MaskReferenceImage:
+  Represents an image used for mask referencing.
+```
+
+----------------------------------------
+
+TITLE: Get File Parameters and Configuration
+DESCRIPTION: Defines the parameters and configuration for retrieving file details. Requires a file name and supports optional abort signals and HTTP options for request customization.
+SOURCE: https://github.com/googleapis/js-genai/blob/main/api-report/genai-node.api.md#_snippet_83
+
+LANGUAGE: APIDOC
+CODE:
+```
+GetFileParameters Interface:
+  config?: GetFileConfig
+    Configuration for the get file request.
+  name: string
+    The name of the file to retrieve.
+
+GetFileConfig Interface:
+  abortSignal?: AbortSignal
+    An optional AbortSignal to cancel the request.
+  httpOptions?: HttpOptions
+    Custom HTTP client options for the request.
+```
+
+----------------------------------------
+
+TITLE: Get File Parameters and Configuration
+DESCRIPTION: Defines the parameters and configuration for retrieving file details. Requires a file name and supports optional abort signals and HTTP options for request customization.
+SOURCE: https://github.com/googleapis/js-genai/blob/main/api-report/genai-web.api.md#_snippet_84
+
+LANGUAGE: APIDOC
+CODE:
+```
+GetFileParameters Interface:
+  config?: GetFileConfig
+    Configuration for the get file request.
+  name: string
+    The name of the file to retrieve.
+
+GetFileConfig Interface:
+  abortSignal?: AbortSignal
+    An optional AbortSignal to cancel the request.
+  httpOptions?: HttpOptions
+    Custom HTTP client options for the request.
+```
+
+----------------------------------------
+
+TITLE: Tokens API Client
+DESCRIPTION: Provides a class for interacting with token-related APIs, specifically for creating authentication tokens. It requires an ApiClient instance for making requests and returns a promise resolving to authentication token information.
+SOURCE: https://github.com/googleapis/js-genai/blob/main/api-report/genai-web.api.md#_snippet_163
+
+LANGUAGE: TypeScript
+CODE:
+```
+export interface TokensInfo {
+    role?: string;
+    tokenIds?: string[];
+    tokens?: string[];
+}
+
+export class Tokens extends BaseModule {
+    constructor(apiClient: ApiClient);
+    create(params: types.CreateAuthTokenParameters): Promise<types.AuthToken>;
+}
+```
+
+----------------------------------------
+
+TITLE: API Interface: SupervisedTuningSpec
+DESCRIPTION: Defines parameters for supervised model tuning, including options for exporting checkpoints, specifying hyperparameters, and providing URIs for training and validation datasets.
+SOURCE: https://github.com/googleapis/js-genai/blob/main/api-report/genai-node.api.md#_snippet_240
+
+LANGUAGE: TypeScript
+CODE:
+```
+export interface SupervisedTuningSpec {
+    exportLastCheckpointOnly?: boolean;
+    hyperParameters?: SupervisedHyperParameters;
+    trainingDatasetUri?: string;
+    validationDatasetUri?: string;
+}
+```
+
+----------------------------------------
+
+TITLE: API Definition: VideoMetadata Interface
+DESCRIPTION: Provides metadata for video segments, such as start and end offsets and frames per second (FPS).
+SOURCE: https://github.com/googleapis/js-genai/blob/main/api-report/genai-web.api.md#_snippet_281
+
+LANGUAGE: APIDOC
+CODE:
+```
+VideoMetadata (Interface):
+  endOffset?: string
+  fps?: number
+  startOffset?: string
+```
+
+----------------------------------------
+
+TITLE: Get File Parameters and Configuration
+DESCRIPTION: Defines the parameters and configuration for retrieving file details. Requires a file name and supports optional abort signals and HTTP options for request customization.
+SOURCE: https://github.com/googleapis/js-genai/blob/main/api-report/genai.api.md#_snippet_83
+
+LANGUAGE: APIDOC
+CODE:
+```
+GetFileParameters Interface:
+  config?: GetFileConfig
+    Configuration for the get file request.
+  name: string
+    The name of the file to retrieve.
+
+GetFileConfig Interface:
+  abortSignal?: AbortSignal
+    An optional AbortSignal to cancel the request.
+  httpOptions?: HttpOptions
+    Custom HTTP client options for the request.
+```
+
+----------------------------------------
+
+TITLE: Tokens API Client
+DESCRIPTION: Provides a class for interacting with token-related APIs, specifically for creating authentication tokens. It requires an ApiClient instance for making requests and returns a promise resolving to authentication token information.
+SOURCE: https://github.com/googleapis/js-genai/blob/main/api-report/genai-node.api.md#_snippet_161
+
+LANGUAGE: TypeScript
+CODE:
+```
+export interface TokensInfo {
+    role?: string;
+    tokenIds?: string[];
+    tokens?: string[];
+}
+
+export class Tokens extends BaseModule {
+    constructor(apiClient: ApiClient);
+    create(params: types.CreateAuthTokenParameters): Promise<types.AuthToken>;
+}
+```
+
+----------------------------------------
+
+TITLE: APIDOC: Video Metadata Interface
+DESCRIPTION: Provides metadata for video content, such as start and end offsets and frames per second (FPS).
+SOURCE: https://github.com/googleapis/js-genai/blob/main/api-report/genai-node.api.md#_snippet_281
+
+LANGUAGE: APIDOC
+CODE:
+```
+// @public
+export interface VideoMetadata {
+    endOffset?: string;
+    fps?: number;
+    startOffset?: string;
+}
+```
+
+----------------------------------------
+
+TITLE: Quickstart: Generate Content with Gemini API (Node.js)
+DESCRIPTION: Demonstrates basic usage of the SDK to generate content using an API key. Initializes GoogleGenAI and calls models.generateContent. Requires GEMINI_API_KEY environment variable.
+SOURCE: https://github.com/googleapis/js-genai/blob/main/docs/index.html#_snippet_1
+
+LANGUAGE: typescript
+CODE:
+```
+import {GoogleGenAI} from '@google/genai';
+
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+const ai = new GoogleGenAI({apiKey: GEMINI_API_KEY});
+
+async function main() {
+  const response = await ai.models.generateContent({
+    model: 'gemini-2.0-flash-001',
+    contents: 'Why is the sky blue?',
+  });
+  console.log(response.text);
+}
+
+main();
+```
+
+----------------------------------------
+
+TITLE: Live Music API Interfaces
+DESCRIPTION: Defines the data structures and enumerations used for client-server communication in the live music generation API.
+SOURCE: https://github.com/googleapis/js-genai/blob/main/api-report/genai-node.api.md#_snippet_104
+
+LANGUAGE: APIDOC
+CODE:
+```
+LiveMusicClientMessage:
+  Represents a message sent from the client to the server.
+  Properties:
+    clientContent?: LiveMusicClientContent
+      Content provided by the client.
+    musicGenerationConfig?: LiveMusicGenerationConfig
+      Configuration for music generation.
+    playbackControl?: LiveMusicPlaybackControl
+      Controls playback actions like PLAY, PAUSE, STOP.
+    setup?: LiveMusicClientSetup
+      Client setup information.
+
+LiveMusicClientSetup:
+  Client-specific setup parameters.
+  Properties:
+    model?: string
+      The identifier for the music generation model.
+
+LiveMusicConnectParameters:
+  Parameters required to establish a connection.
+  Properties:
+    callbacks: LiveMusicCallbacks
+      Callback functions for handling events.
+    model: string
+      The music generation model to connect to.
+
+LiveMusicFilteredPrompt:
+  Represents a prompt that has been filtered by the server.
+  Properties:
+    filteredReason?: string
+      The reason why the prompt was filtered.
+    text?: string
+      The original text of the prompt.
+
+LiveMusicGenerationConfig:
+  Configuration options for music generation.
+  Properties:
+    bpm?: number
+      Beats per minute.
+    brightness?: number
+      Controls music brightness.
+    density?: number
+      Controls music density.
+    guidance?: number
+      Guidance scale for generation.
+    muteBass?: boolean
+      Mute bass track.
+    muteDrums?: boolean
+      Mute drums track.
+    onlyBassAndDrums?: boolean
+      Generate only bass and drums.
+    scale?: Scale
+      Musical scale to use.
+    seed?: number
+      Seed for random number generation.
+    temperature?: number
+      Controls randomness.
+    topK?: number
+      Top-K sampling parameter.
+
+LiveMusicPlaybackControl:
+  Enum for playback control commands.
+  Values:
+    PLAYBACK_CONTROL_UNSPECIFIED: Unspecified playback control.
+    PLAY: Start or resume playback.
+    PAUSE: Pause playback.
+    STOP: Stop playback.
+    RESET_CONTEXT: Reset the generation context.
+
+LiveMusicServerContent:
+  Content sent from the server.
+  Properties:
+    audioChunks?: AudioChunk[]
+      An array of audio data chunks.
+
+LiveMusicServerMessage:
+  Represents a message received from the server.
+  Properties:
+    audioChunk?: AudioChunk
+      An audio data chunk.
+    filteredPrompt?: LiveMusicFilteredPrompt
+      A filtered prompt from the server.
+    serverContent?: LiveServerContent
+      General server content.
+    setupComplete?: LiveMusicServerSetupComplete
+      Indicates completion of server setup.
+    toolCall?: LiveServerToolCall
+      Details of a tool call requested by the server.
+    toolCallCancellation?: LiveServerToolCallCancellation
+      Indicates cancellation of a tool call.
+    usageMetadata?: UsageMetadata
+      Metadata about resource usage.
+
+LiveMusicServerSetupComplete:
+  Indicates that the server setup is complete.
+  Properties:
+    sessionId?: string
+      The unique identifier for the session.
+
+LiveMusicSetConfigParameters:
+  Parameters for setting music generation configuration.
+  Properties:
+    musicGenerationConfig: LiveMusicGenerationConfig
+      The configuration object.
+
+LiveMusicSetWeightedPromptsParameters:
+  Parameters for setting weighted prompts.
+  Properties:
+    weightedPrompts: WeightedPrompt[]
+      An array of prompts with weights.
+
+LiveMusicSourceMetadata:
+  Metadata related to the source of music generation.
+  Properties:
+    clientContent?: LiveMusicClientContent
+      Client-provided content.
+    musicGenerationConfig?: LiveMusicGenerationConfig
+      Configuration used for generation.
+
+LiveSendClientContentParameters:
+  Parameters for sending client content.
+  Properties:
+    turnComplete?: boolean
+      Indicates if the client's turn is complete.
+    turns?: ContentListUnion
+      The content turns to send.
+
+LiveSendRealtimeInputParameters:
+  Parameters for sending real-time input.
+  Properties:
+    activityEnd?: ActivityEnd
+      Indicates the end of an activity.
+    activityStart?: ActivityStart
+      Indicates the start of an activity.
+    audio?: Blob_2
+      Audio data.
+    audioStreamEnd?: boolean
+      Flag indicating the end of an audio stream.
+    media?: BlobImageUnion
+      Media data (image or blob).
+    text?: string
+      Text input.
+    video?: BlobImageUnion
+      Video data.
+
+LiveSendToolResponseParameters:
+  Parameters for sending tool responses.
+  Properties:
+    functionResponses: FunctionResponse[] | FunctionResponse
+      The response(s) from a function call.
+
+LiveServerContent:
+  Content details provided by the server.
+  Properties:
+    generationComplete?: boolean
+      Flag indicating if generation is complete.
+    groundingMetadata?: GroundingMetadata
+      Metadata for grounding the output.
+    inputTranscription?: Transcription
+      Transcription of the input.
+    interrupted?: boolean
+      Flag indicating if the process was interrupted.
+    modelTurn?: Content
+      The model's generated content for the turn.
+    outputTranscription?: Transcription
+      Transcription of the output.
+    turnComplete?: boolean
+      Flag indicating if the server's turn is complete.
+    urlContextMetadata?: UrlContextMetadata
+      Metadata related to URL context.
+
+LiveServerGoAway:
+  Information about the server ending the connection.
+  Properties:
+    timeLeft?: string
+      Time remaining before disconnection.
+
+LiveServerMessage:
+  Represents a message received from the server, encompassing various types of data.
+  Properties:
+    goAway?: LiveServerGoAway
+      Server-initiated disconnection information.
+    serverContent?: LiveServerContent
+      General server-generated content.
+    sessionResumptionUpdate?: LiveServerSessionResumptionUpdate
+      Information about session resumption.
+    setupComplete?: LiveServerSetupComplete
+      Indicates server setup completion.
+    toolCall?: LiveServerToolCall
+      Details of a tool call requested by the server.
+    toolCallCancellation?: LiveServerToolCallCancellation
+      Indicates cancellation of a tool call.
+    usageMetadata?: UsageMetadata
+      Metadata about resource usage.
+
+LiveServerSessionResumptionUpdate:
+  Information related to resuming a session.
+  Properties:
+    lastConsumedClientMessageIndex?: string
+      Index of the last client message consumed.
+    newHandle?: string
+      A new handle for the resumed session.
+    resumable?: boolean
+      Indicates if the session is resumable.
+
+LiveServerSetupComplete:
+  Confirms that the server setup process has been completed.
+  Properties:
+    sessionId?: string
+      The unique identifier assigned to the session.
+
+LiveServerToolCall:
+  Specifies a tool call requested by the server.
+  Properties:
+    functionCalls?: FunctionCall[]
+      An array of function calls to be executed.
+
+LiveServerToolCallCancellation:
+  Indicates that a previously requested tool call should be cancelled.
+  Properties:
+    ids?: string[]
+      An array of identifiers for the tool calls to cancel.
+
+LogprobsResult:
+  Contains log probabilities for generated tokens.
+  Properties:
+    chosenCandidates?: LogprobsResultCandidate[]
+      Candidates chosen for the output.
+    topCandidates?: LogprobsResultTopCandidates[]
+      Top candidates for each token position.
+
+LogprobsResultCandidate:
+  Represents a single candidate token with its log probability.
+  Properties:
+    logProbability?: number
+      The log probability of the token.
+    token?: string
+      The token string.
+    tokenId?: number
+      The token identifier.
+
+LogprobsResultTopCandidates:
+  Contains a list of top candidates for a token position.
+  Properties:
+    candidates?: LogprobsResultCandidate[]
+      An array of candidate tokens.
+
+MaskReferenceConfig:
+  Configuration for mask referencing in image processing.
+  Properties:
+    maskDilation?: number
+      Dilation factor for the mask.
+    maskMode?: MaskReferenceMode
+      The mode for mask referencing.
+    segmentationClasses?: number[]
+      Classes included in the segmentation.
+
+MaskReferenceImage:
+  Represents an image used for mask referencing.
+```

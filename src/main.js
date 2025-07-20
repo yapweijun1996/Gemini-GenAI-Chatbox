@@ -1,3 +1,46 @@
+// Helper function to compress an image
+async function compressImage(base64, mimeType, targetSizeKB = 10, maxIterations = 20) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.src = `data:${mimeType};base64,${base64}`;
+    img.onload = () => {
+      let quality = 1.0;
+      let iterations = 0;
+      let currentBase64 = base64;
+      let width = img.width;
+      let height = img.height;
+
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+
+      function checkSizeAndCompress() {
+        const currentSizeKB = Math.round((currentBase64.length * 3) / 4 / 1024);
+
+        if (currentSizeKB <= targetSizeKB || iterations >= maxIterations) {
+          console.log(`Final image size: ${currentSizeKB}KB after ${iterations} iterations.`);
+          resolve(currentBase64);
+          return;
+        }
+
+        iterations++;
+        quality *= 0.7;
+        width *= 0.7;
+        height *= 0.7;
+
+        canvas.width = width;
+        canvas.height = height;
+        ctx.drawImage(img, 0, 0, width, height);
+
+        currentBase64 = canvas.toDataURL(mimeType, quality).split(',')[1];
+        
+        setTimeout(checkSizeAndCompress, 0);
+      }
+
+      checkSizeAndCompress();
+    };
+    img.onerror = error => reject(error);
+  });
+}
 (function() {
   const n=document.createElement("link").relList;
   if(n&&n.supports&&n.supports("modulepreload"))return;
@@ -203,10 +246,27 @@ function W(e, n, t=[]) {
   a.classList.add(c?"justify-end":"justify-start");
   const y=document.createElement("div");
   if(y.classList.add("px-4", "py-3", "rounded-2xl", "text-white", "prose", ...f.split(" ")), y.style.maxWidth="85vw", i) {
-    const m=document.createElement("img");
-    m.src=i.base64.startsWith("data:")?i.base64:`data:${i.mimeType};base64,${i.base64}`,
-    m.className="max-w-xs md:max-w-sm rounded-lg mb-2",
-    y.appendChild(m)
+    const m = document.createElement("img");
+    const imageToDisplay = i.compressed ? i.compressed : (i.original ? i.original : i);
+    m.src = imageToDisplay.base64.startsWith("data:") ? imageToDisplay.base64 : `data:${imageToDisplay.mimeType};base64,${imageToDisplay.base64}`;
+    m.className = "max-w-[200px] md:max-w-[256px] rounded-lg mb-2 cursor-pointer";
+    m.draggable = true;
+    m.addEventListener("dragstart", e => {
+      const fullImage = i.original ? i.original : i;
+      e.dataTransfer.setData("application/json", JSON.stringify(fullImage));
+    });
+    m.addEventListener("click", () => {
+      const lightbox = document.getElementById("image-lightbox");
+      const lightboxImage = document.getElementById("lightbox-image");
+      const downloadButton = document.getElementById("download-image-button");
+      const fullImage = i.original ? i.original : i;
+      const fullSrc = fullImage.base64.startsWith("data:") ? fullImage.base64 : `data:${fullImage.mimeType};base64,${fullImage.base64}`;
+      lightboxImage.src = fullSrc;
+      downloadButton.href = fullSrc;
+      downloadButton.download = `image-${Date.now()}.png`;
+      lightbox.classList.remove("hidden");
+    });
+    y.appendChild(m);
   }
   if(s) {
     const m=document.createElement("div");
@@ -1282,38 +1342,61 @@ function Pe(e) {
   const n=e.match(/```json\n([\s\S]*?)\n```/);
   return n?n[1]:e
 }
-async function Ut(e, n) {
-  const o=new ce(e).getGenerativeModel( {
-    model:"gemini-2.5-flash"
-  }
-  ),
-  s=`
+async function Ut(e, n, t) {
+  let o=0;
+  const s=e.length;
+  let i=n;
+  for(;
+  o<s;
+  ) {
+    const r=e[i];
+    console.log(`(Memory) Attempting to use API key #${i+1}`);
+    try {
+      const a=new ce(r).getGenerativeModel( {
+        model:"gemini-2.5-flash"
+      }
+      ),
+      c=`
         You are a memory agent. Your task is to analyze the following conversation and extract key information to be stored in a long-term memory.
         Extract facts, user preferences, and any other important details that should be remembered for future conversations.
         Return ONLY the information as a valid JSON object with a single key "memory" which contains an array of strings.
         If no new information is present, return an empty array.
 
         Conversation:
-        ${JSON.stringify(n)}
+        ${JSON.stringify(t)}
     `;
-  try {
-    const a=(await(await o.generateContent(s)).response).text();
-    return JSON.parse(Pe(a)).memory
+      const f=(await(await a.generateContent(c)).response).text();
+      return console.log(`(Memory) API key #${i+1} succeeded.`),
+      JSON.parse(Pe(f)).memory
+    }
+    catch(l) {
+      console.warn(`(Memory) API key #${i+1} failed.`, l),
+      o++,
+      i=(i+1)%e.length,
+      await F("currentKeyIndex", i)
+    }
   }
-  catch(i) {
-    return console.error("Memory Agent Error:", i),
-    []
-  }
+  return console.error("All API keys failed for memory task."),
+  []
 }
-async function V_t(e) {
-  const n=new ce(e).getGenerativeModel( {
-    model:"gemini-2.5-flash"
-  }
-  ),
-  t=await ie();
+async function V_t(e, n) {
+  const t=await ie();
   if(t.length<5)return;
   console.log("Consolidating memories...");
-  const o=`
+  let o=0;
+  const s=e.length;
+  let i=n;
+  for(;
+  o<s;
+  ) {
+    const r=e[i];
+    console.log(`(Consolidation) Attempting to use API key #${i+1}`);
+    try {
+      const a=new ce(r).getGenerativeModel( {
+        model:"gemini-2.5-flash"
+      }
+      ),
+      c=`
         You are a memory consolidation agent. Your task is to review the following list of memories and consolidate them into a more concise, organized, and coherent set of facts.
         - **Merge related facts aggressively.** For example, "User likes dogs" and "User has a golden retriever" must become "User has a golden retriever dog."
         - **Remove redundant or outdated information.** If a memory is a less specific version of another, delete it.
@@ -1322,17 +1405,22 @@ async function V_t(e) {
         - Return ONLY the consolidated information as a valid JSON object with a single key "consolidated_memories" which contains an array of strings.
 
         Memories to consolidate:
-        ${JSON.stringify(t.map(s=>s.text))}
+        ${JSON.stringify(t.map(y=>y.text))}
     `;
-  try {
-    const s=(await(await n.generateContent(o)).response).text(),
-    i=JSON.parse(Pe(s)).consolidated_memories;
-    await ct(),
-    await Ft(i, !0)
+      const f=(await(await a.generateContent(c)).response).text(),
+      y=JSON.parse(Pe(f)).consolidated_memories;
+      return await ct(),
+      await Ft(y, !0),
+      void console.log(`(Consolidation) API key #${i+1} succeeded.`)
+    }
+    catch(h) {
+      console.warn(`(Consolidation) API key #${i+1} failed.`, h),
+      o++,
+      i=(i+1)%e.length,
+      await F("currentKeyIndex", i)
+    }
   }
-  catch(s) {
-    console.error("Memory Consolidation Error:", s)
-  }
+  console.error("All API keys failed for memory consolidation.")
 }
 async function Ft(e, n=!1) {
   const t=await ie(),
@@ -1347,16 +1435,25 @@ async function Ft(e, n=!1) {
   }
   );
   const i=await T("enableMemoryDefrag", !0);
-  !n&&i&&s.length>0&&t.length>0&&t.length%5==0&&setTimeout(()=>V_t(X[Ye]), 1e3)
+  !n&&i&&s.length>0&&t.length>0&&t.length%5==0&&setTimeout(()=>V_t(X, Ye), 1e3)
 }
-async function Pt(e, n) {
-  const o=new ce(e).getGenerativeModel( {
-    model:"gemini-2.5-flash"
-  }
-  ),
-  s=await ie();
-  if(s.length===0)return[];
-  const i=`
+async function Pt(e, n, t) {
+  const o=await ie();
+  if(o.length===0)return[];
+  let s=0;
+  const i=e.length;
+  let r=n;
+  for(;
+  s<i;
+  ) {
+    const a=e[r];
+    console.log(`(Retrieval) Attempting to use API key #${r+1}`);
+    try {
+      const c=new ce(a).getGenerativeModel( {
+        model:"gemini-2.5-flash"
+      }
+      ),
+      f=`
         You are a retrieval agent. Your task is to select the most relevant memories from the following list to help answer the user's query.
         - Analyze the user's query to understand its intent, even if it is vague. For example, a query like "what about my car" should be interpreted as a request for any stored information about their car.
         - Return ONLY the most relevant memories as a valid JSON object with a single key "relevant_memories" which contains an array of strings.
@@ -1364,40 +1461,49 @@ async function Pt(e, n) {
         - Do not return more than 5 memories.
 
         Memories:
-        ${JSON.stringify(s.map(r=>r.text))}
+        ${JSON.stringify(o.map(y=>y.text))}
 
         Query:
-        ${n}
+        ${t}
     `;
-  try {
-    const c=(await(await o.generateContent(i)).response).text();
-    return JSON.parse(Pe(c)).relevant_memories
+      const y=(await(await c.generateContent(f)).response).text();
+      return console.log(`(Retrieval) API key #${r+1} succeeded.`),
+      JSON.parse(Pe(y)).relevant_memories
+    }
+    catch(h) {
+      console.warn(`(Retrieval) API key #${r+1} failed.`, h),
+      s++,
+      r=(r+1)%e.length,
+      await F("currentKeyIndex", r)
+    }
   }
-  catch(r) {
-    return console.error("Retrieval Agent Error:", r),
-    []
-  }
+  return console.error("All API keys failed for memory retrieval."),
+  []
 }
-async function handleMemoryTasks(apiKey,  userMessage,  modelResponse) {
+async function handleMemoryTasks(e, n) {
   try {
-    const history = await ke();
-    const newMemory = await Ut(apiKey,  [...history, {
-       role: "user",  parts: [ {
-         text: userMessage
+    const t = await ke();
+    const memoryConversation = [...t, {
+      role: "user",
+      parts: [{ text: e }]
+    }, {
+      role: "model",
+      parts: [{ text: n }]
+    }].map(msg => {
+      if (msg.image && msg.image.original) {
+        return {
+          ...msg,
+          image: { compressed: msg.image.compressed }
+        };
       }
-      ]
-    }
-, {
-       role: "model",  parts: [ {
-         text: modelResponse
-      }
-      ]
-    }
-    ]);
-    await Ft(newMemory);
+      return msg;
+    });
+
+    const o = await Ut(X, Ye, memoryConversation);
+    await Ft(o);
   }
-   catch (error) {
-    console.error("Error in background memory task:",  error);
+  catch(t) {
+    console.error("Error in background memory task:", t)
   }
 }
 async function Kt(e, n=null, t, o, s) {
@@ -1412,21 +1518,26 @@ async function Kt(e, n=null, t, o, s) {
       const c=new ce(a),
       f=await T("modelName", "gemini-2.5-flash"),
       y=await ke();
-      let h=y.map(p=> {
-        const L=[];
-        return p.text&&L.push( {
-          text:p.text
+      let h = y.map(p => {
+        const L = [];
+        if (p.text) {
+          L.push({ text: p.text });
         }
-        ), p.image&&L.push( {
-          inlineData: {
-            mimeType:p.image.mimeType, data:p.image.base64
-          }
+        if (p.image && p.role === 'user') {
+          // Use compressed image for history, fallback to original/old format
+          const imageForHistory = p.image.compressed ? p.image.compressed : p.image;
+          L.push({
+            inlineData: {
+              mimeType: imageForHistory.mimeType,
+              data: imageForHistory.base64,
+            },
+          });
         }
-        ), {
-          role:p.role, parts:L
-        }
-      }
-      ).filter(p=>p.parts.length>0);
+        return {
+          role: p.role,
+          parts: L,
+        };
+      }).filter(p => p.parts.length > 0);
       const l=h.findIndex(p=>p.role==="user");
       l>-1?h=h.slice(l):h=[];
       const m=new UAParser().getResult(),
@@ -1434,8 +1545,8 @@ async function Kt(e, n=null, t, o, s) {
       Ve=`${m.browser.name} ${m.browser.version}`,
       Je=new Date,
       We=Intl.DateTimeFormat().resolvedOptions().timeZone,
-      ze=Je.toLocaleString(),
-      Xe=await Pt(a, e);
+      ze=Je.toLocaleString();
+      const Xe=await Pt(t, o, e);
       let memoryContext = "";
       if (Xe.length > 0) {
            memoryContext = `Here are some relevant memories from past conversations:
@@ -1533,6 +1644,59 @@ async function Kt(e, n=null, t, o, s) {
   }
   throw new Error("All API keys failed. Please check your keys in the settings.")
 }
+
+async function imageGenerationKt(e, n, t, o) {
+  let i = 0;
+  const r = n.length;
+  for (; i < r;) {
+    const a = n[t];
+    console.log(`Attempting to use API key #${t + 1}`);
+    try {
+      const c = new ce(a);
+      const f = "gemini-2.0-flash-preview-image-generation";
+      const y = c.getGenerativeModel({
+        model: f,
+        generationConfig: {
+          responseModalities: ["Text", "Image"]
+        }
+      });
+
+      const h = await y.generateContent(e);
+      const l = await h.response;
+
+      console.log(`API key #${t + 1} succeeded.`);
+
+      const imagePart = l.candidates[0].content.parts.find(p => p.inlineData);
+      if (!imagePart) {
+        throw new Error("The AI response did not contain an image. Please try a different prompt.");
+      }
+      const originalBase64 = imagePart.inlineData.data;
+      const mimeType = imagePart.inlineData.mimeType;
+      const compressedBase64 = await compressImage(originalBase64, mimeType, 10);
+
+      const modelResponse = {
+        role: "model",
+        text: `Generated image for: "${e}"`,
+        image: {
+          original: { base64: originalBase64, mimeType: mimeType },
+          compressed: { base64: compressedBase64, mimeType: mimeType }
+        }
+      };
+
+      W(o, modelResponse);
+      await se(modelResponse);
+
+      return modelResponse;
+    } catch (c) {
+      console.warn(`API key #${t + 1} failed.`, c);
+      i++;
+      t = (t + 1) % n.length;
+      await F("currentKeyIndex", t);
+    }
+  }
+  throw new Error("All API keys failed for image generation. Please check your keys in the settings.");
+}
+
 const z="your-super-secret-key";
 let E,
 ee,
@@ -1561,9 +1725,43 @@ zt,
 nn,
 on,
 sn,
+generateImageButton,
+imageLightbox,
+lightboxImage,
+closeLightboxButton,
+downloadImageButton,
 X=[],
 Ye=0,
 I=null;
+
+async function generateImage() {
+  if (X.length === 0) return;
+  const n = Xt(u.value);
+  if (!n.trim()) return;
+
+  A(!0, _, u, b, E);
+  N.classList.add("hidden");
+
+  const t = {
+    role: "user",
+    text: `Generate an image of: ${n.trim()}`,
+  };
+
+  W(E, t);
+  await se(t);
+  u.value = "";
+  u.style.height = "auto";
+  u.placeholder = "Type your message or add an image...";
+
+  try {
+    const modelResponse = await imageGenerationKt(t.text, X, Ye, E);
+    A(!1, _, u, b, E);
+  } catch (o) {
+    J(N, o.message);
+    A(!1, _, u, b, E);
+  }
+}
+
 function Xt(e) {
   return e.replace(/&/g, "&").replace(/</g, "<").replace(/>/g, ">").replace(/"/g, '"').replace(/'/g, "&#039;")
 }
@@ -1592,10 +1790,9 @@ async function Zt(e) {
     role:"user",
     text:n.trim()
   };
-  I&&(t.image= {
-    base64:I.base64, mimeType:I.mimeType
+  if (I) {
+    t.image = I;
   }
-  ),
   W(E, t),
   await se(t),
   u.value="",
@@ -1603,9 +1800,9 @@ async function Zt(e) {
   u.placeholder="Type your message or add an image...",
   I&&(I=null, D.value="", Y.classList.add("hidden"), q.src="");
   try {
-    const o = await Kt(t.text, t.image, X, Ye, E);
+    const o = await Kt(t.text, t.image ? t.image.original : null, X, Ye, E);
     A(!1, _, u, b, E);
-    setTimeout(() => handleMemoryTasks(X[Ye],  t.text,  o),  0);
+    setTimeout(() => handleMemoryTasks(t.text,  o),  0);
   }
   catch(o) {
     J(N, o.message),
@@ -1676,9 +1873,18 @@ async function tn() {
     nn=document.getElementById("import-memory-button"),
     on=document.getElementById("export-memory-button"),
     sn=document.getElementById("optimize-memory-button"),
+    generateImageButton = document.getElementById("generate-image-button"),
+    imageLightbox = document.getElementById("image-lightbox"),
+    lightboxImage = document.getElementById("lightbox-image"),
+    closeLightboxButton = document.getElementById("close-lightbox-button"),
+    downloadImageButton = document.getElementById("download-image-button");
     await st(),
     ee.addEventListener("submit", Zt),
     Le.addEventListener("click", ()=>D.click()),
+    generateImageButton.addEventListener("click", generateImage),
+    closeLightboxButton.addEventListener("click", () => {
+      imageLightbox.classList.add("hidden");
+    });
     Ne.addEventListener("click", async()=> {
       confirm("Are you sure you want to clear the entire chat history? This cannot be undone.")&&(await rt(), location.reload())
     }
@@ -1687,11 +1893,16 @@ async function tn() {
       const n=e.target.files[0];
       if(n&&n.type.startsWith("image/")) {
         const t=new FileReader;
-        t.onloadend=()=> {
-          I= {
-            base64:t.result.split(",")[1], mimeType:n.type
-          }
-, q.src=t.result, Y.classList.remove("hidden"), u.placeholder="Describe the image or ask a question..."
+        t.onloadend= async ()=> {
+          const originalBase64 = t.result.split(",")[1];
+          const compressedBase64 = await compressImage(originalBase64, n.type, 10);
+          I = {
+            original: { base64: originalBase64, mimeType: n.type },
+            compressed: { base64: compressedBase64, mimeType: n.type }
+          };
+          q.src=t.result;
+          Y.classList.remove("hidden");
+          u.placeholder="Describe the image or ask a question...";
         }
 , t.readAsDataURL(n)
       }
@@ -1712,6 +1923,49 @@ async function tn() {
       }
     }
     ),
+    ee.addEventListener("dragover", e => {
+      e.preventDefault();
+      ee.classList.add("drag-over");
+    }),
+    ee.addEventListener("dragleave", () => {
+      ee.classList.remove("drag-over");
+    }),
+    ee.addEventListener("drop", async e => {
+      e.preventDefault();
+      ee.classList.remove("drag-over");
+      const file = e.dataTransfer.files[0];
+      const draggedImageData = e.dataTransfer.getData("application/json");
+
+      if (file && file.type.startsWith("image/")) {
+        const reader = new FileReader();
+        reader.onloadend = async () => {
+          const originalBase64 = reader.result.split(",")[1];
+          const compressedBase64 = await compressImage(originalBase64, file.type, 10);
+          I = {
+            original: { base64: originalBase64, mimeType: file.type },
+            compressed: { base64: compressedBase64, mimeType: file.type }
+          };
+          q.src = reader.result;
+          Y.classList.remove("hidden");
+          u.placeholder = "Describe the image or ask a question...";
+        };
+        reader.readAsDataURL(file);
+      } else if (draggedImageData) {
+        try {
+          const { base64, mimeType } = JSON.parse(draggedImageData);
+          const compressedBase64 = await compressImage(base64, mimeType, 10);
+          I = {
+            original: { base64, mimeType },
+            compressed: { base64: compressedBase64, mimeType }
+          };
+          q.src = `data:${mimeType};base64,${base64}`;
+          Y.classList.remove("hidden");
+          u.placeholder = "Describe the image or ask a question...";
+        } catch (error) {
+          console.error("Failed to handle dropped image data:", error);
+        }
+      }
+    }),
     u.addEventListener("input", ()=> {
       u.style.height="auto";
       const e=Math.min(u.scrollHeight, 200);
@@ -1793,7 +2047,7 @@ async function tn() {
 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
 </svg> Optimizing...`;
             try {
-                await V_t(X[Ye]);
+                await V_t(X, Ye);
                 alert("AI memory has been optimized.");
             } catch (t) {
                 alert("An error occurred during memory optimization.");

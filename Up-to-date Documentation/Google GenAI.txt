@@ -1,0 +1,1883 @@
+TITLE: GoogleGenerativeAI Class Definition and API Reference
+DESCRIPTION: Comprehensive API documentation for the `GoogleGenerativeAI` class, outlining its structure, initialization, available properties, and methods for interacting with generative models.
+SOURCE: https://github.com/google-gemini/generative-ai-js/blob/main/docs/reference/main/generative-ai.googlegenerativeai.md#_snippet_0
+
+LANGUAGE: TypeScript
+CODE:
+```
+export declare class GoogleGenerativeAI
+```
+
+LANGUAGE: APIDOC
+CODE:
+```
+GoogleGenerativeAI class
+  Description: Top-level class for this SDK
+
+  Constructors:
+    (constructor)(apiKey)
+      Description: Constructs a new instance of the GoogleGenerativeAI class
+
+  Properties:
+    apiKey
+      Type: string
+
+  Methods:
+    getGenerativeModel(modelParams, requestOptions)
+      Description: Gets a GenerativeModel instance for the provided model name.
+    getGenerativeModelFromCachedContent(cachedContent, modelParams, requestOptions)
+      Description: Creates a GenerativeModel instance from provided content cache.
+```
+
+----------------------------------------
+
+TITLE: GenerativeModel Class API Documentation
+DESCRIPTION: Detailed API documentation for the `GenerativeModel` class, outlining its structure, initialization, configurable properties, and available methods for various generative AI operations like content generation, embedding, and token counting.
+SOURCE: https://github.com/google-gemini/generative-ai-js/blob/main/docs/reference/main/generative-ai.generativemodel.md#_snippet_0
+
+LANGUAGE: APIDOC
+CODE:
+```
+GenerativeModel class:
+  Signature: export declare class GenerativeModel
+
+  Constructors:
+    (constructor)(apiKey, modelParams, _requestOptions)
+      Description: Constructs a new instance of the GenerativeModel class
+
+  Properties:
+    apiKey: string
+    cachedContent: CachedContent
+    generationConfig: GenerationConfig
+    model: string
+    safetySettings: SafetySetting[]
+    systemInstruction?: Content (Optional)
+    toolConfig?: ToolConfig (Optional)
+    tools?: Tool[] (Optional)
+
+  Methods:
+    batchEmbedContents(batchEmbedContentRequest, requestOptions)
+      Description: Embeds an array of EmbedContentRequest. Fields set in the optional SingleRequestOptions parameter will take precedence over the RequestOptions values provided to GoogleGenerativeAI.getGenerativeModel().
+    countTokens(request, requestOptions)
+      Description: Counts the tokens in the provided request. Fields set in the optional SingleRequestOptions parameter will take precedence over the RequestOptions values provided to GoogleGenerativeAI.getGenerativeModel().
+    embedContent(request, requestOptions)
+      Description: Embeds the provided content. Fields set in the optional SingleRequestOptions parameter will take precedence over the RequestOptions values provided to GoogleGenerativeAI.getGenerativeModel().
+    generateContent(request, requestOptions)
+      Description: Makes a single non-streaming call to the model and returns an object containing a single GenerateContentResponse. Fields set in the optional SingleRequestOptions parameter will take precedence over the RequestOptions values provided to GoogleGenerativeAI.getGenerativeModel().
+    generateContentStream(request, requestOptions)
+      Description: Makes a single streaming call to the model and returns an object containing an iterable stream that iterates over all chunks in the streaming response as well as a promise that returns the final aggregated response. Fields set in the optional SingleRequestOptions parameter will take precedence over the RequestOptions values provided to GoogleGenerativeAI.getGenerativeModel().
+    startChat(startChatParams)
+      Description: Gets a new ChatSession instance which can be used for multi-turn chats.
+```
+
+----------------------------------------
+
+TITLE: Handle User Input and Stream Responses in Generative AI Chat (JavaScript)
+DESCRIPTION: This JavaScript snippet demonstrates how to set up a chat interface, handle user input from a form submission, initialize a Generative AI model (Gemini 1.5 Flash), and stream responses back to the UI. It utilizes shared utility functions for model retrieval, UI updates, and scrolling to manage the chat history display.
+SOURCE: https://github.com/google-gemini/generative-ai-js/blob/main/samples/web/chat.html#_snippet_0
+
+LANGUAGE: JavaScript
+CODE:
+```
+import { getGenerativeModel, scrollToDocumentBottom, updateUI, } from "./utils/shared.js";
+const promptInput = document.querySelector("#prompt");
+const historyElement = document.querySelector("#chat-history");
+let chat;
+document
+  .querySelector("#form")
+  .addEventListener("submit", async (event) => {
+    event.preventDefault();
+    if (!chat) {
+      const model = await getGenerativeModel({ model: "gemini-1.5-flash" });
+      chat = model.startChat({
+        generationConfig: {
+          maxOutputTokens: 100,
+        },
+      });
+    }
+    const userMessage = promptInput.value;
+    promptInput.value = "";
+    // Create UI for the new user / assistant messages pair
+    historyElement.innerHTML += `<div class="history-item user-role"> <div class="name">User</div> <blockquote>${userMessage}</blockquote> </div> <div class="history-item model-role"> <div class="name">Model</div> <blockquote></blockquote> </div>`;
+    scrollToDocumentBottom();
+    const resultEls = document.querySelectorAll(
+      ".model-role > blockquote",
+    );
+    await updateUI(
+      resultEls[resultEls.length - 1],
+      () => chat.sendMessageStream(userMessage),
+      true,
+    );
+  });
+```
+
+----------------------------------------
+
+TITLE: GenerativeModel.generateContent() Method API Reference
+DESCRIPTION: Detailed API documentation for the `generateContent` method of the `GenerativeModel` class, including its TypeScript signature, parameters, and return type. This method is used to make a single, non-streaming call to the model for content generation.
+SOURCE: https://github.com/google-gemini/generative-ai-js/blob/main/docs/reference/main/generative-ai.generativemodel.generatecontent.md#_snippet_0
+
+LANGUAGE: typescript
+CODE:
+```
+generateContent(request: GenerateContentRequest | string | Array<string | Part>, requestOptions?: SingleRequestOptions): Promise<GenerateContentResult>;
+```
+
+LANGUAGE: APIDOC
+CODE:
+```
+Parameters:
+  request: GenerateContentRequest | string | Array<string | Part>
+  requestOptions: SingleRequestOptions (Optional)
+
+Returns:
+  Promise<GenerateContentResult>
+```
+
+----------------------------------------
+
+TITLE: GenerateContentResponse.candidates Property Reference
+DESCRIPTION: This entry provides the API documentation for the 'candidates' property, an optional array of `GenerateContentCandidate` objects, found within the `GenerateContentResponse` interface. It represents the candidate responses generated by the model.
+SOURCE: https://github.com/google-gemini/generative-ai-js/blob/main/docs/reference/main/generative-ai.generatecontentresponse.candidates.md#_snippet_0
+
+LANGUAGE: APIDOC
+CODE:
+```
+Property: candidates
+  Description: Candidate responses from the model.
+  Signature (TypeScript):
+    candidates?: GenerateContentCandidate[];
+```
+
+----------------------------------------
+
+TITLE: Google Generative AI Content Interface API Reference
+DESCRIPTION: Comprehensive API documentation for the `Content` interface, outlining its structure, properties, and usage in generative AI applications for both prompts and response candidates.
+SOURCE: https://github.com/google-gemini/generative-ai-js/blob/main/docs/reference/main/generative-ai.content.md#_snippet_0
+
+LANGUAGE: typescript
+CODE:
+```
+export interface Content
+```
+
+LANGUAGE: APIDOC
+CODE:
+```
+Properties:
+  - Property: parts
+    Type: [Part][]
+    Description: (No description provided)
+  - Property: role
+    Type: string
+    Description: (No description provided)
+```
+
+----------------------------------------
+
+TITLE: GoogleGenerativeAI Class Constructor
+DESCRIPTION: Initializes a new instance of the GoogleGenerativeAI class. This constructor requires an API key as a string for authentication and access to Google's Generative AI services.
+SOURCE: https://github.com/google-gemini/generative-ai-js/blob/main/docs/reference/main/generative-ai.googlegenerativeai._constructor_.md#_snippet_0
+
+LANGUAGE: TypeScript
+CODE:
+```
+constructor(apiKey: string);
+```
+
+LANGUAGE: APIDOC
+CODE:
+```
+Parameters:
+  apiKey: string - The API key required to authenticate with Google Generative AI services.
+```
+
+----------------------------------------
+
+TITLE: API Reference for GenerativeModel Class
+DESCRIPTION: Provides methods for interacting with a generative AI model, including content generation, embedding, and token counting. It allows starting chat sessions and configuring model behavior.
+SOURCE: https://github.com/google-gemini/generative-ai-js/blob/main/common/api-review/generative-ai.api.md#_snippet_29
+
+LANGUAGE: APIDOC
+CODE:
+```
+class GenerativeModel {
+  constructor(apiKey: string, modelParams: ModelParams, _requestOptions?: RequestOptions);
+  apiKey: string;
+  batchEmbedContents(batchEmbedContentRequest: BatchEmbedContentsRequest, requestOptions?: SingleRequestOptions): Promise<BatchEmbedContentsResponse>;
+  cachedContent: CachedContent;
+  countTokens(request: CountTokensRequest | string | Array<string | Part>, requestOptions?: SingleRequestOptions): Promise<CountTokensResponse>;
+  embedContent(request: EmbedContentRequest | string | Array<string | Part>, requestOptions?: SingleRequestOptions): Promise<EmbedContentResponse>;
+  generateContent(request: GenerateContentRequest | string | Array<string | Part>, requestOptions?: SingleRequestOptions): Promise<GenerateContentResult>;
+  generateContentStream(request: GenerateContentRequest | string | Array<string | Part>, requestOptions?: SingleRequestOptions): Promise<GenerateContentStreamResult>;
+  generationConfig: GenerationConfig;
+  model: string;
+  safetySettings: SafetySetting[];
+  startChat(startChatParams?: StartChatParams): ChatSession;
+  systemInstruction?: Content;
+  toolConfig?: ToolConfig;
+  tools?: Tool[];
+}
+```
+
+----------------------------------------
+
+TITLE: GoogleGenerativeAI.getGenerativeModel() API Reference
+DESCRIPTION: Provides comprehensive API documentation for the `getGenerativeModel` method, detailing its purpose, TypeScript signature, required and optional parameters, and the `GenerativeModel` return type.
+SOURCE: https://github.com/google-gemini/generative-ai-js/blob/main/docs/reference/main/generative-ai.googlegenerativeai.getgenerativemodel.md#_snippet_0
+
+LANGUAGE: APIDOC
+CODE:
+```
+Method: GoogleGenerativeAI.getGenerativeModel()
+Description: Gets a GenerativeModel instance for the provided model name.
+Parameters:
+  - Name: modelParams
+    Type: ModelParams
+    Description: (No description provided in source)
+  - Name: requestOptions
+    Type: RequestOptions
+    Description: (Optional)
+Returns:
+  Type: GenerativeModel
+```
+
+LANGUAGE: typescript
+CODE:
+```
+getGenerativeModel(modelParams: ModelParams, requestOptions?: RequestOptions): GenerativeModel;
+```
+
+----------------------------------------
+
+TITLE: API Reference for GenerationConfig Interface
+DESCRIPTION: Configures parameters for content generation, such as candidate count, penalties, logprobs, max output tokens, response MIME type, schema, stop sequences, temperature, topK, and topP.
+SOURCE: https://github.com/google-gemini/generative-ai-js/blob/main/common/api-review/generative-ai.api.md#_snippet_27
+
+LANGUAGE: APIDOC
+CODE:
+```
+interface GenerationConfig {
+  candidateCount?: number;
+  frequencyPenalty?: number;
+  logprobs?: number;
+  maxOutputTokens?: number;
+  presencePenalty?: number;
+  responseLogprobs?: boolean;
+  responseMimeType?: string;
+  responseSchema?: ResponseSchema;
+  stopSequences?: string[];
+  temperature?: number;
+  topK?: number;
+  topP?: number;
+}
+```
+
+----------------------------------------
+
+TITLE: Generative AI SDK Classes
+DESCRIPTION: Lists the core classes available in the `@google/generative-ai` package, including `ChatSession`, `GenerativeModel`, `GoogleGenerativeAI` (the top-level SDK class), and various error types for handling API responses and request issues.
+SOURCE: https://github.com/google-gemini/generative-ai-js/blob/main/docs/reference/main/generative-ai.md#_snippet_0
+
+LANGUAGE: APIDOC
+CODE:
+```
+Classes:
+  ChatSession: ChatSession class that enables sending chat messages and stores history of sent and received messages so far.
+  GenerativeModel: Class for generative model APIs.
+  GoogleGenerativeAI: Top-level class for this SDK.
+  GoogleGenerativeAIAbortError: Error thrown when a request is aborted, either due to a timeout or intentional cancellation by the user.
+  GoogleGenerativeAIError: Basic error type for this SDK.
+  GoogleGenerativeAIFetchError: Error class covering HTTP errors when calling the server. Includes HTTP status, statusText, and optional details, if provided in the server response.
+  GoogleGenerativeAIRequestInputError: Errors in the contents of a request originating from user input.
+  GoogleGenerativeAIResponseError: Errors in the contents of a response from the model. This includes parsing errors, or responses including a safety block reason.
+```
+
+----------------------------------------
+
+TITLE: API Reference for GenerateContentResponse Interface
+DESCRIPTION: Represents the response from a content generation operation, containing candidate outputs, prompt feedback, and usage metadata.
+SOURCE: https://github.com/google-gemini/generative-ai-js/blob/main/common/api-review/generative-ai.api.md#_snippet_24
+
+LANGUAGE: APIDOC
+CODE:
+```
+interface GenerateContentResponse {
+  candidates?: GenerateContentCandidate[];
+  promptFeedback?: PromptFeedback;
+  usageMetadata?: UsageMetadata;
+}
+```
+
+----------------------------------------
+
+TITLE: GenerateContentRequest.contents Property Definition
+DESCRIPTION: Defines the `contents` property within the `GenerateContentRequest` interface. This property is an array of `Content` objects, used to specify the input parts for generative content requests.
+SOURCE: https://github.com/google-gemini/generative-ai-js/blob/main/docs/reference/main/generative-ai.generatecontentrequest.contents.md#_snippet_0
+
+LANGUAGE: typescript
+CODE:
+```
+contents: Content[];
+```
+
+LANGUAGE: APIDOC
+CODE:
+```
+Property: contents
+  Parent: GenerateContentRequest
+  Type: Content[]
+  Description: An array of Content objects representing the input for content generation.
+```
+
+----------------------------------------
+
+TITLE: GenerativeModel.generationConfig Property Signature and API Definition
+DESCRIPTION: Defines the `generationConfig` property, a key part of the `GenerativeModel` class, used to set various parameters for text generation, such as temperature, top_k, and stop sequences. This property holds an object of type `GenerationConfig`.
+SOURCE: https://github.com/google-gemini/generative-ai-js/blob/main/docs/reference/main/generative-ai.generativemodel.generationconfig.md#_snippet_0
+
+LANGUAGE: TypeScript
+CODE:
+```
+generationConfig: GenerationConfig;
+```
+
+LANGUAGE: APIDOC
+CODE:
+```
+GenerativeModel:
+  properties:
+    generationConfig:
+      type: GenerationConfig
+      description: Configuration for generation parameters for the model.
+```
+
+----------------------------------------
+
+TITLE: Send Text and Image to Generative AI Model in JavaScript
+DESCRIPTION: This JavaScript snippet demonstrates how to send text prompts and image files to a Generative AI model (Gemini 1.5 Flash). It includes functionality for handling file input, converting image files into a format suitable for the model, and streaming content generation. The code also shows how to update the UI asynchronously with the model's response.
+SOURCE: https://github.com/google-gemini/generative-ai-js/blob/main/samples/web/index.html#_snippet_0
+
+LANGUAGE: JavaScript
+CODE:
+```
+import { getGenerativeModel, fileToGenerativePart, updateUI, } from "./utils/shared.js";
+
+async function run(prompt, files) {
+  const imageParts = await Promise.all(
+    [...files].map(fileToGenerativePart),
+  );
+  const model = await getGenerativeModel({ model: "gemini-1.5-flash", });
+  return model.generateContentStream([...imageParts, prompt]);
+}
+
+const fileInputEl = document.querySelector("input[type=file]");
+const thumbnailsEl = document.querySelector("#thumbnails");
+
+fileInputEl.addEventListener("input", () => {
+  thumbnailsEl.innerHTML = "";
+  for (const file of fileInputEl.files) {
+    const url = URL.createObjectURL(file);
+    thumbnailsEl.innerHTML += `<img class="thumb" src="${url}" onload="window.URL.revokeObjectURL(this.src)" />`;
+  }
+});
+
+document
+  .querySelector("#form")
+  .addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const promptEl = document.querySelector("#prompt");
+    const resultEl = document.querySelector("#result");
+    updateUI(
+      resultEl,
+      () => run(promptEl.value, fileInputEl.files),
+      true,
+    );
+  });
+```
+
+----------------------------------------
+
+TITLE: ChatSession.sendMessage Method API Reference
+DESCRIPTION: Documents the `sendMessage` method of the `ChatSession` class. This method sends a chat message and returns a non-streaming `GenerateContentResult`. Optional `SingleRequestOptions` can override `RequestOptions` set during model initialization.
+SOURCE: https://github.com/google-gemini/generative-ai-js/blob/main/docs/reference/main/generative-ai.chatsession.sendmessage.md#_snippet_0
+
+LANGUAGE: typescript
+CODE:
+```
+sendMessage(request: string | Array<string | Part>, requestOptions?: SingleRequestOptions): Promise<GenerateContentResult>;
+```
+
+LANGUAGE: APIDOC
+CODE:
+```
+ChatSession.sendMessage:
+  description: Sends a chat message and receives a non-streaming GenerateContentResult.
+  parameters:
+    - name: request
+      type: string | Array<string | Part>
+      description: ""
+    - name: requestOptions
+      type: SingleRequestOptions
+      description: "(Optional)"
+  returns:
+    type: Promise<GenerateContentResult>
+```
+
+----------------------------------------
+
+TITLE: Define FunctionDeclaration Interface and Properties
+DESCRIPTION: Defines the `FunctionDeclaration` interface, a structured representation of a function declaration used by generative models as a tool. It includes the function's name and parameters, adhering to the OpenAPI 3.0 specification. This snippet provides both the TypeScript interface declaration and a detailed APIDOC description of its properties.
+SOURCE: https://github.com/google-gemini/generative-ai-js/blob/main/docs/reference/server/generative-ai.functiondeclaration.md#_snippet_0
+
+LANGUAGE: TypeScript
+CODE:
+```
+export declare interface FunctionDeclaration
+```
+
+LANGUAGE: APIDOC
+CODE:
+```
+FunctionDeclaration interface:
+  description: Structured representation of a function declaration as defined by the OpenAPI 3.0 specification. Included in this declaration are the function name and parameters. This FunctionDeclaration is a representation of a block of code that can be used as a Tool by the model and executed by the client.
+  properties:
+    description:
+      type: string
+      optional: true
+      description: Optional. Description and purpose of the function. Model uses it to decide how and whether to call the function.
+    name:
+      type: string
+      optional: false
+      description: The name of the function to call. Must start with a letter or an underscore. Must be a-z, A-Z, 0-9, or contain underscores and dashes, with a max length of 64.
+    parameters:
+      type: FunctionDeclarationSchema
+      optional: true
+      description: Optional. Describes the parameters to this function in JSON Schema Object format. Reflects the Open API 3.03 Parameter Object. string Key: the name of the parameter. Parameter names are case sensitive. Schema Value: the Schema defining the type used for the parameter. For function with no parameters, this can be left unset.
+```
+
+----------------------------------------
+
+TITLE: TypeScript Interface Definition for GenerateContentRequest
+DESCRIPTION: Defines the `GenerateContentRequest` interface in TypeScript, specifying its extension from `BaseParams` for content generation requests.
+SOURCE: https://github.com/google-gemini/generative-ai-js/blob/main/docs/reference/main/generative-ai.generatecontentrequest.md#_snippet_0
+
+LANGUAGE: TypeScript
+CODE:
+```
+export interface GenerateContentRequest extends BaseParams
+```
+
+----------------------------------------
+
+TITLE: GenerativeModel.generateContentStream() API Reference
+DESCRIPTION: Provides the TypeScript signature and detailed API documentation including parameters and return types for the `generateContentStream` method, which makes a single streaming call to the model.
+SOURCE: https://github.com/google-gemini/generative-ai-js/blob/main/docs/reference/main/generative-ai.generativemodel.generatecontentstream.md#_snippet_0
+
+LANGUAGE: typescript
+CODE:
+```
+generateContentStream(request: GenerateContentRequest | string | Array<string | Part>, requestOptions?: SingleRequestOptions): Promise<GenerateContentStreamResult>;
+```
+
+LANGUAGE: APIDOC
+CODE:
+```
+Parameters:
+  request: GenerateContentRequest | string | Array<string | Part>
+  requestOptions: SingleRequestOptions (Optional)
+Returns:
+  Promise<GenerateContentStreamResult>
+```
+
+----------------------------------------
+
+TITLE: GenerateContentRequest.systemInstruction Property Signature
+DESCRIPTION: This snippet defines the signature for the `systemInstruction` property within the `GenerateContentRequest` interface. It is an optional property that can accept a `string`, a `Part` object, or a `Content` object, providing system-level instructions for the generative model.
+SOURCE: https://github.com/google-gemini/generative-ai-js/blob/main/docs/reference/main/generative-ai.generatecontentrequest.systeminstruction.md#_snippet_0
+
+LANGUAGE: TypeScript
+CODE:
+```
+systemInstruction?: string | Part | Content;
+```
+
+----------------------------------------
+
+TITLE: API Reference: GenerateContentResult Interface
+DESCRIPTION: Documents the `GenerateContentResult` interface, which encapsulates the response from the `generateContent()` API call. It details the interface's structure and its primary property.
+SOURCE: https://github.com/google-gemini/generative-ai-js/blob/main/docs/reference/main/generative-ai.generatecontentresult.md#_snippet_0
+
+LANGUAGE: APIDOC
+CODE:
+```
+GenerateContentResult interface:
+  Description: Result object returned from generateContent() call.
+  Signature: export interface GenerateContentResult
+  Properties:
+    response:
+      Type: EnhancedGenerateContentResponse
+      Description: (empty)
+```
+
+----------------------------------------
+
+TITLE: GoogleGenerativeAI.apiKey Property Signature
+DESCRIPTION: This snippet defines the `apiKey` property, a string type, which is part of the `GoogleGenerativeAI` class. It is essential for authenticating requests to the Google Generative AI API.
+SOURCE: https://github.com/google-gemini/generative-ai-js/blob/main/docs/reference/main/generative-ai.googlegenerativeai.apikey.md#_snippet_0
+
+LANGUAGE: typescript
+CODE:
+```
+apiKey: string;
+```
+
+----------------------------------------
+
+TITLE: Example Generative AI API Response (JSON)
+DESCRIPTION: This snippet displays a typical JSON response structure received from a generative AI API call. It includes the 'candidates' array, which contains the generated content parts (e.g., 'Cheyenne'), the 'finishReason' indicating why the generation stopped, and comprehensive 'safetyRatings' for both the generated content and the initial prompt feedback, categorized by potential harm types.
+SOURCE: https://github.com/google-gemini/generative-ai-js/blob/main/test-utils/mock-responses/streaming-success-basic-reply-short.txt#_snippet_0
+
+LANGUAGE: JSON
+CODE:
+```
+{"candidates": [{"content": {"parts": [{"text": "Cheyenne"}]}},"finishReason": "STOP","index": 0,"safetyRatings": [{"category": "HARM_CATEGORY_SEXUALLY_EXPLICIT","probability": "NEGLIGIBLE"},{"category": "HARM_CATEGORY_HATE_SPEECH","probability": "NEGLIGIBLE"},{"category": "HARM_CATEGORY_HARASSMENT","probability": "NEGLIGIBLE"},{"category": "HARM_CATEGORY_DANGEROUS_CONTENT","probability": "NEGLIGIBLE"}]}],"promptFeedback": {"safetyRatings": [{"category": "HARM_CATEGORY_SEXUALLY_EXPLICIT","probability": "NEGLIGIBLE"},{"category": "HARM_CATEGORY_HATE_SPEECH","probability": "NEGLIGIBLE"},{"category": "HARM_CATEGORY_HARASSMENT","probability": "NEGLIGIBLE"},{"category": "HARM_CATEGORY_DANGEROUS_CONTENT","probability": "NEGLIGIBLE"}]}}
+```
+
+----------------------------------------
+
+TITLE: Content.parts Property API Reference
+DESCRIPTION: Defines the `parts` property of the `Content` interface, which is an array of `Part` objects. This property is fundamental for structuring and representing content within the generative AI models, allowing for multi-part content inputs and outputs.
+SOURCE: https://github.com/google-gemini/generative-ai-js/blob/main/docs/reference/main/generative-ai.content.parts.md#_snippet_0
+
+LANGUAGE: APIDOC
+CODE:
+```
+Content.parts property:
+  Type: Part[]
+  Description: An array of content parts, representing different segments or types of content within a larger piece of generative AI input or output.
+  Source Signature: parts: Part[];
+```
+
+----------------------------------------
+
+TITLE: GenerateContentResult API Reference
+DESCRIPTION: Result object returned from generateContent() call.
+SOURCE: https://github.com/google-gemini/generative-ai-js/blob/main/docs/reference/main/generative-ai.md#_snippet_11
+
+LANGUAGE: APIDOC
+CODE:
+```
+GenerateContentResult
+  Description: Result object returned from generateContent() call.
+```
+
+----------------------------------------
+
+TITLE: API Reference for GoogleGenerativeAI Class
+DESCRIPTION: The main entry point for interacting with the Google Generative AI API, allowing instantiation of GenerativeModel instances.
+SOURCE: https://github.com/google-gemini/generative-ai-js/blob/main/common/api-review/generative-ai.api.md#_snippet_30
+
+LANGUAGE: APIDOC
+CODE:
+```
+class GoogleGenerativeAI {
+  constructor(apiKey: string);
+  apiKey: string;
+  getGenerativeModel(modelParams: ModelParams, requestOptions?: RequestOptions): GenerativeModel;
+  getGenerativeModelFromCachedContent(cachedContent: CachedContent, modelParams?: Partial<ModelParams>, requestOptions?: RequestOptions): GenerativeModel;
+}
+```
+
+----------------------------------------
+
+TITLE: API Reference: GenerationConfig.topP Property
+DESCRIPTION: The `topP` property is an optional numerical parameter within the `GenerationConfig` interface. It is used in nucleus sampling, a method for controlling the randomness of text generation by the model. A lower `topP` value means the model considers a smaller set of high-probability tokens, leading to more focused and less diverse output. Conversely, a higher `topP` value allows the model to consider a broader range of tokens, potentially increasing diversity but also the risk of less coherent output. It works in conjunction with `temperature` and `topK` to fine-tune the model's response generation.
+SOURCE: https://github.com/google-gemini/generative-ai-js/blob/main/docs/reference/main/generative-ai.generationconfig.topp.md#_snippet_0
+
+LANGUAGE: TypeScript
+CODE:
+```
+topP?: number;
+```
+
+----------------------------------------
+
+TITLE: API Reference: GenerationConfig Interface
+DESCRIPTION: Defines configuration options for controlling the behavior of content generation requests in the Google Generative AI JavaScript library. This includes parameters for output length, randomness, and content filtering.
+SOURCE: https://github.com/google-gemini/generative-ai-js/blob/main/docs/reference/main/generative-ai.generationconfig.md#_snippet_0
+
+LANGUAGE: APIDOC
+CODE:
+```
+export interface GenerationConfig {
+  // Config options for content-related requests
+  candidateCount?: number; // (Optional)
+  frequencyPenalty?: number; // (Optional) Frequency penalty applied to the next token's logprobs, multiplied by the number of times each token has been seen in the respponse so far.
+  logprobs?: number; // (Optional) Valid if responseLogProbs is set to True. This will set the number of top logprobs to return at each decoding step in the logprobsResult.
+  maxOutputTokens?: number; // (Optional)
+  presencePenalty?: number; // (Optional) Presence penalty applied to the next token's logprobs if the token has already been seen in the response.
+  responseLogprobs?: boolean; // (Optional) If True, export the logprobs results in response.
+  responseMimeType?: string; // (Optional) Output response mimetype of the generated candidate text. Supported mimetype: `text/plain`: (default) Text output. `application/json`: JSON response in the candidates.
+  responseSchema?: ResponseSchema; // (Optional) Output response schema of the generated candidate text. Note: This only applies when the specified `responseMIMEType` supports a schema; currently this is limited to `application/json`.
+  stopSequences?: string[]; // (Optional)
+  temperature?: number; // (Optional)
+  topK?: number; // (Optional)
+  topP?: number; // (Optional)
+}
+```
+
+----------------------------------------
+
+TITLE: GenerateContentResponse API Reference
+DESCRIPTION: Individual response from GenerativeModel.generateContent() and GenerativeModel.generateContentStream(). generateContentStream() will return one in each chunk until the stream is done.
+SOURCE: https://github.com/google-gemini/generative-ai-js/blob/main/docs/reference/main/generative-ai.md#_snippet_10
+
+LANGUAGE: APIDOC
+CODE:
+```
+GenerateContentResponse
+  Description: Individual response from GenerativeModel.generateContent() and GenerativeModel.generateContentStream(). generateContentStream() will return one in each chunk until the stream is done.
+```
+
+----------------------------------------
+
+TITLE: RequestOptions Interface Definition and Properties
+DESCRIPTION: Defines the `RequestOptions` interface, which specifies optional parameters for configuring API requests when initializing generative models or file managers in the Google Generative AI JavaScript SDK.
+SOURCE: https://github.com/google-gemini/generative-ai-js/blob/main/docs/reference/main/generative-ai.requestoptions.md#_snippet_0
+
+LANGUAGE: typescript
+CODE:
+```
+export interface RequestOptions 
+```
+
+LANGUAGE: APIDOC
+CODE:
+```
+RequestOptions interface
+  Description: Params passed to getGenerativeModel() or GoogleAIFileManager().
+  Properties:
+    apiClient?: string
+      Description: (Optional) Additional attribution information to include in the x-goog-api-client header. Used by wrapper SDKs.
+    apiVersion?: string
+      Description: (Optional) Version of API endpoint to call (e.g. \"v1\" or \"v1beta\"). If not specified, defaults to latest stable version.
+    baseUrl?: string
+      Description: (Optional) Base endpoint url. Defaults to \"https://generativelanguage.googleapis.com\"
+    customHeaders?: Headers | Record<string, string>
+      Description: (Optional) Custom HTTP request headers.
+    timeout?: number
+      Description: (Optional) Request timeout in milliseconds.
+```
+
+----------------------------------------
+
+TITLE: GenerateContentCandidate Content Property Definition
+DESCRIPTION: Defines the `content` property of the `GenerateContentCandidate` interface, specifying that it holds a `Content` object. This property is crucial for accessing the generated content from a candidate response.
+SOURCE: https://github.com/google-gemini/generative-ai-js/blob/main/docs/reference/main/generative-ai.generatecontentcandidate.content.md#_snippet_0
+
+LANGUAGE: typescript
+CODE:
+```
+content: Content;
+```
+
+----------------------------------------
+
+TITLE: API Reference: BaseParams.safetySettings Property
+DESCRIPTION: Defines the 'safetySettings' property, an optional array of 'SafetySetting' objects used to configure safety moderation for generative AI requests. This property allows developers to specify rules for blocking content based on safety attributes.
+SOURCE: https://github.com/google-gemini/generative-ai-js/blob/main/docs/reference/main/generative-ai.baseparams.safetysettings.md#_snippet_0
+
+LANGUAGE: APIDOC
+CODE:
+```
+Property: safetySettings
+  Type: SafetySetting[]
+  Optional: true
+```
+
+LANGUAGE: TypeScript
+CODE:
+```
+safetySettings?: SafetySetting[];
+```
+
+----------------------------------------
+
+TITLE: GoogleSearchRetrievalTool API Reference
+DESCRIPTION: Retrieval tool that is powered by Google search.
+SOURCE: https://github.com/google-gemini/generative-ai-js/blob/main/docs/reference/main/generative-ai.md#_snippet_16
+
+LANGUAGE: APIDOC
+CODE:
+```
+GoogleSearchRetrievalTool
+  Description: Retrieval tool that is powered by Google search.
+```
+
+----------------------------------------
+
+TITLE: Define SafetySetting Interface for Generative AI
+DESCRIPTION: Defines the `SafetySetting` interface, which specifies safety configurations that can be included in generative AI request parameters. It comprises properties for `category` (the type of harm) and `threshold` (the blocking sensitivity level).
+SOURCE: https://github.com/google-gemini/generative-ai-js/blob/main/docs/reference/main/generative-ai.safetysetting.md#_snippet_0
+
+LANGUAGE: APIDOC
+CODE:
+```
+SafetySetting interface:
+  description: Safety setting that can be sent as part of request parameters.
+  signature: export interface SafetySetting
+  properties:
+    category:
+      type: HarmCategory
+      description: ""
+    threshold:
+      type: HarmBlockThreshold
+      description: ""
+```
+
+----------------------------------------
+
+TITLE: API Reference for GoogleSearchRetrievalTool Interface
+DESCRIPTION: Represents a tool that utilizes Google Search retrieval capabilities.
+SOURCE: https://github.com/google-gemini/generative-ai-js/blob/main/common/api-review/generative-ai.api.md#_snippet_37
+
+LANGUAGE: APIDOC
+CODE:
+```
+interface GoogleSearchRetrievalTool {
+  googleSearchRetrieval?: GoogleSearchRetrieval;
+}
+```
+
+----------------------------------------
+
+TITLE: GenerateContentResponse Interface Properties
+DESCRIPTION: Lists the optional properties available within the `GenerateContentResponse` interface, providing details on candidate responses, prompt feedback, and token usage metadata.
+SOURCE: https://github.com/google-gemini/generative-ai-js/blob/main/docs/reference/main/generative-ai.generatecontentresponse.md#_snippet_1
+
+LANGUAGE: APIDOC
+CODE:
+```
+GenerateContentResponse Properties:
+  candidates?: GenerateContentCandidate[]
+    Description: Candidate responses from the model.
+  promptFeedback?: PromptFeedback
+    Description: The prompt's feedback related to the content filters.
+  usageMetadata?: UsageMetadata
+    Description: Metadata on the generation request's token usage.
+```
+
+----------------------------------------
+
+TITLE: TextPart.text Property Signature
+DESCRIPTION: Defines the `text` property of the `TextPart` interface. This property is used to access the string content of a text part within the `@google/generative-ai` library's content structure.
+SOURCE: https://github.com/google-gemini/generative-ai-js/blob/main/docs/reference/server/generative-ai.textpart.text.md#_snippet_0
+
+LANGUAGE: TypeScript
+CODE:
+```
+text: string;
+```
+
+----------------------------------------
+
+TITLE: GenerateContentResult.response Property Definition
+DESCRIPTION: Defines the 'response' property within the 'GenerateContentResult' interface, specifying its type as 'EnhancedGenerateContentResponse'. This property holds the detailed output from a content generation request.
+SOURCE: https://github.com/google-gemini/generative-ai-js/blob/main/docs/reference/main/generative-ai.generatecontentresult.response.md#_snippet_0
+
+LANGUAGE: APIDOC
+CODE:
+```
+GenerateContentResult.response property
+
+Signature:
+  response: EnhancedGenerateContentResponse;
+```
+
+----------------------------------------
+
+TITLE: FunctionResponse Interface Definition
+DESCRIPTION: Defines the TypeScript interface for FunctionResponse, detailing its structure including the function name and the response object. This interface is crucial for passing function call results back to the generative model.
+SOURCE: https://github.com/google-gemini/generative-ai-js/blob/main/docs/reference/server/generative-ai.functionresponse.md#_snippet_0
+
+LANGUAGE: APIDOC
+CODE:
+```
+FunctionResponse interface
+  Signature:
+    export interface FunctionResponse
+  Properties:
+    name: string
+    response: object
+```
+
+----------------------------------------
+
+TITLE: StartChatParams Interface Definition
+DESCRIPTION: Defines the parameters required to initiate a chat session. This includes optional cached content, chat history, system instructions, tool configuration, and a list of tools.
+SOURCE: https://github.com/google-gemini/generative-ai-js/blob/main/common/api-review/generative-ai.api.md#_snippet_68
+
+LANGUAGE: APIDOC
+CODE:
+```
+interface StartChatParams extends BaseParams {
+  cachedContent?: string;
+  history?: Content[];
+  systemInstruction?: string | Part | Content;
+  toolConfig?: ToolConfig;
+  tools?: Tool[];
+}
+```
+
+----------------------------------------
+
+TITLE: ToolConfig Interface Definition and Properties
+DESCRIPTION: Defines the `ToolConfig` interface, which specifies configuration options for tools used in generative AI requests. This configuration is shared across all tools provided in a request and includes settings like `functionCallingConfig`.
+SOURCE: https://github.com/google-gemini/generative-ai-js/blob/main/docs/reference/server/generative-ai.toolconfig.md#_snippet_0
+
+LANGUAGE: APIDOC
+CODE:
+```
+ToolConfig interface:
+  Signature:
+    export interface ToolConfig
+  Properties:
+    functionCallingConfig: FunctionCallingConfig
+```
+
+----------------------------------------
+
+TITLE: Define Part Type Alias
+DESCRIPTION: A union type representing various content parts that can be included in a generative AI model's input or output, such as text, inline data, function calls, or code execution results.
+SOURCE: https://github.com/google-gemini/generative-ai-js/blob/main/common/api-review/generative-ai-server.api.md#_snippet_25
+
+LANGUAGE: APIDOC
+CODE:
+```
+export type Part = TextPart | InlineDataPart | FunctionCallPart | FunctionResponsePart | FileDataPart | ExecutableCodePart | CodeExecutionResultPart;
+```
+
+----------------------------------------
+
+TITLE: Basic Gemini API Text Generation Responses
+DESCRIPTION: Examples of standard JSON responses from the Google Gemini API for text generation, demonstrating the structure of `candidates` (generated content) and `usageMetadata` (token counts). These responses typically contain the model's generated text and information about token consumption.
+SOURCE: https://github.com/google-gemini/generative-ai-js/blob/main/test-utils/mock-responses/streaming-success-search-grounding.txt#_snippet_0
+
+LANGUAGE: JSON
+CODE:
+```
+{"candidates": [{"content": {"parts": [{"text": "The"}], "role": "model"}, "finishReason": "STOP", "index": 0}], "usageMetadata": {"promptTokenCount": 8, "candidatesTokenCount": 1, "totalTokenCount": 9}}
+```
+
+LANGUAGE: JSON
+CODE:
+```
+{"candidates": [{"content": {"parts": [{"text": " current stock price for Alphabet Inc. (Google) Class C (GOOG)"}], "role": "model"}, "finishReason": "STOP", "index": 0}], "usageMetadata": {"promptTokenCount": 8, "candidatesTokenCount": 17, "totalTokenCount": 25}}
+```
+
+LANGUAGE: JSON
+CODE:
+```
+{"candidates": [{"content": {"parts": [{"text": " is \\$166.79 USD. This price reflects a decrease of"}], "role": "model"}, "finishReason": "STOP", "index": 0}], "usageMetadata": {"promptTokenCount": 8, "candidatesTokenCount": 33, "totalTokenCount": 41}}
+```
+
+LANGUAGE: JSON
+CODE:
+```
+{"candidates": [{"content": {"parts": [{"text": " -0.97% over the last 24 hours. \n\nPlease note that stock prices can change rapidly.  This information is current as of"}], "role": "model"}, "finishReason": "STOP", "index": 0}], "usageMetadata": {"promptTokenCount": 8, "candidatesTokenCount": 65, "totalTokenCount": 73}}
+```
+
+LANGUAGE: JSON
+CODE:
+```
+{"candidates": [{"content": {"parts": [{"text": " October 2, 2024, at 5:58 PM UTC.  You can find the most up-to-date information on"}], "role": "model"}, "finishReason": "STOP", "index": 0}], "usageMetadata": {"promptTokenCount": 8, "candidatesTokenCount": 97, "totalTokenCount": 105}}
+```
+
+LANGUAGE: JSON
+CODE:
+```
+{"candidates": [{"content": {"parts": [{"text": " financial websites like Google Finance or TradingView.\n"}], "role": "model"}, "finishReason": "STOP", "index": 0}], "usageMetadata": {"promptTokenCount": 8, "candidatesTokenCount": 106, "totalTokenCount": 114}}
+```
+
+----------------------------------------
+
+TITLE: TextPart Interface Definition and Properties
+DESCRIPTION: Defines the `TextPart` interface, used for content parts representing text strings. It includes the required `text` property and several optional properties related to code execution results, executable code, file data, function calls, function responses, and inline data.
+SOURCE: https://github.com/google-gemini/generative-ai-js/blob/main/docs/reference/main/generative-ai.textpart.md#_snippet_0
+
+LANGUAGE: typescript
+CODE:
+```
+export interface TextPart
+```
+
+LANGUAGE: APIDOC
+CODE:
+```
+TextPart interface properties:
+  - Property: codeExecutionResult
+    Modifiers: (Optional)
+    Type: never
+    Description: 
+  - Property: executableCode
+    Modifiers: (Optional)
+    Type: never
+    Description: 
+  - Property: fileData
+    Modifiers: (Optional)
+    Type: never
+    Description: 
+  - Property: functionCall
+    Modifiers: (Optional)
+    Type: never
+    Description: 
+  - Property: functionResponse
+    Modifiers: (Optional)
+    Type: never
+    Description: 
+  - Property: inlineData
+    Modifiers: (Optional)
+    Type: never
+    Description: 
+  - Property: text
+    Modifiers: 
+    Type: string
+    Description: 
+```
+
+----------------------------------------
+
+TITLE: GenerativeModel.apiKey Property Definition
+DESCRIPTION: Defines the `apiKey` property of the `GenerativeModel` class. This property is a string that holds the API key required for authenticating requests to the Generative AI service.
+SOURCE: https://github.com/google-gemini/generative-ai-js/blob/main/docs/reference/main/generative-ai.generativemodel.apikey.md#_snippet_0
+
+LANGUAGE: TypeScript
+CODE:
+```
+apiKey: string;
+```
+
+----------------------------------------
+
+TITLE: GenerativeModel Constructor API Reference
+DESCRIPTION: Provides the API signature and parameter details for constructing a new instance of the `GenerativeModel` class.
+SOURCE: https://github.com/google-gemini/generative-ai-js/blob/main/docs/reference/main/generative-ai.generativemodel._constructor_.md#_snippet_0
+
+LANGUAGE: APIDOC
+CODE:
+```
+GenerativeModel Constructor:
+  Signature: constructor(apiKey: string, modelParams: ModelParams, _requestOptions?: RequestOptions);
+  Parameters:
+    apiKey:
+      Type: string
+    modelParams:
+      Type: ModelParams
+    _requestOptions:
+      Type: RequestOptions
+      Description: (Optional)
+```
+
+----------------------------------------
+
+TITLE: Generative AI Part Type Definition
+DESCRIPTION: Defines the `Part` type, a crucial union type in the Google Generative AI library, encompassing all possible content components that can be sent or received, such as text, inline data, function calls, and file data.
+SOURCE: https://github.com/google-gemini/generative-ai-js/blob/main/docs/reference/main/generative-ai.part.md#_snippet_0
+
+LANGUAGE: APIDOC
+CODE:
+```
+Part type
+
+Description: Content part - includes text or image part types.
+
+Signature:
+  export type Part = TextPart | InlineDataPart | FunctionCallPart | FunctionResponsePart | FileDataPart | ExecutableCodePart | CodeExecutionResultPart;
+
+References:
+  - TextPart
+  - InlineDataPart
+  - FunctionCallPart
+  - FunctionResponsePart
+  - FileDataPart
+  - ExecutableCodePart
+  - CodeExecutionResultPart
+```
+
+----------------------------------------
+
+TITLE: GenerativeModel.safetySettings Property Reference
+DESCRIPTION: Reference documentation for the `safetySettings` property, which is an array of `SafetySetting` objects used to configure content safety filters for the generative model.
+SOURCE: https://github.com/google-gemini/generative-ai-js/blob/main/docs/reference/main/generative-ai.generativemodel.safetysettings.md#_snippet_0
+
+LANGUAGE: APIDOC
+CODE:
+```
+GenerativeModel.safetySettings:
+  Type: SafetySetting[]
+  Signature: safetySettings: SafetySetting[];
+```
+
+----------------------------------------
+
+TITLE: EmbedContentResponse.embedding Property Signature
+DESCRIPTION: This property provides the `ContentEmbedding` object, which contains the numerical representation of the input content after it has been embedded by the generative AI model. It is a core part of the response when performing content embedding operations.
+SOURCE: https://github.com/google-gemini/generative-ai-js/blob/main/docs/reference/main/generative-ai.embedcontentresponse.embedding.md#_snippet_0
+
+LANGUAGE: TypeScript
+CODE:
+```
+embedding: ContentEmbedding;
+```
+
+----------------------------------------
+
+TITLE: TextPart Interface Definition
+DESCRIPTION: Defines the `TextPart` interface, which represents a text string content part in the `@google/generative-ai` library. This interface specifies that a `TextPart` primarily contains a `text` property of type `string`, while other content-related properties are explicitly marked as `never` to indicate they are not applicable for a text-only part.
+SOURCE: https://github.com/google-gemini/generative-ai-js/blob/main/docs/reference/server/generative-ai.textpart.md#_snippet_0
+
+LANGUAGE: APIDOC
+CODE:
+```
+export interface TextPart
+
+Properties:
+  codeExecutionResult?: never (Optional)
+  executableCode?: never (Optional)
+  fileData?: never (Optional)
+  functionCall?: never (Optional)
+  functionResponse?: never (Optional)
+  inlineData?: never (Optional)
+  text: string
+```
+
+----------------------------------------
+
+TITLE: Define Tool Type for Generative AI Models
+DESCRIPTION: This type defines a tool that a generative AI model can call to access external knowledge. It is a union type encompassing function declarations, code execution, and Google Search retrieval tools.
+SOURCE: https://github.com/google-gemini/generative-ai-js/blob/main/docs/reference/server/generative-ai.tool.md#_snippet_0
+
+LANGUAGE: typescript
+CODE:
+```
+export declare type Tool = FunctionDeclarationsTool | CodeExecutionTool | GoogleSearchRetrievalTool;
+```
+
+----------------------------------------
+
+TITLE: API Reference for GoogleSearchRetrieval Interface
+DESCRIPTION: Defines configuration for Google Search retrieval, including dynamic retrieval settings.
+SOURCE: https://github.com/google-gemini/generative-ai-js/blob/main/common/api-review/generative-ai.api.md#_snippet_36
+
+LANGUAGE: APIDOC
+CODE:
+```
+interface GoogleSearchRetrieval {
+  dynamicRetrievalConfig?: DynamicRetrievalConfig;
+}
+```
+
+----------------------------------------
+
+TITLE: Example JSON Schema for Function Parameters
+DESCRIPTION: Illustrates a JSON Schema Object for function parameters, demonstrating how to define one required string parameter ('param1') and one optional integer parameter ('param2'). This structure is used by FunctionDeclaration.parameters.
+SOURCE: https://github.com/google-gemini/generative-ai-js/blob/main/docs/reference/server/generative-ai.functiondeclaration.parameters.md#_snippet_1
+
+LANGUAGE: JSON Schema
+CODE:
+```
+type: OBJECT
+properties:
+
+  param1:
+
+    type: STRING
+  param2:
+
+   type: INTEGER
+required:
+
+  - param1
+```
+
+----------------------------------------
+
+TITLE: StartChatParams.systemInstruction Property Definition
+DESCRIPTION: Defines the 'systemInstruction' property within the 'StartChatParams' interface, specifying its accepted types for providing system-level instructions to a generative AI chat model.
+SOURCE: https://github.com/google-gemini/generative-ai-js/blob/main/docs/reference/main/generative-ai.startchatparams.systeminstruction.md#_snippet_0
+
+LANGUAGE: APIDOC
+CODE:
+```
+StartChatParams.systemInstruction property:
+  Type: string | Part | Content
+  Description: Optional property to provide system-level instructions for the chat model.
+```
+
+----------------------------------------
+
+TITLE: FunctionCallingConfig Interface Definition and Properties
+DESCRIPTION: Defines the `FunctionCallingConfig` interface, which allows developers to specify how function calls should be handled by the generative model. It includes properties for controlling allowed function names and the function calling mode.
+SOURCE: https://github.com/google-gemini/generative-ai-js/blob/main/docs/reference/server/generative-ai.functioncallingconfig.md#_snippet_0
+
+LANGUAGE: TypeScript
+CODE:
+```
+export interface FunctionCallingConfig 
+```
+
+LANGUAGE: APIDOC
+CODE:
+```
+interface FunctionCallingConfig:
+  description: Configuration for controlling function calling behavior.
+  properties:
+    allowedFunctionNames?:
+      type: string[]
+      description: (Optional) A list of specific function names that the model is allowed to call.
+    mode?:
+      type: FunctionCallingMode
+      description: (Optional) The mode that dictates how function calls are handled, e.g., AUTO, NONE, ANY.
+```
+
+----------------------------------------
+
+TITLE: FunctionDeclarationsTool API Reference
+DESCRIPTION: A FunctionDeclarationsTool is a piece of code that enables the system to interact with external systems to perform an action, or set of actions, outside of knowledge and scope of the model.
+SOURCE: https://github.com/google-gemini/generative-ai-js/blob/main/docs/reference/main/generative-ai.md#_snippet_5
+
+LANGUAGE: APIDOC
+CODE:
+```
+FunctionDeclarationsTool
+  Description: A FunctionDeclarationsTool is a piece of code that enables the system to interact with external systems to perform an action, or set of actions, outside of knowledge and scope of the model.
+```
+
+----------------------------------------
+
+TITLE: GenerativeModel.embedContent() Method API Reference
+DESCRIPTION: Provides the API signature, parameters, and return type for the `embedContent` method, which is used to embed content. It accepts content in various forms and optional request configurations.
+SOURCE: https://github.com/google-gemini/generative-ai-js/blob/main/docs/reference/main/generative-ai.generativemodel.embedcontent.md#_snippet_0
+
+LANGUAGE: APIDOC
+CODE:
+```
+Method: GenerativeModel.embedContent()
+Signature:
+  embedContent(request: EmbedContentRequest | string | Array<string | Part>, requestOptions?: SingleRequestOptions): Promise<EmbedContentResponse>;
+
+Parameters:
+  - Parameter: request
+    Type: EmbedContentRequest | string | Array<string | Part>
+    Description: (No description provided in source for this parameter)
+  - Parameter: requestOptions
+    Type: SingleRequestOptions
+    Description: (Optional)
+
+Returns:
+  Promise<EmbedContentResponse>
+```
+
+----------------------------------------
+
+TITLE: FunctionCall.args Property Signature and Definition
+DESCRIPTION: This snippet defines the `args` property within the `FunctionCall` interface, specifying it as an object type. This property is used to pass arguments to a function being called.
+SOURCE: https://github.com/google-gemini/generative-ai-js/blob/main/docs/reference/server/generative-ai.functioncall.args.md#_snippet_0
+
+LANGUAGE: TypeScript
+CODE:
+```
+args: object;
+```
+
+LANGUAGE: APIDOC
+CODE:
+```
+FunctionCall:
+  properties:
+    args:
+      type: object
+      description: Arguments for the function call.
+```
+
+----------------------------------------
+
+TITLE: FunctionCallingConfig Interface Definition and Properties
+DESCRIPTION: Defines the `FunctionCallingConfig` interface used in the `@google/generative-ai` library to control how function calling is handled. It specifies optional properties like `allowedFunctionNames` and the overall `mode`.
+SOURCE: https://github.com/google-gemini/generative-ai-js/blob/main/docs/reference/main/generative-ai.functioncallingconfig.md#_snippet_0
+
+LANGUAGE: typescript
+CODE:
+```
+export interface FunctionCallingConfig
+```
+
+LANGUAGE: APIDOC
+CODE:
+```
+FunctionCallingConfig Properties:
+  allowedFunctionNames?:
+    Type: string[]
+    Description: _(Optional)_
+  mode?:
+    Type: FunctionCallingMode
+    Description: _(Optional)_
+```
+
+----------------------------------------
+
+TITLE: JSON Schema Example for Function Parameters Definition
+DESCRIPTION: Illustrates a JSON Schema Object structure for defining function parameters, showing how to specify a required string parameter (`param1`) and an optional integer parameter (`param2`). This example reflects the format expected by the `parameters` property.
+SOURCE: https://github.com/google-gemini/generative-ai-js/blob/main/docs/reference/main/generative-ai.functiondeclaration.parameters.md#_snippet_2
+
+LANGUAGE: JSON Schema
+CODE:
+```
+type: OBJECT
+properties:
+
+  param1:
+
+    type: STRING
+param2:
+
+ type: INTEGER
+required:
+
+  - param1
+```
+
+----------------------------------------
+
+TITLE: APIDOC: GenerateContentRequest Properties
+DESCRIPTION: Detailed API documentation for the properties of the `GenerateContentRequest` interface, including their types, modifiers, and descriptions.
+SOURCE: https://github.com/google-gemini/generative-ai-js/blob/main/docs/reference/main/generative-ai.generatecontentrequest.md#_snippet_1
+
+LANGUAGE: APIDOC
+CODE:
+```
+interface GenerateContentRequest:
+  Properties:
+    cachedContent?: string
+      Description: (Optional) This is the name of a `CachedContent` and not the cache object itself.
+    contents: Content[]
+      Description: Required array of `Content` objects.
+    systemInstruction?: string | Part | Content
+      Description: (Optional) System instruction for the model.
+    toolConfig?: ToolConfig
+      Description: (Optional) Configuration for tools.
+    tools?: Tool[]
+      Description: (Optional) Array of `Tool` objects.
+```
+
+----------------------------------------
+
+TITLE: Define Schema Type in TypeScript
+DESCRIPTION: This TypeScript type definition for `Schema` is a union type, combining various specific schema types such as `StringSchema`, `NumberSchema`, `IntegerSchema`, `BooleanSchema`, `ArraySchema`, and `ObjectSchema`. It is designed to specify data formats for API interactions, aligning with a subset of OpenAPI 3.0 specifications.
+SOURCE: https://github.com/google-gemini/generative-ai-js/blob/main/docs/reference/main/generative-ai.schema.md#_snippet_0
+
+LANGUAGE: TypeScript
+CODE:
+```
+export type Schema = StringSchema | NumberSchema | IntegerSchema | BooleanSchema | ArraySchema | ObjectSchema;
+```
+
+----------------------------------------
+
+TITLE: API Reference: GenerateContentCandidate Properties
+DESCRIPTION: Comprehensive list of properties available on the `GenerateContentCandidate` interface, including their types, modifiers (e.g., optionality), and descriptions. These properties provide details about the generated content, its safety, and associated metadata.
+SOURCE: https://github.com/google-gemini/generative-ai-js/blob/main/docs/reference/main/generative-ai.generatecontentcandidate.md#_snippet_1
+
+LANGUAGE: APIDOC
+CODE:
+```
+GenerateContentCandidate Properties:
+  avgLogprobs?: number - (Optional) Average log probability score of the candidate.
+  citationMetadata?: CitationMetadata - (Optional)
+  content: Content
+  finishMessage?: string - (Optional)
+  finishReason?: FinishReason - (Optional)
+  groundingMetadata?: GroundingMetadata - (Optional) Search grounding metadata.
+  index: number
+  logprobsResult?: LogprobsResult - (Optional) Log-likelihood scores for the response tokens and top tokens.
+  safetyRatings?: SafetyRating[] - (Optional)
+```
+
+----------------------------------------
+
+TITLE: API Class: GoogleAIFileManager
+DESCRIPTION: Provides functionalities for managing files within the Google AI system, including uploading, retrieving, and deleting files.
+SOURCE: https://github.com/google-gemini/generative-ai-js/blob/main/common/api-review/generative-ai-server.api.md#_snippet_16
+
+LANGUAGE: TypeScript
+CODE:
+```
+export class GoogleAIFileManager {
+    constructor(apiKey: string, _requestOptions?: RequestOptions);
+    apiKey: string;
+    deleteFile(fileId: string): Promise<void>;
+    getFile(fileId: string, requestOptions?: SingleRequestOptions): Promise<FileMetadataResponse>;
+    listFiles(listParams?: ListParams, requestOptions?: SingleRequestOptions): Promise<ListFilesResponse>;
+    uploadFile(fileData: string | Buffer, fileMetadata: FileMetadata): Promise<UploadFileResponse>;
+}
+```
+
+----------------------------------------
+
+TITLE: HarmBlockThreshold Enum Definition
+DESCRIPTION: Defines the `HarmBlockThreshold` enum, used to specify the sensitivity level for blocking harmful content in AI model responses. It determines the minimum harm probability score at which content will be blocked.
+SOURCE: https://github.com/google-gemini/generative-ai-js/blob/main/docs/reference/main/generative-ai.harmblockthreshold.md#_snippet_0
+
+LANGUAGE: APIDOC
+CODE:
+```
+HarmBlockThreshold (enum):
+  Description: Threshold above which a prompt or candidate will be blocked.
+  Signature: export declare enum HarmBlockThreshold
+  Members:
+    - Name: BLOCK_LOW_AND_ABOVE
+      Value: "BLOCK_LOW_AND_ABOVE"
+      Description: Content with NEGLIGIBLE will be allowed.
+    - Name: BLOCK_MEDIUM_AND_ABOVE
+      Value: "BLOCK_MEDIUM_AND_ABOVE"
+      Description: Content with NEGLIGIBLE and LOW will be allowed.
+    - Name: BLOCK_NONE
+      Value: "BLOCK_NONE"
+      Description: All content will be allowed.
+    - Name: BLOCK_ONLY_HIGH
+      Value: "BLOCK_ONLY_HIGH"
+      Description: Content with NEGLIGIBLE, LOW, and MEDIUM will be allowed.
+    - Name: HARM_BLOCK_THRESHOLD_UNSPECIFIED
+      Value: "HARM_BLOCK_THRESHOLD_UNSPECIFIED"
+      Description: Threshold is unspecified.
+```
+
+LANGUAGE: TypeScript
+CODE:
+```
+export declare enum HarmBlockThreshold
+```
+
+----------------------------------------
+
+TITLE: ModelParams.tools Property API Reference
+DESCRIPTION: This snippet provides the API definition for the `tools` property, an optional array of `Tool` objects used to specify available tools for the generative model. It is part of the `ModelParams` configuration.
+SOURCE: https://github.com/google-gemini/generative-ai-js/blob/main/docs/reference/main/generative-ai.modelparams.tools.md#_snippet_0
+
+LANGUAGE: APIDOC
+CODE:
+```
+ModelParams:
+  properties:
+    tools:
+      type: "Tool[]"
+      description: "Optional array of Tool objects."
+      signature: "tools?: Tool[];"
+```
+
+----------------------------------------
+
+TITLE: API Reference for GenerativeContentBlob Interface
+DESCRIPTION: Represents a binary content blob, containing the data string and its MIME type.
+SOURCE: https://github.com/google-gemini/generative-ai-js/blob/main/common/api-review/generative-ai.api.md#_snippet_28
+
+LANGUAGE: APIDOC
+CODE:
+```
+interface GenerativeContentBlob {
+  data: string;
+  mimeType: string;
+}
+```
+
+----------------------------------------
+
+TITLE: ChatSession Class Constructor Definition
+DESCRIPTION: This snippet documents the constructor for the `ChatSession` class, which is used to create new chat sessions. It requires an API key and a model name, and optionally accepts `StartChatParams` for initial chat configuration and `RequestOptions` for underlying request customization.
+SOURCE: https://github.com/google-gemini/generative-ai-js/blob/main/docs/reference/main/generative-ai.chatsession._constructor_.md#_snippet_0
+
+LANGUAGE: TypeScript
+CODE:
+```
+constructor(apiKey: string, model: string, params?: StartChatParams, _requestOptions?: RequestOptions);
+```
+
+LANGUAGE: APIDOC
+CODE:
+```
+Parameters:
+  apiKey: string
+  model: string
+  params: StartChatParams (Optional)
+  _requestOptions: RequestOptions (Optional)
+```
+
+----------------------------------------
+
+TITLE: GenerativeModel.startChat() API Reference
+DESCRIPTION: Detailed API documentation for the `startChat` method of `GenerativeModel`, including its signature, parameters, and return type for initiating multi-turn chat sessions.
+SOURCE: https://github.com/google-gemini/generative-ai-js/blob/main/docs/reference/main/generative-ai.generativemodel.startchat.md#_snippet_0
+
+LANGUAGE: TypeScript
+CODE:
+```
+startChat(startChatParams?: StartChatParams): ChatSession;
+```
+
+LANGUAGE: APIDOC
+CODE:
+```
+Parameters:
+  startChatParams: StartChatParams (Optional)
+
+Returns:
+  ChatSession
+```
+
+----------------------------------------
+
+TITLE: Example Google Gemini Prompt Feedback JSON Response
+DESCRIPTION: This snippet illustrates a sample JSON response from the Google Gemini API when a prompt is blocked due to safety concerns. It shows the `promptFeedback` object, detailing the `blockReason` and an array of `safetyRatings` with their respective categories and probabilities.
+SOURCE: https://github.com/google-gemini/generative-ai-js/blob/main/test-utils/mock-responses/streaming-failure-prompt-blocked-safety.txt#_snippet_0
+
+LANGUAGE: JSON
+CODE:
+```
+{
+  "promptFeedback": {
+    "blockReason": "SAFETY",
+    "safetyRatings": [
+      {
+        "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+        "probability": "NEGLIGIBLE"
+      },
+      {
+        "category": "HARM_CATEGORY_HATE_SPEECH",
+        "probability": "HIGH"
+      },
+      {
+        "category": "HARM_CATEGORY_HARASSMENT",
+        "probability": "NEGLIGIBLE"
+      },
+      {
+        "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
+        "probability": "NEGLIGIBLE"
+      }
+    ]
+  }
+}
+```
+
+----------------------------------------
+
+TITLE: API Reference for GenerateContentCandidate Interface
+DESCRIPTION: Defines the structure for a candidate response from a generative model, including finish reason, grounding metadata, index, log probabilities, and safety ratings.
+SOURCE: https://github.com/google-gemini/generative-ai-js/blob/main/common/api-review/generative-ai.api.md#_snippet_21
+
+LANGUAGE: APIDOC
+CODE:
+```
+interface GenerateContentCandidate {
+  finishReason?: FinishReason;
+  groundingMetadata?: GroundingMetadata;
+  index: number;
+  logprobsResult?: LogprobsResult;
+  safetyRatings?: SafetyRating[];
+}
+```
+
+----------------------------------------
+
+TITLE: Google Generative AI TypeScript API Definitions
+DESCRIPTION: This section details the core TypeScript interfaces and enums available in the `@google/generative-ai` library, including data schemas, content structures, and tool definitions. It is an auto-generated API report.
+SOURCE: https://github.com/google-gemini/generative-ai-js/blob/main/common/api-review/generative-ai-server.api.md#_snippet_0
+
+LANGUAGE: TypeScript
+CODE:
+```
+// Warning: (ae-incompatible-release-tags) The symbol "ArraySchema" is marked as @public, but its signature references "BaseSchema" which is marked as @internal
+//
+// @public
+export interface ArraySchema extends BaseSchema {
+    items: Schema;
+    maxItems?: number;
+    minItems?: number;
+    // (undocumented)
+    type: typeof SchemaType.ARRAY;
+}
+
+// Warning: (ae-internal-missing-underscore) The name "BaseSchema" should be prefixed with an underscore because the declaration is marked as @internal
+//
+// @internal
+export interface BaseSchema {
+    description?: string;
+    nullable?: boolean;
+}
+
+// Warning: (ae-incompatible-release-tags) The symbol "BooleanSchema" is marked as @public, but its signature references "BaseSchema" which is marked as @internal
+//
+// @public
+export interface BooleanSchema extends BaseSchema {
+    // (undocumented)
+    type: typeof SchemaType.BOOLEAN;
+}
+
+/// <reference types="node" />
+
+// @public
+export interface CachedContent extends CachedContentBase {
+    createTime?: string;
+    // (undocumented)
+    name?: string;
+    ttl?: string;
+    updateTime?: string;
+}
+
+// @public (undocumented)
+export interface CachedContentBase {
+    // (undocumented)
+    contents: Content[];
+    // (undocumented)
+    displayName?: string;
+    expireTime?: string;
+    // (undocumented)
+    model?: string;
+    // (undocumented)
+    systemInstruction?: string | Part | Content;
+    // (undocumented)
+    toolConfig?: ToolConfig;
+    // (undocumented)
+    tools?: Tool[];
+}
+
+// @public
+export interface CachedContentCreateParams extends CachedContentBase {
+    ttlSeconds?: number;
+}
+
+// @public
+export interface CachedContentUpdateInputFields {
+    // (undocumented)
+    expireTime?: string;
+    // (undocumented)
+    ttlSeconds?: number;
+}
+
+// @public
+export interface CachedContentUpdateParams {
+    // (undocumented)
+    cachedContent: CachedContentUpdateInputFields;
+    updateMask?: string[];
+}
+
+// @internal
+export interface _CachedContentUpdateRequest {
+    // (undocumented)
+    cachedContent: _CachedContentUpdateRequestFields;
+    updateMask?: string[];
+}
+
+// @internal
+export interface _CachedContentUpdateRequestFields {
+    // (undocumented)
+    expireTime?: string;
+    // (undocumented)
+    ttl?: string;
+}
+
+// @public
+export interface CodeExecutionResult {
+    outcome: Outcome;
+    output: string;
+}
+
+// @public
+export interface CodeExecutionResultPart {
+    // (undocumented)
+    codeExecutionResult: CodeExecutionResult;
+    // (undocumented)
+    executableCode?: never;
+    // (undocumented)
+    fileData?: never;
+    // (undocumented)
+    functionCall?: never;
+    // (undocumented)
+    functionResponse?: never;
+    // (undocumented)
+    inlineData?: never;
+    // (undocumented)
+    text?: never;
+}
+
+// @public
+export interface CodeExecutionTool {
+    codeExecution: {};
+}
+
+// @public
+export interface Content {
+    // (undocumented)
+    parts: Part[];
+    // (undocumented)
+    role: string;
+}
+
+// Warning: (ae-incompatible-release-tags) The symbol "EnumStringSchema" is marked as @public, but its signature references "BaseSchema" which is marked as @internal
+//
+// @public
+export interface EnumStringSchema extends BaseSchema {
+    enum: string[];
+    // (undocumented)
+    format: "enum";
+    // (undocumented)
+    type: typeof SchemaType.STRING;
+}
+
+// @public
+export interface ErrorDetails {
+    // (undocumented)
+    "@type"?: string;
+    // (undocumented)
+    [key: string]: unknown;
+    // (undocumented)
+    domain?: string;
+    // (undocumented)
+    metadata?: Record<string, unknown>;
+    // (undocumented)
+    reason?: string;
+}
+
+// @public
+export interface ExecutableCode {
+    code: string;
+    language: ExecutableCodeLanguage;
+}
+
+// @public (undocumented)
+export enum ExecutableCodeLanguage {
+    // (undocumented)
+    LANGUAGE_UNSPECIFIED = "language_unspecified",
+    // (undocumented)
+    PYTHON = "python"
+}
+
+// @public
+export interface ExecutableCodePart {
+    // (undocumented)
+    codeExecutionResult?: never;
+    // (undocumented)
+    executableCode: ExecutableCode;
+    // (undocumented)
+    fileData?: never;
+    // (undocumented)
+    functionCall?: never;
+    // (undocumented)
+    functionResponse?: never;
+    // (undocumented)
+    inlineData?: never;
+    // (undocumented)
+    text?: never;
+}
+
+// @public
+export interface FileData {
+    // (undocumented)
+    fileUri: string;
+    // (undocumented)
+    mimeType: string;
+}
+
+// @public
+export interface FileDataPart {
+    // (undocumented)
+    codeExecutionResult?: never;
+    // (undocumented)
+    executableCode?: never;
+    // (undocumented)
+    fileData: FileData;
+    // (undocumented)
+    functionCall?: never;
+    // (undocumented)
+    functionResponse?: never;
+    // (undocumented)
+    inlineData?: never;
+    // (undocumented)
+    text?: never;
+}
+
+// @public
+export interface FileMetadata {
+```
+
+LANGUAGE: APIDOC
+CODE:
+```
+interface ArraySchema extends BaseSchema
+  items: Schema
+  maxItems?: number
+  minItems?: number
+  type: typeof SchemaType.ARRAY
+
+interface BaseSchema
+  description?: string
+  nullable?: boolean
+
+interface BooleanSchema extends BaseSchema
+  type: typeof SchemaType.BOOLEAN
+
+interface CachedContent extends CachedContentBase
+  createTime?: string
+  name?: string
+  ttl?: string
+  updateTime?: string
+
+interface CachedContentBase
+  contents: Content[]
+  displayName?: string
+  expireTime?: string
+  model?: string
+  systemInstruction?: string | Part | Content
+  toolConfig?: ToolConfig
+  tools?: Tool[]
+
+interface CachedContentCreateParams extends CachedContentBase
+  ttlSeconds?: number
+
+interface CachedContentUpdateInputFields
+  expireTime?: string
+  ttlSeconds?: number
+
+interface CachedContentUpdateParams
+  cachedContent: CachedContentUpdateInputFields
+  updateMask?: string[]
+
+interface _CachedContentUpdateRequest
+  cachedContent: _CachedContentUpdateRequestFields
+  updateMask?: string[]
+
+interface _CachedContentUpdateRequestFields
+  expireTime?: string
+  ttl?: string
+
+interface CodeExecutionResult
+  outcome: Outcome
+  output: string
+
+interface CodeExecutionResultPart
+  codeExecutionResult: CodeExecutionResult
+  executableCode?: never
+  fileData?: never
+  functionCall?: never
+  functionResponse?: never
+  inlineData?: never
+  text?: never
+
+interface CodeExecutionTool
+  codeExecution: {}
+
+interface Content
+  parts: Part[]
+  role: string
+
+interface EnumStringSchema extends BaseSchema
+  enum: string[]
+  format: "enum"
+  type: typeof SchemaType.STRING
+
+interface ErrorDetails
+  "@type"?: string
+  [key: string]: unknown
+  domain?: string
+  metadata?: Record<string, unknown>
+  reason?: string
+
+interface ExecutableCode
+  code: string
+  language: ExecutableCodeLanguage
+
+enum ExecutableCodeLanguage
+  LANGUAGE_UNSPECIFIED = "language_unspecified"
+  PYTHON = "python"
+
+interface ExecutableCodePart
+  codeExecutionResult?: never
+  executableCode: ExecutableCode
+  fileData?: never
+  functionCall?: never
+  functionResponse?: never
+  inlineData?: never
+  text?: never
+
+interface FileData
+  fileUri: string
+  mimeType: string
+
+interface FileDataPart
+  codeExecutionResult?: never
+  executableCode?: never
+  fileData: FileData
+  functionCall?: never
+  functionResponse?: never
+  inlineData?: never
+  text?: never
+
+interface FileMetadata
+```
+
+----------------------------------------
+
+TITLE: API Definition: Tool Type for Generative AI
+DESCRIPTION: This API documentation defines the `Tool` type, which represents a callable external resource for generative AI models. It is a union type encompassing `FunctionDeclarationsTool`, `CodeExecutionTool`, and `GoogleSearchRetrievalTool`, allowing models to access diverse external knowledge or execution capabilities.
+SOURCE: https://github.com/google-gemini/generative-ai-js/blob/main/docs/reference/main/generative-ai.tool.md#_snippet_0
+
+LANGUAGE: TypeScript
+CODE:
+```
+export declare type Tool = FunctionDeclarationsTool | CodeExecutionTool | GoogleSearchRetrievalTool;
+```
+
+----------------------------------------
+
+TITLE: GenerativeModel.batchEmbedContents() API Reference
+DESCRIPTION: Detailed API documentation for the GenerativeModel.batchEmbedContents method, including its purpose, parameters, and return type. This method is used to embed multiple content requests in a batch operation.
+SOURCE: https://github.com/google-gemini/generative-ai-js/blob/main/docs/reference/main/generative-ai.generativemodel.batchembedcontents.md#_snippet_0
+
+LANGUAGE: APIDOC
+CODE:
+```
+GenerativeModel.batchEmbedContents(
+  batchEmbedContentRequest: BatchEmbedContentsRequest,
+  requestOptions?: SingleRequestOptions
+): Promise<BatchEmbedContentsResponse>
+
+Description: Embeds an array of EmbedContentRequests. Fields set in the optional SingleRequestOptions parameter will take precedence over the RequestOptions values provided to GoogleGenerativeAI.getGenerativeModel().
+
+Parameters:
+  batchEmbedContentRequest: BatchEmbedContentsRequest
+  requestOptions: SingleRequestOptions (Optional)
+
+Returns: Promise<BatchEmbedContentsResponse>
+```
+
+----------------------------------------
+
+TITLE: API Reference: FunctionDeclarationsTool.functionDeclarations Property
+DESCRIPTION: This section provides the API documentation and TypeScript signature for the `functionDeclarations` property. It details its type, optionality, and how it's utilized by the generative AI model for enabling function calling capabilities.
+SOURCE: https://github.com/google-gemini/generative-ai-js/blob/main/docs/reference/main/generative-ai.functiondeclarationstool.functiondeclarations.md#_snippet_0
+
+LANGUAGE: TypeScript
+CODE:
+```
+functionDeclarations?: FunctionDeclaration[];
+```
+
+LANGUAGE: APIDOC
+CODE:
+```
+FunctionDeclarationsTool:
+  property: functionDeclarations
+    type: FunctionDeclaration[]
+    optional: true
+    description: Optional. One or more function declarations to be passed to the model along with the current user query. Model may decide to call a subset of these functions by populating [FunctionCall][content.part.functionCall] in the response. User should provide a [FunctionResponse][content.part.functionResponse] for each function call in the next turn. Based on the function responses, Model will generate the final response back to the user. Maximum 64 function declarations can be provided.
+```

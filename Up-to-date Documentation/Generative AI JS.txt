@@ -1,0 +1,2060 @@
+TITLE: GoogleGenerativeAI Class Definition
+DESCRIPTION: Defines the top-level `GoogleGenerativeAI` class, which serves as the primary entry point for interacting with the Google Generative AI SDK. This class is declared for export and provides the foundational structure for the library.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/main/generative-ai.googlegenerativeai.md#_snippet_0
+
+LANGUAGE: TypeScript
+CODE:
+```
+export declare class GoogleGenerativeAI
+```
+
+----------------------------------------
+
+TITLE: ChatSession Class Constructor API Reference
+DESCRIPTION: This section provides the API documentation for the `ChatSession` class constructor. It details the constructor's signature, including its required `apiKey` and `model` parameters, and optional `params` and `_requestOptions` parameters, which are used to initialize a new chat session.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/main/generative-ai.chatsession._constructor_.md#_snippet_0
+
+LANGUAGE: APIDOC
+CODE:
+```
+ChatSession:
+  (constructor)(apiKey: string, model: string, params?: StartChatParams, _requestOptions?: RequestOptions)
+    apiKey: string
+    model: string
+    params: StartChatParams (Optional)
+    _requestOptions: RequestOptions (Optional)
+```
+
+----------------------------------------
+
+TITLE: API Documentation for GenerativeModel.countTokens() Method
+DESCRIPTION: Comprehensive API documentation for the `GenerativeModel.countTokens()` method, including its overall description, method signature, detailed parameter descriptions with types, and the expected return type.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/main/generative-ai.generativemodel.counttokens.md#_snippet_1
+
+LANGUAGE: APIDOC
+CODE:
+```
+GenerativeModel.countTokens() method:
+  Description: Counts the tokens in the provided request. Fields set in the optional SingleRequestOptions parameter will take precedence over the RequestOptions values provided to GoogleGenerativeAI.getGenerativeModel().
+  Signature: countTokens(request: CountTokensRequest | string | Array<string | Part>, requestOptions?: SingleRequestOptions): Promise<CountTokensResponse>
+  Parameters:
+    request:
+      Type: CountTokensRequest | string | Array<string | Part>
+      Description: 
+    requestOptions:
+      Type: SingleRequestOptions
+      Description: (Optional)
+  Returns:
+    Type: Promise<CountTokensResponse>
+```
+
+----------------------------------------
+
+TITLE: GenerativeModel.generateContent() Method API Reference
+DESCRIPTION: This method makes a single non-streaming call to the model and returns an object containing a single `GenerateContentResponse`. Fields set in the optional `SingleRequestOptions` parameter will take precedence over `RequestOptions` values provided to `GoogleGenerativeAI.getGenerativeModel()`.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/main/generative-ai.generativemodel.generatecontent.md#_snippet_0
+
+LANGUAGE: typescript
+CODE:
+```
+generateContent(request: GenerateContentRequest | string | Array<string | Part>, requestOptions?: SingleRequestOptions): Promise<GenerateContentResult>;
+```
+
+LANGUAGE: APIDOC
+CODE:
+```
+GenerativeModel.generateContent():
+  Description: Makes a single non-streaming call to the model and returns an object containing a single GenerateContentResponse.
+  Parameters:
+    request: GenerateContentRequest | string | Array<string | Part>
+      Description: The content request for the model.
+    requestOptions: SingleRequestOptions (Optional)
+      Description: Options for the single request, overriding global request options.
+  Returns:
+    Promise<GenerateContentResult>
+      Description: A promise that resolves to the result of the content generation.
+```
+
+----------------------------------------
+
+TITLE: Example JSON Schema for Function Parameters
+DESCRIPTION: An example of a JSON Schema Object defining function parameters, illustrating one required string parameter (`param1`) and one optional integer parameter (`param2`). This schema reflects the structure expected by the `parameters` property for defining function inputs.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/main/generative-ai.functiondeclaration.parameters.md#_snippet_1
+
+LANGUAGE: APIDOC
+CODE:
+```
+type: OBJECT properties:
+
+param1:
+
+  type: STRING
+param2:
+
+ type: INTEGER
+required:
+
+  - param1
+```
+
+----------------------------------------
+
+TITLE: TypeScript Signature for FunctionDeclaration.parameters
+DESCRIPTION: The TypeScript signature for the `parameters` property, indicating it is an optional property of type `FunctionDeclarationSchema`.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/main/generative-ai.functiondeclaration.parameters.md#_snippet_0
+
+LANGUAGE: TypeScript
+CODE:
+```
+parameters?: FunctionDeclarationSchema;
+```
+
+----------------------------------------
+
+TITLE: ModelParams API
+DESCRIPTION: Params passed to GoogleGenerativeAI.getGenerativeModel().
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/main/generative-ai.md#_snippet_54
+
+LANGUAGE: APIDOC
+CODE:
+```
+interface ModelParams
+```
+
+----------------------------------------
+
+TITLE: GenerateContentRequest Interface Definition and Properties
+DESCRIPTION: Defines the `GenerateContentRequest` interface, detailing its inheritance from `BaseParams` and listing all available properties with their types and descriptions for constructing content generation requests.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/main/generative-ai.generatecontentrequest.md#_snippet_0
+
+LANGUAGE: APIDOC
+CODE:
+```
+interface GenerateContentRequest:
+  Description: Request sent to `generateContent` endpoint.
+  Signature: export interface GenerateContentRequest extends BaseParams
+  Extends: BaseParams
+  Properties:
+    cachedContent?: string (Optional) This is the name of a `CachedContent` and not the cache object itself.
+    contents: Content[]
+    systemInstruction?: string | Part | Content (Optional)
+    toolConfig?: ToolConfig (Optional)
+    tools?: Tool[] (Optional)
+```
+
+----------------------------------------
+
+TITLE: BaseParams Interface
+DESCRIPTION: Base parameters for a number of methods.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/main/generative-ai.md#_snippet_3
+
+LANGUAGE: APIDOC
+CODE:
+```
+BaseParams:
+  Base parameters for a number of methods.
+```
+
+----------------------------------------
+
+TITLE: GenerateContentResult Interface API Reference
+DESCRIPTION: Comprehensive API documentation for the `GenerateContentResult` interface, detailing its purpose, TypeScript signature, and all available properties with their types. This interface represents the outcome of a `generateContent()` call.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/main/generative-ai.generatecontentresult.md#_snippet_0
+
+LANGUAGE: TypeScript
+CODE:
+```
+export interface GenerateContentResult
+```
+
+LANGUAGE: APIDOC
+CODE:
+```
+Properties:
+  response: EnhancedGenerateContentResponse
+```
+
+----------------------------------------
+
+TITLE: Define FunctionDeclaration Interface in TypeScript
+DESCRIPTION: Defines the `FunctionDeclaration` interface in TypeScript, which serves as a structured representation of a function declaration. This interface is designed to be used by models as a tool, encapsulating the function's name and its parameters.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/main/generative-ai.functiondeclaration.md#_snippet_0
+
+LANGUAGE: typescript
+CODE:
+```
+export declare interface FunctionDeclaration
+```
+
+----------------------------------------
+
+TITLE: Define FunctionCallingConfig Interface with Properties
+DESCRIPTION: Documents the `FunctionCallingConfig` interface, detailing its structure and optional properties like `allowedFunctionNames` and `mode` for controlling function call behavior in generative AI models.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/main/generative-ai.functioncallingconfig.md#_snippet_0
+
+LANGUAGE: TypeScript
+CODE:
+```
+export interface FunctionCallingConfig
+```
+
+LANGUAGE: APIDOC
+CODE:
+```
+FunctionCallingConfig interface:
+  Properties:
+    allowedFunctionNames?: string[]
+      Description: (Optional)
+    mode?: FunctionCallingMode
+      Description: (Optional)
+```
+
+----------------------------------------
+
+TITLE: GenerativeContentBlob API
+DESCRIPTION: Interface for sending an image.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/main/generative-ai.md#_snippet_42
+
+LANGUAGE: APIDOC
+CODE:
+```
+interface GenerativeContentBlob
+```
+
+----------------------------------------
+
+TITLE: TypeScript FileDataPart Interface Definition
+DESCRIPTION: Defines the `FileDataPart` interface, which represents a content part containing file data within the `@google/generative-ai` library. This interface is part of the API Documenter generated documentation.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/main/generative-ai.filedatapart.md#_snippet_0
+
+LANGUAGE: typescript
+CODE:
+```
+export interface FileDataPart
+```
+
+----------------------------------------
+
+TITLE: FileDataPart Interface Property Reference
+DESCRIPTION: Provides a detailed reference for all properties available on the `FileDataPart` interface, including their types and whether they are optional. This interface is designed to hold file-specific data, with other properties typically being 'never' for this specific part type.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/main/generative-ai.filedatapart.md#_snippet_1
+
+LANGUAGE: APIDOC
+CODE:
+```
+interface FileDataPart:
+  properties:
+    codeExecutionResult?: never (Optional)
+    executableCode?: never (Optional)
+    fileData: FileData
+    functionCall?: never (Optional)
+    functionResponse?: never (Optional)
+    inlineData?: never (Optional)
+    text?: never (Optional)
+```
+
+----------------------------------------
+
+TITLE: FunctionDeclaration API
+DESCRIPTION: Structured representation of a function declaration as defined by the OpenAPI 3.0 specification. Included in this declaration are the function name and parameters. This FunctionDeclaration is a representation of a block of code that can be used as a Tool by the model and executed by the client.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/main/generative-ai.md#_snippet_31
+
+LANGUAGE: APIDOC
+CODE:
+```
+interface FunctionDeclaration
+```
+
+----------------------------------------
+
+TITLE: ListParams Interface Definition for Google AI Listing
+DESCRIPTION: This API documentation describes the `ListParams` interface, which provides optional parameters for pagination when calling listing methods like `GoogleAIFileManager.listFiles()` or `GoogleAICacheManager.list()`.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/server/generative-ai.listparams.md#_snippet_0
+
+LANGUAGE: APIDOC
+CODE:
+```
+ListParams interface
+  Description: Params to pass to GoogleAIFileManager.listFiles() or GoogleAICacheManager.list()
+  Signature:
+    export interface ListParams
+  Properties:
+    pageSize?: number (Optional)
+    pageToken?: string (Optional)
+```
+
+----------------------------------------
+
+TITLE: CountTokensResponse Interface
+DESCRIPTION: Response from calling GenerativeModel.countTokens().
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/main/generative-ai.md#_snippet_17
+
+LANGUAGE: APIDOC
+CODE:
+```
+CountTokensResponse:
+  Response from calling GenerativeModel.countTokens().
+```
+
+----------------------------------------
+
+TITLE: FunctionCallingMode Enum Definition
+DESCRIPTION: Defines the `FunctionCallingMode` enum, which specifies how function calls are handled by the generative AI model. This enum provides options to control whether the model automatically decides to call functions, explicitly calls a function, or does not call any functions.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/main/generative-ai.functioncallingmode.md#_snippet_0
+
+LANGUAGE: TypeScript
+CODE:
+```
+export declare enum FunctionCallingMode 
+```
+
+LANGUAGE: APIDOC
+CODE:
+```
+FunctionCallingMode enum:
+  Description: Specifies how function calls are handled by the generative AI model.
+  Signature:
+    export declare enum FunctionCallingMode
+  Members:
+    ANY: "ANY"
+    AUTO: "AUTO"
+    MODE_UNSPECIFIED: "MODE_UNSPECIFIED"
+    NONE: "NONE"
+```
+
+----------------------------------------
+
+TITLE: GoogleSearchRetrievalTool.googleSearchRetrieval Property Definition
+DESCRIPTION: Documents the `googleSearchRetrieval` property, which defines the configuration for Google search retrieval within the `GoogleSearchRetrievalTool`.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/main/generative-ai.googlesearchretrievaltool.googlesearchretrieval.md#_snippet_0
+
+LANGUAGE: APIDOC
+CODE:
+```
+GoogleSearchRetrievalTool.googleSearchRetrieval property:
+  Description: Google search retrieval tool config.
+  Signature:
+    googleSearchRetrieval?: GoogleSearchRetrieval;
+```
+
+----------------------------------------
+
+TITLE: GoogleSearchRetrieval Interface Definition and Properties
+DESCRIPTION: Defines the GoogleSearchRetrieval interface, a retrieval tool powered by Google search, including its TypeScript signature and available properties with their types and descriptions.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/main/generative-ai.googlesearchretrieval.md#_snippet_0
+
+LANGUAGE: typescript
+CODE:
+```
+export declare interface GoogleSearchRetrieval
+```
+
+LANGUAGE: APIDOC
+CODE:
+```
+GoogleSearchRetrieval interface:
+  Properties:
+    dynamicRetrievalConfig?: DynamicRetrievalConfig
+      Description: (Optional) Specifies the dynamic retrieval configuration for the given source.
+```
+
+----------------------------------------
+
+TITLE: FunctionCallingMode Enum
+DESCRIPTION: Enumerates the modes for function calling behavior, such as allowing any function, automatic calling, or no function calls.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/common/api-review/generative-ai.api.md#_snippet_21
+
+LANGUAGE: TypeScript
+CODE:
+```
+export enum FunctionCallingMode {
+    // (undocumented)
+    ANY = "ANY",
+    // (undocumented)
+    AUTO = "AUTO",
+    // (undocumented)
+    MODE_UNSPECIFIED = "MODE_UNSPECIFIED",
+    // (undocumented)
+    NONE = "NONE"
+}
+```
+
+----------------------------------------
+
+TITLE: Tool Type Alias
+DESCRIPTION: A type alias defining a tool that the generative model can call to access external knowledge or capabilities.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/server/generative-ai.md#_snippet_20
+
+LANGUAGE: APIDOC
+CODE:
+```
+Type Alias: Tool
+  Description: Defines a tool that model can call to access external knowledge.
+```
+
+----------------------------------------
+
+TITLE: Content.role Property API Documentation
+DESCRIPTION: This snippet provides the API documentation for the `role` property of the `Content` interface. It specifies that `role` is a string type, typically used to identify the author of a piece of content (e.g., 'user' or 'model').
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/main/generative-ai.content.role.md#_snippet_0
+
+LANGUAGE: APIDOC
+CODE:
+```
+Content.role property
+  Signature:
+    role: string;
+```
+
+LANGUAGE: TypeScript
+CODE:
+```
+role: string;
+```
+
+----------------------------------------
+
+TITLE: GenerateContentCandidate.content Property Definition
+DESCRIPTION: Defines the 'content' property within the 'GenerateContentCandidate' interface. This property holds the generated content, typically an instance of the 'Content' type, which encapsulates the model's output.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/main/generative-ai.generatecontentcandidate.content.md#_snippet_0
+
+LANGUAGE: typescript
+CODE:
+```
+content: Content;
+```
+
+LANGUAGE: APIDOC
+CODE:
+```
+GenerateContentCandidate:
+  content: Content
+```
+
+----------------------------------------
+
+TITLE: Send Chat Message with Generative AI in JavaScript
+DESCRIPTION: This JavaScript code snippet initializes a chat session with a Generative AI model (Gemini 1.5 Flash), handles user input from a form, sends the message to the model, and updates the UI with both user and streamed model responses. It uses helper functions for UI updates and scrolling.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/samples/web/chat.html#_snippet_0
+
+LANGUAGE: JavaScript
+CODE:
+```
+import { getGenerativeModel, scrollToDocumentBottom, updateUI, } from "./utils/shared.js";
+const promptInput = document.querySelector("#prompt");
+const historyElement = document.querySelector("#chat-history");
+let chat;
+document
+  .querySelector("#form")
+  .addEventListener("submit", async (event) => {
+    event.preventDefault();
+    if (!chat) {
+      const model = await getGenerativeModel({ model: "gemini-1.5-flash" });
+      chat = model.startChat({
+        generationConfig: {
+          maxOutputTokens: 100,
+        },
+      });
+    }
+    const userMessage = promptInput.value;
+    promptInput.value = "";
+    // Create UI for the new user / assistant messages pair
+    historyElement.innerHTML += `<div class="history-item user-role"> <div class="name">User</div> <blockquote>${userMessage}</blockquote> </div> <div class="history-item model-role"> <div class="name">Model</div> <blockquote></blockquote> </div>`;
+    scrollToDocumentBottom();
+    const resultEls = document.querySelectorAll(
+      ".model-role > blockquote",
+    );
+    await updateUI(
+      resultEls[resultEls.length - 1],
+      () => chat.sendMessageStream(userMessage),
+      true,
+    );
+  });
+```
+
+----------------------------------------
+
+TITLE: FunctionResponsePart Interface Properties Reference
+DESCRIPTION: Details the properties available on the `FunctionResponsePart` interface, including their types and whether they are optional. This interface is used to represent a part of content that contains a function's response.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/server/generative-ai.functionresponsepart.md#_snippet_1
+
+LANGUAGE: APIDOC
+CODE:
+```
+FunctionResponsePart:
+  Properties:
+    codeExecutionResult?: never (Optional)
+    executableCode?: never (Optional)
+    fileData?: never (Optional)
+    functionCall?: never (Optional)
+    functionResponse: FunctionResponse
+    inlineData?: never (Optional)
+    text?: never (Optional)
+```
+
+----------------------------------------
+
+TITLE: TypeScript FunctionResponsePart Interface Definition
+DESCRIPTION: Defines the core structure of the `FunctionResponsePart` interface in TypeScript, indicating it's an exported interface.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/server/generative-ai.functionresponsepart.md#_snippet_0
+
+LANGUAGE: typescript
+CODE:
+```
+export interface FunctionResponsePart
+```
+
+----------------------------------------
+
+TITLE: TypeScript Signature for FunctionResponsePart.functionCall Property
+DESCRIPTION: Defines the type signature for the `functionCall` property within `FunctionResponsePart`. The `never` type indicates that this property should not be present or accessible, possibly used for type exclusion or future-proofing in the API design.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/main/generative-ai.functionresponsepart.functioncall.md#_snippet_0
+
+LANGUAGE: typescript
+CODE:
+```
+functionCall?: never;
+```
+
+LANGUAGE: APIDOC
+CODE:
+```
+FunctionResponsePart.functionCall property
+Signature:
+  functionCall?: never;
+```
+
+----------------------------------------
+
+TITLE: FunctionCallPart Interface Definition and Properties
+DESCRIPTION: This snippet defines the `FunctionCallPart` interface, which is used to represent a function call within content parts. It lists all its properties, indicating their types, modifiers (optionality), and a brief description.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/main/generative-ai.functioncallpart.md#_snippet_0
+
+LANGUAGE: typescript
+CODE:
+```
+export interface FunctionCallPart
+```
+
+LANGUAGE: APIDOC
+CODE:
+```
+FunctionCallPart:
+  codeExecutionResult?: never
+  executableCode?: never
+  fileData?: never
+  functionCall: FunctionCall
+  functionResponse?: never
+  inlineData?: never
+  text?: never
+```
+
+----------------------------------------
+
+TITLE: SimpleStringSchema Interface
+DESCRIPTION: Describes a basic string schema, which can optionally include format specifications.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/server/generative-ai.md#_snippet_9
+
+LANGUAGE: APIDOC
+CODE:
+```
+Interface/Type: SimpleStringSchema
+  Description: Describes a simple string schema, with or without format
+```
+
+----------------------------------------
+
+TITLE: API Reference: GenerateContentCandidate.finishReason Property
+DESCRIPTION: Documents the 'finishReason' property, which indicates why the model stopped generating content for a specific candidate. This property is optional and its type is 'FinishReason'.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/main/generative-ai.generatecontentcandidate.finishreason.md#_snippet_0
+
+LANGUAGE: TypeScript
+CODE:
+```
+finishReason?: FinishReason;
+```
+
+LANGUAGE: APIDOC
+CODE:
+```
+Property: finishReason
+  Parent: GenerateContentCandidate
+  Type: FinishReason
+  Optional: true
+  Description: The reason why the model stopped generating content for this candidate.
+```
+
+----------------------------------------
+
+TITLE: APIDOC: FunctionCallPart.fileData Property
+DESCRIPTION: Documents the `fileData` property of the `FunctionCallPart` interface, showing its TypeScript signature and indicating it should never be used due to its `never` type.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/main/generative-ai.functioncallpart.filedata.md#_snippet_0
+
+LANGUAGE: APIDOC
+CODE:
+```
+FunctionCallPart.fileData property:
+  Signature: fileData?: never;
+```
+
+LANGUAGE: TypeScript
+CODE:
+```
+fileData?: never;
+```
+
+----------------------------------------
+
+TITLE: FunctionResponse.name Property API Reference
+DESCRIPTION: Documents the `name` property of the `FunctionResponse` interface, which holds the name of the function associated with the response. This property is part of the `@google/generative-ai` library and is automatically generated.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/server/generative-ai.functionresponse.name.md#_snippet_0
+
+LANGUAGE: APIDOC
+CODE:
+```
+FunctionResponse:
+  property name:
+    Type: string
+    Description: Represents the name of the function associated with the response.
+    Source: @google/generative-ai
+```
+
+LANGUAGE: typescript
+CODE:
+```
+name: string;
+```
+
+----------------------------------------
+
+TITLE: FunctionResponse.name Property API Reference
+DESCRIPTION: Documents the `name` property of the `FunctionResponse` interface, which is a string. This property is part of the `@google/generative-ai` library and is automatically generated.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/main/generative-ai.functionresponse.name.md#_snippet_0
+
+LANGUAGE: APIDOC
+CODE:
+```
+FunctionResponse.name property
+
+Signature:
+name: string;
+```
+
+----------------------------------------
+
+TITLE: API Reference for Content Interface Properties
+DESCRIPTION: Details the properties of the `Content` interface, including `parts` (an array of `Part` objects) and `role` (a string), which define the structure of conversational content in the Google Generative AI API.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/main/generative-ai.content.md#_snippet_1
+
+LANGUAGE: APIDOC
+CODE:
+```
+Content interface properties:
+  parts: Part[]
+  role: string
+```
+
+----------------------------------------
+
+TITLE: TextPart.fileData Property Definition
+DESCRIPTION: API documentation and TypeScript signature for the `fileData` property of the `TextPart` interface. The `never` type indicates that this property is not intended for use, likely signifying a deprecated or intentionally unused field within the `@google/generative-ai` library.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/server/generative-ai.textpart.filedata.md#_snippet_0
+
+LANGUAGE: APIDOC
+CODE:
+```
+TextPart.fileData property:
+  Signature:
+    fileData?: never;
+```
+
+LANGUAGE: TypeScript
+CODE:
+```
+fileData?: never;
+```
+
+----------------------------------------
+
+TITLE: TypeScript FunctionDeclarationSchema Interface Definition and Properties
+DESCRIPTION: Defines the FunctionDeclarationSchema interface, which specifies the structure for parameters within a FunctionDeclaration. This includes properties for an optional description, a map of nested properties, an array of required parameter names, and the overall schema type.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/main/generative-ai.functiondeclarationschema.md#_snippet_0
+
+LANGUAGE: TypeScript
+CODE:
+```
+export interface FunctionDeclarationSchema
+```
+
+LANGUAGE: APIDOC
+CODE:
+```
+FunctionDeclarationSchema interface:
+  description?: string (Optional) - Optional. Description of the parameter.
+  properties: { [k: string]: FunctionDeclarationSchemaProperty; } - The format of the parameter.
+  required?: string[] (Optional) - Optional. Array of required parameters.
+  type: SchemaType - The type of the parameter.
+```
+
+----------------------------------------
+
+TITLE: API Reference: FunctionDeclarationSchema.properties
+DESCRIPTION: Documents the 'properties' field of the `FunctionDeclarationSchema` interface, detailing its purpose and TypeScript signature for defining function parameters. This field specifies the format of parameters as a dictionary where keys are strings and values are `FunctionDeclarationSchemaProperty` objects.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/main/generative-ai.functiondeclarationschema.properties.md#_snippet_0
+
+LANGUAGE: APIDOC
+CODE:
+```
+FunctionDeclarationSchema.properties property
+  Description: The format of the parameter.
+  Type: object (dictionary/map)
+  Key Type: string
+  Value Type: FunctionDeclarationSchemaProperty
+  Signature:
+    properties: {
+            [k: string]: FunctionDeclarationSchemaProperty;
+        };
+```
+
+LANGUAGE: typescript
+CODE:
+```
+properties: {
+        [k: string]: FunctionDeclarationSchemaProperty;
+    };
+```
+
+----------------------------------------
+
+TITLE: TypeScript: CodeExecutionResultPart.functionCall Property Signature
+DESCRIPTION: This snippet defines the 'functionCall' property within the 'CodeExecutionResultPart' interface. Its type is 'never', indicating that this property should not be present or accessible, often used to explicitly disallow certain fields in a union type or interface.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/main/generative-ai.codeexecutionresultpart.functioncall.md#_snippet_0
+
+LANGUAGE: typescript
+CODE:
+```
+functionCall?: never;
+```
+
+----------------------------------------
+
+TITLE: API Documentation for CodeExecutionResultPart.functionCall Property
+DESCRIPTION: Provides the structured API documentation for the `functionCall` property, including its type and signature, as part of the `CodeExecutionResultPart` interface.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/server/generative-ai.codeexecutionresultpart.functioncall.md#_snippet_0
+
+LANGUAGE: APIDOC
+CODE:
+```
+CodeExecutionResultPart:
+  functionCall:
+    type: never
+    description: "Property indicating that functionCall is not expected or is deprecated for CodeExecutionResultPart."
+    signature: "functionCall?: never;"
+```
+
+LANGUAGE: typescript
+CODE:
+```
+functionCall?: never;
+```
+
+----------------------------------------
+
+TITLE: DynamicRetrievalConfig Interface Definition
+DESCRIPTION: Defines the structure and properties for configuring dynamic retrieval within the `@google/generative-ai` library. It includes optional properties for setting a dynamic threshold and retrieval mode.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/main/generative-ai.dynamicretrievalconfig.md#_snippet_0
+
+LANGUAGE: APIDOC
+CODE:
+```
+DynamicRetrievalConfig interface:
+  Specifies the dynamic retrieval configuration for the given source.
+  Signature:
+    export declare interface DynamicRetrievalConfig
+
+  Properties:
+    dynamicThreshold?: number
+      (Optional) The threshold to be used in dynamic retrieval. If not set, a system default value is used.
+    mode?: DynamicRetrievalMode
+      (Optional) The mode of the predictor to be used in dynamic retrieval.
+```
+
+----------------------------------------
+
+TITLE: DynamicRetrievalConfig.mode Property Definition
+DESCRIPTION: Defines the 'mode' property within the `DynamicRetrievalConfig` interface, specifying the predictor mode for dynamic retrieval. This property is optional.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/main/generative-ai.dynamicretrievalconfig.mode.md#_snippet_0
+
+LANGUAGE: APIDOC
+CODE:
+```
+DynamicRetrievalConfig:
+  mode?: DynamicRetrievalMode
+    Description: The mode of the predictor to be used in dynamic retrieval.
+```
+
+LANGUAGE: TypeScript
+CODE:
+```
+mode?: DynamicRetrievalMode;
+```
+
+----------------------------------------
+
+TITLE: DynamicRetrievalMode Enum Definition
+DESCRIPTION: Defines the modes for dynamic retrieval within the `@google/generative-ai` library. This enum specifies whether the retrieval is dynamic or unspecified.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/main/generative-ai.dynamicretrievalmode.md#_snippet_0
+
+LANGUAGE: APIDOC
+CODE:
+```
+DynamicRetrievalMode enum:
+  Description: The mode of the predictor to be used in dynamic retrieval.
+  Signature: export declare enum DynamicRetrievalMode
+  Members:
+    MODE_DYNAMIC: "MODE_DYNAMIC"
+    MODE_UNSPECIFIED: "MODE_UNSPECIFIED"
+```
+
+----------------------------------------
+
+TITLE: ObjectSchema Interface
+DESCRIPTION: Defines a schema for a JSON object, mapping specific keys to their corresponding values, crucial for structured data handling.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/server/generative-ai.md#_snippet_6
+
+LANGUAGE: APIDOC
+CODE:
+```
+Interface/Type: ObjectSchema
+  Description: Describes a JSON object, a mapping of specific keys to values.
+```
+
+----------------------------------------
+
+TITLE: ExecutableCodePart.functionCall Property Definition
+DESCRIPTION: Defines the 'functionCall' property within the 'ExecutableCodePart' interface or class. Its type is specified as 'never', which typically indicates that this property should not exist or be used, or that it's a placeholder for a type that will never be instantiated.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/main/generative-ai.executablecodepart.functioncall.md#_snippet_0
+
+LANGUAGE: TypeScript
+CODE:
+```
+functionCall?: never;
+```
+
+LANGUAGE: APIDOC
+CODE:
+```
+ExecutableCodePart:
+  property functionCall: never
+    Description: This property is defined as 'never', indicating it should not be present or accessible.
+```
+
+----------------------------------------
+
+TITLE: GenerativeModel.generationConfig Property Definition
+DESCRIPTION: Defines the `generationConfig` property within the `GenerativeModel` class, specifying its type as `GenerationConfig`. This snippet provides both the TypeScript signature and a structured API documentation representation.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/main/generative-ai.generativemodel.generationconfig.md#_snippet_0
+
+LANGUAGE: TypeScript
+CODE:
+```
+generationConfig: GenerationConfig;
+```
+
+LANGUAGE: APIDOC
+CODE:
+```
+GenerativeModel.generationConfig property
+Signature:
+  generationConfig: GenerationConfig;
+```
+
+----------------------------------------
+
+TITLE: FunctionDeclarationsTool API
+DESCRIPTION: A FunctionDeclarationsTool is a piece of code that enables the system to interact with external systems to perform an action, or set of actions, outside of knowledge and scope of the model.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/main/generative-ai.md#_snippet_33
+
+LANGUAGE: APIDOC
+CODE:
+```
+interface FunctionDeclarationsTool
+```
+
+----------------------------------------
+
+TITLE: FunctionCall.name Property Definition (TypeScript)
+DESCRIPTION: Defines the 'name' property as part of the `FunctionCall` interface in TypeScript, indicating that it holds a string value. This property is typically used to identify the name of a function to be called.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/main/generative-ai.functioncall.name.md#_snippet_0
+
+LANGUAGE: APIDOC
+CODE:
+```
+FunctionCall:
+  name:
+    type: string
+    description: The name of the function.
+```
+
+LANGUAGE: TypeScript
+CODE:
+```
+name: string;
+```
+
+----------------------------------------
+
+TITLE: GenerationConfig Interface Properties
+DESCRIPTION: Details the configurable properties for content generation, including their types, descriptions, and optionality.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/main/generative-ai.generationconfig.md#_snippet_1
+
+LANGUAGE: APIDOC
+CODE:
+```
+GenerationConfig interface:
+  Properties:
+    candidateCount?: number
+    frequencyPenalty?: number
+      Description: Frequency penalty applied to the next token's logprobs, multiplied by the number of times each token has been seen in the respponse so far.
+    logprobs?: number
+      Description: Valid if responseLogProbs is set to True. This will set the number of top logprobs to return at each decoding step in the logprobsResult.
+    maxOutputTokens?: number
+    presencePenalty?: number
+      Description: Presence penalty applied to the next token's logprobs if the token has already been seen in the response.
+    responseLogprobs?: boolean
+      Description: If True, export the logprobs results in response.
+    responseMimeType?: string
+      Description: Output response mimetype of the generated candidate text. Supported mimetype: `text/plain`: (default) Text output. `application/json`: JSON response in the candidates.
+    responseSchema?: ResponseSchema
+      Description: Output response schema of the generated candidate text. Note: This only applies when the specified `responseMIMEType` supports a schema; currently this is limited to `application/json`.
+    stopSequences?: string[]
+    temperature?: number
+    topK?: number
+    topP?: number
+```
+
+----------------------------------------
+
+TITLE: FunctionCallPart.text Property Definition
+DESCRIPTION: Defines the 'text' property of the 'FunctionCallPart' interface. This property is explicitly typed as 'never', implying it should not be present or used in valid instances of FunctionCallPart. This is typically used in discriminated union types where other parts of the union define the actual content.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/server/generative-ai.functioncallpart.text.md#_snippet_0
+
+LANGUAGE: TypeScript
+CODE:
+```
+text?: never;
+```
+
+LANGUAGE: APIDOC
+CODE:
+```
+FunctionCallPart:
+  properties:
+    text:
+      type: never
+      description: This property is typed as 'never', indicating it should not be present or used, likely as part of a type union where other parts define the actual content.
+```
+
+----------------------------------------
+
+TITLE: API Reference: FunctionCallingConfig Interface
+DESCRIPTION: Configures how function calling should behave, including allowed function names and the calling mode.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/common/api-review/generative-ai-server.api.md#_snippet_25
+
+LANGUAGE: APIDOC
+CODE:
+```
+FunctionCallingConfig:
+  allowedFunctionNames?: string[]
+  mode?: FunctionCallingMode
+```
+
+----------------------------------------
+
+TITLE: EmbedContentRequest Properties
+DESCRIPTION: Details the properties available within the `EmbedContentRequest` interface, including their types and descriptions for content embedding operations.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/main/generative-ai.embedcontentrequest.md#_snippet_1
+
+LANGUAGE: APIDOC
+CODE:
+```
+EmbedContentRequest:
+  properties:
+    content:
+      type: Content
+      description: ""
+    taskType?:
+      type: TaskType
+      description: "(Optional)"
+    title?:
+      type: string
+      description: "(Optional)"
+```
+
+----------------------------------------
+
+TITLE: Define 'tools' property for GenerateContentRequest
+DESCRIPTION: This property allows specifying an array of `Tool` objects within a `GenerateContentRequest`. It is optional and can be used to provide the model with access to external tools or functions. The property's type is an array of `Tool` objects, indicated by `Tool[]`.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/main/generative-ai.generatecontentrequest.tools.md#_snippet_0
+
+LANGUAGE: APIDOC
+CODE:
+```
+GenerateContentRequest.tools property:
+  Description: Optional array of Tool objects.
+  Type: Tool[]
+  Signature:
+    tools?: Tool[];
+```
+
+----------------------------------------
+
+TITLE: GenerativeModel.generateContentStream() Method API Reference
+DESCRIPTION: This section provides the detailed API documentation for the `generateContentStream` method. It includes the method's TypeScript signature, a description of its purpose, and a breakdown of its parameters and return type. This method is designed to make a single streaming call to the model, providing an iterable stream of content chunks and a promise for the final aggregated response.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/main/generative-ai.generativemodel.generatecontentstream.md#_snippet_0
+
+LANGUAGE: TypeScript
+CODE:
+```
+generateContentStream(request: GenerateContentRequest | string | Array<string | Part>, requestOptions?: SingleRequestOptions): Promise<GenerateContentStreamResult>;
+```
+
+LANGUAGE: APIDOC
+CODE:
+```
+GenerativeModel.generateContentStream():
+  Description: Makes a single streaming call to the model and returns an object containing an iterable stream that iterates over all chunks in the streaming response as well as a promise that returns the final aggregated response.
+  Parameters:
+    request: GenerateContentRequest | string | Array<string | Part>
+      Description: The content generation request, which can be a GenerateContentRequest object, a string, or an array of strings or Part objects.
+    requestOptions: SingleRequestOptions (Optional)
+      Description: Optional request configuration. Fields set here will take precedence over RequestOptions values provided during model initialization.
+  Returns: Promise<GenerateContentStreamResult>
+    Description: A Promise that resolves to a GenerateContentStreamResult object, containing an iterable stream of content chunks and a promise for the final aggregated response.
+```
+
+----------------------------------------
+
+TITLE: GenerateContentRequest.systemInstruction Property Definition
+DESCRIPTION: Defines the `systemInstruction` property within the `GenerateContentRequest` interface, specifying its possible types and optional nature. This property is used to provide system-level instructions to the generative model.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/main/generative-ai.generatecontentrequest.systeminstruction.md#_snippet_0
+
+LANGUAGE: APIDOC
+CODE:
+```
+GenerateContentRequest.systemInstruction property
+
+Signature:
+systemInstruction?: string | Part | Content;
+```
+
+----------------------------------------
+
+TITLE: CachedContentBase.contents Property Definition
+DESCRIPTION: Defines the 'contents' property of the 'CachedContentBase' class, which holds an array of 'Content' objects. This property is a core part of the cached content structure within the `@google/generative-ai` library.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/main/generative-ai.cachedcontentbase.contents.md#_snippet_0
+
+LANGUAGE: TypeScript
+CODE:
+```
+contents: Content[];
+```
+
+LANGUAGE: APIDOC
+CODE:
+```
+Property: contents
+  Parent: CachedContentBase
+  Type: Content[]
+  Description: An array of Content objects representing the cached content.
+```
+
+----------------------------------------
+
+TITLE: CachedContentBase.contents Property API Reference
+DESCRIPTION: API documentation for the 'contents' property of the 'CachedContentBase' class. This property holds an array of 'Content' objects, representing the cached content.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/server/generative-ai.cachedcontentbase.contents.md#_snippet_0
+
+LANGUAGE: APIDOC
+CODE:
+```
+CachedContentBase.contents property
+  Signature:
+    contents: Content[];
+  Description:
+    This property holds an array of 'Content' objects.
+```
+
+----------------------------------------
+
+TITLE: UsageMetadata Interface Definition and Properties
+DESCRIPTION: Defines the `UsageMetadata` interface, which encapsulates various token counts related to a generative AI request. This includes the number of tokens in the prompt, the generated candidates, any cached content, and the total token count for the request.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/main/generative-ai.usagemetadata.md#_snippet_0
+
+LANGUAGE: APIDOC
+CODE:
+```
+UsageMetadata interface:
+  Signature: export interface UsageMetadata
+  Description: Metadata on the generation request's token usage.
+  Properties:
+    cachedContentTokenCount?: number
+      Description: (Optional) Total token count in the cached part of the prompt, i.e. in the cached content.
+    candidatesTokenCount: number
+      Description: Total number of tokens across the generated candidates.
+    promptTokenCount: number
+      Description: Number of tokens in the prompt.
+    totalTokenCount: number
+      Description: Total token count for the generation request (prompt + candidates).
+```
+
+----------------------------------------
+
+TITLE: UsageMetadata.promptTokenCount Property Definition
+DESCRIPTION: This snippet defines the `promptTokenCount` property, part of the `UsageMetadata` interface, which represents the number of tokens in the prompt. It includes both the TypeScript signature and a structured API documentation entry.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/main/generative-ai.usagemetadata.prompttokencount.md#_snippet_0
+
+LANGUAGE: typescript
+CODE:
+```
+promptTokenCount: number;
+```
+
+LANGUAGE: APIDOC
+CODE:
+```
+UsageMetadata.promptTokenCount property:
+  Description: Number of tokens in the prompt.
+  Type: number
+```
+
+----------------------------------------
+
+TITLE: ResponseSchema Type Alias
+DESCRIPTION: A type alias for the schema passed to GenerationConfig.responseSchema, defining the expected format of model responses.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/server/generative-ai.md#_snippet_17
+
+LANGUAGE: APIDOC
+CODE:
+```
+Type Alias: ResponseSchema
+  Description: Schema passed to `GenerationConfig.responseSchema`
+```
+
+----------------------------------------
+
+TITLE: ModelParams.cachedContent Property Definition
+DESCRIPTION: Defines the `cachedContent` property within the `ModelParams` interface/class. This property is optional and expects a value of type `CachedContent`.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/main/generative-ai.modelparams.cachedcontent.md#_snippet_0
+
+LANGUAGE: APIDOC
+CODE:
+```
+ModelParams.cachedContent property:
+  Signature: cachedContent?: CachedContent;
+  Type: CachedContent
+  Optional: true
+```
+
+----------------------------------------
+
+TITLE: CountTokensRequest Interface Properties
+DESCRIPTION: Documents the properties available within the `CountTokensRequest` interface, detailing their types and descriptions. These properties are used to specify the content for which tokens need to be counted.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/main/generative-ai.counttokensrequest.md#_snippet_1
+
+LANGUAGE: APIDOC
+CODE:
+```
+CountTokensRequest interface properties:
+  contents?: Content[]
+    Description: (Optional) An array of Content objects.
+  generateContentRequest?: GenerateContentRequest
+    Description: (Optional) A GenerateContentRequest object.
+```
+
+----------------------------------------
+
+TITLE: CountTokensRequest.contents Property Definition
+DESCRIPTION: Defines the `contents` property, an optional array of `Content` objects, typically used as input for token counting requests. Its presence indicates the content to be analyzed.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/main/generative-ai.counttokensrequest.contents.md#_snippet_0
+
+LANGUAGE: TypeScript
+CODE:
+```
+contents?: Content[];
+```
+
+LANGUAGE: APIDOC
+CODE:
+```
+Property: contents
+  Type: Content[]
+  Optional: true
+```
+
+----------------------------------------
+
+TITLE: ChatSession.getHistory() API Documentation
+DESCRIPTION: Provides the API documentation for the `ChatSession.getHistory()` method, detailing its purpose, signature, and return value. This method retrieves the chat history, excluding blocked prompts and candidates.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/main/generative-ai.chatsession.gethistory.md#_snippet_0
+
+LANGUAGE: typescript
+CODE:
+```
+getHistory(): Promise<Content[]>
+```
+
+LANGUAGE: APIDOC
+CODE:
+```
+ChatSession.getHistory():
+  Description: Gets the chat history so far. Blocked prompts are not added to history. Blocked candidates are not added to history, nor are the prompts that generated them.
+  Returns:
+    Type: Promise<Content[]>
+    Description: A Promise that resolves to an array of Content objects representing the chat history.
+```
+
+----------------------------------------
+
+TITLE: GenerateContentCandidate.safetyRatings Property Definition
+DESCRIPTION: Defines the 'safetyRatings' property within the 'GenerateContentCandidate' interface or class. This property is optional and holds an array of 'SafetyRating' objects, typically used to convey content safety attributes.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/main/generative-ai.generatecontentcandidate.safetyratings.md#_snippet_0
+
+LANGUAGE: TypeScript
+CODE:
+```
+safetyRatings?: SafetyRating[];
+```
+
+LANGUAGE: APIDOC
+CODE:
+```
+GenerateContentCandidate:
+  properties:
+    safetyRatings:
+      type: SafetyRating[]
+      optional: true
+      description: An array of safety ratings associated with the content candidate.
+```
+
+----------------------------------------
+
+TITLE: Define FunctionDeclarationsTool Interface in TypeScript
+DESCRIPTION: Defines the `FunctionDeclarationsTool` interface, which represents a mechanism for the generative AI model to interact with external systems by declaring functions. This interface is part of the `@google/generative-ai` library.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/main/generative-ai.functiondeclarationstool.md#_snippet_0
+
+LANGUAGE: TypeScript
+CODE:
+```
+export declare interface FunctionDeclarationsTool
+```
+
+----------------------------------------
+
+TITLE: StartChatParams.cachedContent Property Definition
+DESCRIPTION: Defines the `cachedContent` property, an optional string that represents the name of a `CachedContent` object rather than the object itself. This property is part of the `StartChatParams` interface.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/main/generative-ai.startchatparams.cachedcontent.md#_snippet_0
+
+LANGUAGE: APIDOC
+CODE:
+```
+StartChatParams.cachedContent property:
+  Description: This is the name of a `CachedContent` and not the cache object itself.
+  Signature: cachedContent?: string;
+```
+
+LANGUAGE: TypeScript
+CODE:
+```
+cachedContent?: string;
+```
+
+----------------------------------------
+
+TITLE: Content.parts Property Definition
+DESCRIPTION: Defines the `parts` property of the `Content` interface, which holds an array of `Part` objects. This property is fundamental for structuring content within the generative AI models, allowing for a sequence of different content types.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/main/generative-ai.content.parts.md#_snippet_0
+
+LANGUAGE: TypeScript
+CODE:
+```
+parts: Part[];
+```
+
+LANGUAGE: APIDOC
+CODE:
+```
+Content.parts property
+  Type: Part[]
+```
+
+----------------------------------------
+
+TITLE: CachedContentBase.tools Property Definition
+DESCRIPTION: Defines the 'tools' property within the 'CachedContentBase' interface. This property is optional and expects an array of 'Tool' objects, likely representing tools or functions available for the generative AI model.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/main/generative-ai.cachedcontentbase.tools.md#_snippet_0
+
+LANGUAGE: TypeScript
+CODE:
+```
+tools?: Tool[];
+```
+
+LANGUAGE: APIDOC
+CODE:
+```
+CachedContentBase.tools:
+  Type: Tool[]
+  Optional: true
+```
+
+----------------------------------------
+
+TITLE: API Documentation for GenerateContentResponse Properties
+DESCRIPTION: This documentation details the properties available within the `GenerateContentResponse` interface, outlining their types, optionality, and purpose. It includes fields for model candidates, prompt feedback, and usage metadata.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/main/generative-ai.generatecontentresponse.md#_snippet_1
+
+LANGUAGE: APIDOC
+CODE:
+```
+GenerateContentResponse interface:
+  Properties:
+    candidates?: GenerateContentCandidate[]
+      Description: Optional candidate responses from the model.
+    promptFeedback?: PromptFeedback
+      Description: Optional feedback related to the content filters.
+    usageMetadata?: UsageMetadata
+      Description: Optional metadata on the generation request's token usage.
+```
+
+----------------------------------------
+
+TITLE: Declare HarmCategory Enum in TypeScript
+DESCRIPTION: Defines the `HarmCategory` enum, which specifies various categories of content deemed harmful. This enum is used by the Google Generative AI API to block prompts or candidates that fall into these categories.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/main/generative-ai.harmcategory.md#_snippet_0
+
+LANGUAGE: typescript
+CODE:
+```
+export declare enum HarmCategory
+```
+
+----------------------------------------
+
+TITLE: CachedContentBase.model Property Definition
+DESCRIPTION: Defines the `model` property of the `CachedContentBase` interface/class. This property is optional and of type `string`.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/main/generative-ai.cachedcontentbase.model.md#_snippet_0
+
+LANGUAGE: TypeScript
+CODE:
+```
+model?: string;
+```
+
+LANGUAGE: APIDOC
+CODE:
+```
+CachedContentBase:
+  model:
+    type: string
+    optional: true
+```
+
+----------------------------------------
+
+TITLE: CachedContentBase.model Property Definition
+DESCRIPTION: Defines the `model` property of the `CachedContentBase` interface. This optional property specifies the name of the generative model used for the cached content. It is a string type.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/server/generative-ai.cachedcontentbase.model.md#_snippet_0
+
+LANGUAGE: APIDOC
+CODE:
+```
+CachedContentBase:
+  model?: string
+    description: The optional model name associated with the cached content.
+```
+
+LANGUAGE: TypeScript
+CODE:
+```
+model?: string;
+```
+
+----------------------------------------
+
+TITLE: GenerateContentCandidate finishMessage Property Signature
+DESCRIPTION: Provides the TypeScript signature for the 'finishMessage' property, indicating it is an optional string type.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/main/generative-ai.generatecontentcandidate.finishmessage.md#_snippet_0
+
+LANGUAGE: APIDOC
+CODE:
+```
+GenerateContentCandidate.finishMessage property:
+  Signature: finishMessage?: string;
+```
+
+----------------------------------------
+
+TITLE: FunctionResponse API
+DESCRIPTION: The result output from a FunctionCall that contains a string representing the FunctionDeclaration.name and a structured JSON object containing any output from the function is used as context to the model. This should contain the result of a FunctionCall made based on model prediction.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/main/generative-ai.md#_snippet_34
+
+LANGUAGE: APIDOC
+CODE:
+```
+interface FunctionResponse
+```
+
+----------------------------------------
+
+TITLE: TypeScript IntegerSchema Interface Definition
+DESCRIPTION: Defines the `IntegerSchema` interface, extending `BaseSchema`, used for describing JSON-encodable integers.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/main/generative-ai.integerschema.md#_snippet_0
+
+LANGUAGE: typescript
+CODE:
+```
+export interface IntegerSchema extends BaseSchema
+```
+
+----------------------------------------
+
+TITLE: ExecutableCode.code Property Definition
+DESCRIPTION: This snippet defines the 'code' property, a string type, within the 'ExecutableCode' interface/class. It is intended to store the actual code that needs to be executed.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/main/generative-ai.executablecode.code.md#_snippet_0
+
+LANGUAGE: typescript
+CODE:
+```
+code: string;
+```
+
+LANGUAGE: APIDOC
+CODE:
+```
+ExecutableCode:
+  properties:
+    code:
+      type: string
+      description: The code to be executed.
+```
+
+----------------------------------------
+
+TITLE: Define ToolConfig Interface Structure
+DESCRIPTION: Defines the TypeScript interface for `ToolConfig`, which encapsulates configuration settings shared across all tools used in a generative AI request.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/server/generative-ai.toolconfig.md#_snippet_0
+
+LANGUAGE: typescript
+CODE:
+```
+export interface ToolConfig
+```
+
+----------------------------------------
+
+TITLE: API Property: InlineDataPart.codeExecutionResult
+DESCRIPTION: Documents the 'codeExecutionResult' property of the 'InlineDataPart' interface. This property is optional and its type is 'never', suggesting it might be a placeholder or intended to never hold a value in certain contexts.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/main/generative-ai.inlinedatapart.codeexecutionresult.md#_snippet_0
+
+LANGUAGE: typescript
+CODE:
+```
+codeExecutionResult?: never;
+```
+
+LANGUAGE: APIDOC
+CODE:
+```
+Property: InlineDataPart.codeExecutionResult
+  Type: never
+  Optional: true
+  Description: Represents a property that is not expected to hold any value.
+```
+
+----------------------------------------
+
+TITLE: Define ResponseSchema Type
+DESCRIPTION: Documents the `ResponseSchema` type, which is an alias for `Schema` and is used to specify the expected response structure in `GenerationConfig.responseSchema`.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/server/generative-ai.responseschema.md#_snippet_0
+
+LANGUAGE: APIDOC
+CODE:
+```
+ResponseSchema type:
+  Description: Schema passed to `GenerationConfig.responseSchema`
+  Signature: export type ResponseSchema = Schema;
+  References: Schema
+```
+
+LANGUAGE: TypeScript
+CODE:
+```
+export type ResponseSchema = Schema;
+```
+
+----------------------------------------
+
+TITLE: ModelParams Interface Definition
+DESCRIPTION: Defines the structure for parameters used when obtaining a generative model from GoogleGenerativeAI, extending BaseParams and specifying various configuration options.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/main/generative-ai.modelparams.md#_snippet_0
+
+LANGUAGE: TypeScript
+CODE:
+```
+export interface ModelParams extends BaseParams
+```
+
+LANGUAGE: APIDOC
+CODE:
+```
+ModelParams interface:
+  Extends: BaseParams
+  Properties:
+    cachedContent?: CachedContent (Optional)
+    model: string
+    systemInstruction?: string | Part | Content (Optional)
+    toolConfig?: ToolConfig (Optional)
+    tools?: Tool[] (Optional)
+```
+
+----------------------------------------
+
+TITLE: Define StartChatParams History Property
+DESCRIPTION: This snippet defines the `history` property of the `StartChatParams` interface. It is an optional array of `Content` objects, used to provide a pre-existing chat history when starting a new conversation with the generative model.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/main/generative-ai.startchatparams.history.md#_snippet_0
+
+LANGUAGE: APIDOC
+CODE:
+```
+StartChatParams:
+  history:
+    type: Content[]
+    optional: true
+    description: An optional array of Content objects representing the chat history to initialize the conversation with.
+```
+
+----------------------------------------
+
+TITLE: ArraySchema Interface Definition and Properties
+DESCRIPTION: Defines the ArraySchema interface, which describes an ordered list of values, extending BaseSchema. It includes properties for defining array item schema, minimum and maximum item counts, and its schema type.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/main/generative-ai.arrayschema.md#_snippet_0
+
+LANGUAGE: APIDOC
+CODE:
+```
+ArraySchema interface:
+  Description: Describes an array, an ordered list of values.
+  Signature: export interface ArraySchema extends BaseSchema
+  Extends: BaseSchema
+  Properties:
+    items:
+      Type: Schema
+      Description: A schema describing the entries in the array.
+    maxItems?:
+      Type: number
+      Description: (Optional) The maximum number of items in the array.
+    minItems?:
+      Type: number
+      Description: (Optional) The minimum number of items in the array.
+    type:
+      Type: typeof SchemaType.ARRAY
+      Description: (No explicit description provided in source, but context implies it's the schema type identifier)
+```
+
+----------------------------------------
+
+TITLE: Schema Type Definition and Usage
+DESCRIPTION: This snippet defines the `Schema` type, which is a union of several primitive schema types. It is used to specify the structure and format of data for inputs and outputs, aligning with a subset of the OpenAPI 3.0 specification. Future updates may expand its fields.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/main/generative-ai.schema.md#_snippet_0
+
+LANGUAGE: APIDOC
+CODE:
+```
+Type: Schema
+Description: Used to define the format of input/output data. Represents a select subset of an OpenAPI 3.0 schema object. More fields may be added in the future as needed.
+Signature:
+  export type Schema = StringSchema | NumberSchema | IntegerSchema | BooleanSchema | ArraySchema | ObjectSchema;
+References:
+  - StringSchema
+  - NumberSchema
+  - IntegerSchema
+  - BooleanSchema
+  - ArraySchema
+  - ObjectSchema
+```
+
+LANGUAGE: TypeScript
+CODE:
+```
+export type Schema = StringSchema | NumberSchema | IntegerSchema | BooleanSchema | ArraySchema | ObjectSchema;
+```
+
+----------------------------------------
+
+TITLE: NumberSchema Interface Definition and Properties
+DESCRIPTION: Defines the structure of the `NumberSchema` interface, including its inheritance and properties, for describing JSON-encodable floating-point numbers within the `@google/generative-ai` library. This interface extends `BaseSchema` and includes optional `format` and required `type` properties.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/server/generative-ai.numberschema.md#_snippet_0
+
+LANGUAGE: TypeScript
+CODE:
+```
+export interface NumberSchema extends BaseSchema
+```
+
+LANGUAGE: APIDOC
+CODE:
+```
+NumberSchema interface
+  Description: Describes a JSON-encodable floating point number.
+  Extends: BaseSchema
+
+  Properties:
+    format?: "float" | "double"
+      Description: Optional. The format of the number.
+    type: typeof SchemaType.NUMBER
+      Description: (No explicit description provided)
+```
+
+----------------------------------------
+
+TITLE: NumberSchema Interface Definition and Properties
+DESCRIPTION: Defines the `NumberSchema` interface, which extends `BaseSchema`, and details its properties `format` and `type` for describing JSON-encodable floating-point numbers. This interface is part of the `@google/generative-ai` library.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/main/generative-ai.numberschema.md#_snippet_0
+
+LANGUAGE: APIDOC
+CODE:
+```
+NumberSchema interface:
+  Description: Describes a JSON-encodable floating point number.
+  Signature: export interface NumberSchema extends BaseSchema
+  Extends: BaseSchema
+  Properties:
+    format?:
+      Type: "float" | "double"
+      Description: Optional. The format of the number.
+    type:
+      Type: typeof SchemaType.NUMBER
+      Description: (No explicit description provided in the table, but implied by its type)
+```
+
+----------------------------------------
+
+TITLE: NumberSchema.type Property Definition
+DESCRIPTION: Defines the 'type' property of the 'NumberSchema' class, indicating that the schema represents a numerical value. This property is part of the schema definition within the '@google/generative-ai' library.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/main/generative-ai.numberschema.type.md#_snippet_0
+
+LANGUAGE: typescript
+CODE:
+```
+type: typeof SchemaType.NUMBER;
+```
+
+LANGUAGE: APIDOC
+CODE:
+```
+NumberSchema.type property
+  type: typeof SchemaType.NUMBER
+  description: The type property indicating a number schema.
+```
+
+----------------------------------------
+
+TITLE: Define FunctionDeclarationsTool Interface
+DESCRIPTION: Defines the `FunctionDeclarationsTool` interface, which represents a tool for declaring functions that a generative AI model can call to interact with external systems. This interface is part of the `@google/generative-ai` library and includes properties for specifying the functions available to the model.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/server/generative-ai.functiondeclarationstool.md#_snippet_0
+
+LANGUAGE: APIDOC
+CODE:
+```
+FunctionDeclarationsTool interface:
+  Signature:
+    export declare interface FunctionDeclarationsTool
+  Properties:
+    functionDeclarations?: FunctionDeclaration[]
+      Description: (Optional) One or more function declarations to be passed to the model along with the current user query. Model may decide to call a subset of these functions by populating [FunctionCall][content.part.functionCall] in the response. User should provide a [FunctionResponse][content.part.functionResponse] for each function call in the next turn. Based on the function responses, Model will generate the final response back to the user. Maximum 64 function declarations can be provided.
+```
+
+----------------------------------------
+
+TITLE: EnumStringSchema Interface Definition
+DESCRIPTION: This snippet defines the `EnumStringSchema` interface, which describes a string enumeration. It extends `BaseSchema` and includes properties for the enum values, format, and type, providing a structured way to represent string-based enums in API schemas.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/main/generative-ai.enumstringschema.md#_snippet_0
+
+LANGUAGE: APIDOC
+CODE:
+```
+EnumStringSchema interface:
+  Description: Describes a string enum
+  Signature: export interface EnumStringSchema extends BaseSchema
+  Extends: BaseSchema
+  Properties:
+    enum:
+      Type: string[]
+      Description: Possible values for this enum
+    format:
+      Type: "enum"
+      Description: ""
+    type:
+      Type: typeof SchemaType.STRING
+      Description: ""
+```
+
+----------------------------------------
+
+TITLE: TypeScript IntegerSchema Interface Definition
+DESCRIPTION: Defines the `IntegerSchema` interface in TypeScript, specifying that it extends `BaseSchema`. This interface is used to describe JSON-encodable integer types.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/server/generative-ai.integerschema.md#_snippet_0
+
+LANGUAGE: typescript
+CODE:
+```
+export interface IntegerSchema extends BaseSchema
+```
+
+----------------------------------------
+
+TITLE: ExecutableCodePart.codeExecutionResult Property Definition
+DESCRIPTION: Defines the `codeExecutionResult` property as part of the `ExecutableCodePart` interface. Its type is `never`, which typically signifies that this property should not be directly assigned a value or accessed, often implying internal management or a state that is not meant for external interaction.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/main/generative-ai.executablecodepart.codeexecutionresult.md#_snippet_0
+
+LANGUAGE: typescript
+CODE:
+```
+codeExecutionResult?: never;
+```
+
+LANGUAGE: APIDOC
+CODE:
+```
+ExecutableCodePart:
+  codeExecutionResult:
+    type: property
+    signature: codeExecutionResult?: never;
+    description: This property is defined as 'never', indicating it should not be directly assigned or accessed in a typical manner.
+```
+
+----------------------------------------
+
+TITLE: ChatSession.sendMessageStream() Method API Reference
+DESCRIPTION: Detailed API documentation for the `sendMessageStream` method of the `ChatSession` class. This method is used to send a chat message and receive the response as a streamable result, with options to override global request settings.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/main/generative-ai.chatsession.sendmessagestream.md#_snippet_0
+
+LANGUAGE: APIDOC
+CODE:
+```
+ChatSession.sendMessageStream() method:
+  Description: Sends a chat message and receives the response as a GenerateContentStreamResult containing an iterable stream and a response promise. Fields set in the optional SingleRequestOptions parameter will take precedence over the RequestOptions values provided to GoogleGenerativeAI.getGenerativeModel().
+  Signature: sendMessageStream(request: string | Array<string | Part>, requestOptions?: SingleRequestOptions): Promise<GenerateContentStreamResult>;
+  Parameters:
+    request: string | Array<string | Part>
+      Description: The content of the chat message to send.
+    requestOptions: SingleRequestOptions (Optional)
+      Description: Optional request-specific options that override global RequestOptions.
+  Returns: Promise<GenerateContentStreamResult>
+```
+
+----------------------------------------
+
+TITLE: TextPart Interface Properties Overview
+DESCRIPTION: Lists and describes all properties available on the `TextPart` interface, including their types and whether they are optional. These properties define the structure of a text content part.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/main/generative-ai.textpart.md#_snippet_1
+
+LANGUAGE: APIDOC
+CODE:
+```
+TextPart properties:
+  codeExecutionResult?: never (Optional)
+  executableCode?: never (Optional)
+  fileData?: never (Optional)
+  functionCall?: never (Optional)
+  functionResponse?: never (Optional)
+  inlineData?: never (Optional)
+  text: string
+```
+
+----------------------------------------
+
+TITLE: Define TaskType Enum for Content Embedding
+DESCRIPTION: Defines the `TaskType` enum within the `@google/generative-ai` library, specifying various task types for content embedding operations. This enum includes members for classification, clustering, retrieval, and semantic similarity tasks.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/main/generative-ai.tasktype.md#_snippet_0
+
+LANGUAGE: TypeScript
+CODE:
+```
+export declare enum TaskType
+```
+
+LANGUAGE: APIDOC
+CODE:
+```
+Enumeration Members:
+- CLASSIFICATION (Value: "CLASSIFICATION")
+- CLUSTERING (Value: "CLUSTERING")
+- RETRIEVAL_DOCUMENT (Value: "RETRIEVAL_DOCUMENT")
+- RETRIEVAL_QUERY (Value: "RETRIEVAL_QUERY")
+- SEMANTIC_SIMILARITY (Value: "SEMANTIC_SIMILARITY")
+- TASK_TYPE_UNSPECIFIED (Value: "TASK_TYPE_UNSPECIFIED")
+```
+
+----------------------------------------
+
+TITLE: ExecutableCodePart.inlineData Property Definition
+DESCRIPTION: This snippet provides the API documentation and TypeScript signature for the 'inlineData' property, which is part of the 'ExecutableCodePart' interface/class in the '@google/generative-ai' package. The 'never' type indicates that this property should not be accessed or used.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/main/generative-ai.executablecodepart.inlinedata.md#_snippet_0
+
+LANGUAGE: APIDOC
+CODE:
+```
+ExecutableCodePart:
+  property inlineData:
+    type: never
+    description: This property is part of the ExecutableCodePart interface/class within the @google/generative-ai library. Its type is 'never', implying it is not meant to be used or is reserved.
+```
+
+LANGUAGE: typescript
+CODE:
+```
+inlineData?: never;
+```
+
+----------------------------------------
+
+TITLE: API Definition for TextPart.functionResponse Property
+DESCRIPTION: Defines the `functionResponse` property within the `TextPart` interface. Its type is `never`, signifying that it should not be set or accessed, effectively acting as a type-level restriction or a placeholder.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/server/generative-ai.textpart.functionresponse.md#_snippet_0
+
+LANGUAGE: APIDOC
+CODE:
+```
+TextPart:
+  Properties:
+    functionResponse:
+      Type: never
+      Description: This property is defined as 'never', indicating it should not be used or accessed. It might serve as a type-level constraint or a placeholder for future extensions.
+      Signature: functionResponse?: never;
+```
+
+----------------------------------------
+
+TITLE: FileDataPart.inlineData Property Definition
+DESCRIPTION: Defines the `inlineData` property within the `FileDataPart` interface. Its type `never` indicates that this property is not intended for direct use, often used for type-level exclusion or deprecation in API design.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/main/generative-ai.filedatapart.inlinedata.md#_snippet_0
+
+LANGUAGE: TypeScript
+CODE:
+```
+inlineData?: never;
+```
+
+LANGUAGE: APIDOC
+CODE:
+```
+FileDataPart.inlineData property
+
+Signature:
+
+inlineData?: never;
+```
+
+----------------------------------------
+
+TITLE: EmbedContentRequest.taskType Property Definition
+DESCRIPTION: Defines the 'taskType' property, an optional field within the 'EmbedContentRequest' interface. This property is used to specify the type of task for which the content is being embedded, influencing the embedding model's behavior.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/main/generative-ai.embedcontentrequest.tasktype.md#_snippet_0
+
+LANGUAGE: TypeScript
+CODE:
+```
+taskType?: TaskType;
+```
+
+LANGUAGE: APIDOC
+CODE:
+```
+EmbedContentRequest.taskType:
+  Type: TaskType
+  Optional: true
+  Description: Specifies the type of task for content embedding.
+```
+
+----------------------------------------
+
+TITLE: FileDataPart.executableCode Property Definition
+DESCRIPTION: Defines the `executableCode` property within the `FileDataPart` interface. The `never` type indicates that this property should not be used or accessed, often signifying a placeholder or a property that will never hold a value.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/main/generative-ai.filedatapart.executablecode.md#_snippet_0
+
+LANGUAGE: TypeScript
+CODE:
+```
+executableCode?: never;
+```
+
+LANGUAGE: APIDOC
+CODE:
+```
+FileDataPart.executableCode property
+  Type: never
+  Description: This property is defined as 'never', indicating it should not be used or accessed.
+```
+
+----------------------------------------
+
+TITLE: SimpleStringSchema.enum Property Definition
+DESCRIPTION: Documents the 'enum' property of the `SimpleStringSchema` API, specifying its type as `never`. This property is likely a placeholder or indicates that enumeration is not supported for this schema type.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/main/generative-ai.simplestringschema.enum.md#_snippet_0
+
+LANGUAGE: APIDOC
+CODE:
+```
+SimpleStringSchema:
+  properties:
+    enum:
+      type: never
+```
+
+LANGUAGE: typescript
+CODE:
+```
+enum?: never;
+```
+
+----------------------------------------
+
+TITLE: APIDOC: SimpleStringSchema Interface Definition
+DESCRIPTION: Extends BaseSchema to define a simple string schema, specifying its format (e.g., 'date-time') and type. It explicitly disallows 'enum' for simple string definitions, ensuring a straightforward string type.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/common/api-review/generative-ai.api.md#_snippet_53
+
+LANGUAGE: TypeScript
+CODE:
+```
+export interface SimpleStringSchema extends BaseSchema {
+    // (undocumented)
+    enum?: never;
+    // (undocumented)
+    format?: "date-time" | undefined;
+    // (undocumented)
+    type: typeof SchemaType.STRING;
+}
+```
+
+----------------------------------------
+
+TITLE: FunctionCallingConfig Interface
+DESCRIPTION: No description provided.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/main/generative-ai.md#_snippet_29
+
+LANGUAGE: APIDOC
+CODE:
+```
+FunctionCallingConfig:
+  No description provided.
+```
+
+----------------------------------------
+
+TITLE: Content Interface
+DESCRIPTION: Content type for both prompts and response candidates.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/main/generative-ai.md#_snippet_14
+
+LANGUAGE: APIDOC
+CODE:
+```
+Content:
+  Content type for both prompts and response candidates.
+```
+
+----------------------------------------
+
+TITLE: GenerateContentResponse API
+DESCRIPTION: Individual response from GenerativeModel.generateContent() and GenerativeModel.generateContentStream(). generateContentStream() will return one in each chunk until the stream is done.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/main/generative-ai.md#_snippet_38
+
+LANGUAGE: APIDOC
+CODE:
+```
+interface GenerateContentResponse
+```
+
+----------------------------------------
+
+TITLE: RequestOptions.baseUrl Property Definition
+DESCRIPTION: Defines the `baseUrl` property for `RequestOptions`, which specifies the base endpoint URL for API requests. This property is optional and defaults to 'https://generativelanguage.googleapis.com'.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/main/generative-ai.requestoptions.baseurl.md#_snippet_0
+
+LANGUAGE: APIDOC
+CODE:
+```
+RequestOptions.baseUrl property
+  Description: Base endpoint url. Defaults to "https://generativelanguage.googleapis.com"
+  Signature:
+    baseUrl?: string;
+```
+
+LANGUAGE: typescript
+CODE:
+```
+baseUrl?: string;
+```
+
+----------------------------------------
+
+TITLE: ObjectSchema.required Property Definition (TypeScript & API)
+DESCRIPTION: Defines the 'required' property within an ObjectSchema, indicating a list of keys that must be present in the generated object. This property is optional and expects an array of strings.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/server/generative-ai.objectschema.required.md#_snippet_0
+
+LANGUAGE: TypeScript
+CODE:
+```
+required?: string[];
+```
+
+LANGUAGE: APIDOC
+CODE:
+```
+ObjectSchema:
+  properties:
+    required:
+      type: string[]
+      optional: true
+      description: A list of keys declared in the properties object. Required properties will always be present in the generated object.
+```
+
+----------------------------------------
+
+TITLE: Define ObjectSchema Type Property
+DESCRIPTION: This snippet defines the `type` property for the `ObjectSchema` interface. It is a read-only property that always returns the `SchemaType.OBJECT` enum value, indicating the schema represents an object type.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/server/generative-ai.objectschema.type.md#_snippet_0
+
+LANGUAGE: typescript
+CODE:
+```
+type: typeof SchemaType.OBJECT;
+```
+
+LANGUAGE: APIDOC
+CODE:
+```
+ObjectSchema:
+  properties:
+    type:
+      description: The type property of ObjectSchema.
+      type: typeof SchemaType.OBJECT
+```
+
+----------------------------------------
+
+TITLE: API Documentation for CountTokensResponse.totalTokens Property
+DESCRIPTION: Documents the `totalTokens` property, which represents the total number of tokens counted in a response. This property is a numerical value, providing a direct count of tokens.
+SOURCE: https://github.com/google-gemini/deprecated-generative-ai-js/blob/main/docs/reference/main/generative-ai.counttokensresponse.totaltokens.md#_snippet_0
+
+LANGUAGE: APIDOC
+CODE:
+```
+CountTokensResponse.totalTokens property
+
+Signature:
+```typescript
+totalTokens: number;
+```
+```

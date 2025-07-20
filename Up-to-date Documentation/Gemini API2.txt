@@ -1,0 +1,1298 @@
+TITLE: Implement Multi-turn Conversations (Chat) with Gemini API (PHP)
+DESCRIPTION: This PHP snippet demonstrates how to build multi-turn conversational experiences using the Gemini API. It shows how to maintain context by passing a history of user and model interactions within the `contents` array, enabling the model to respond coherently based on previous turns.
+SOURCE: https://github.com/derrickobedgiu1/gemini-api/blob/main/examples/README.md#_snippet_8
+
+LANGUAGE: php
+CODE:
+```
+use Derrickob\GeminiApi\Data\Content;
+
+$response = $gemini->models()->generateContent([
+    'model' => 'models/gemini-1.5-flash',
+    'contents' => [
+        Content::createTextContent('Write the first line of a story about a magic backpack.', 'user'),
+        Content::createTextContent('In the bustling city of Meadow brook, lived a young girl named Sophie. She was a bright and curious soul with an imaginative mind.', 'model'),
+        Content::createTextContent('Can you set it in a quiet village in 1600s France?', 'user'),
+    ],
+]);
+
+echo $response->text(); // The worn leather of the backpack creaked softly as Marie, a young girl...
+```
+
+----------------------------------------
+
+TITLE: Generate Content with Gemini API using PHP and API Key
+DESCRIPTION: Demonstrates how to initialize the `derrickob/gemini-api` client using an API key. The example shows a basic content generation request to the `models/gemini-1.5-flash` model, including a system instruction and user prompt, and then prints the generated text response.
+SOURCE: https://github.com/derrickobedgiu1/gemini-api/blob/main/README.md#_snippet_13
+
+LANGUAGE: php
+CODE:
+```
+<?php
+
+require_once 'vendor/autoload.php';
+
+use Derrickob\GeminiApi\Gemini;
+
+$apiKey = getenv('GOOGLE_API_KEY');
+
+$gemini = new Gemini([
+    'apiKey' => $apiKey,
+]);
+
+$response = $gemini->models()->generateContent([
+    'model' => 'models/gemini-1.5-flash',
+    'systemInstruction' => 'You are a helpful assistant',
+    'contents' => 'Hello',
+]);
+
+echo $response->text(); // Hello!👋  What can I do for you today?
+```
+
+----------------------------------------
+
+TITLE: Submit Function Call Response with Gemini API in PHP
+DESCRIPTION: This PHP code demonstrates how to interact with the Gemini API by defining custom tools (functions) and submitting a function call response within a conversation. It shows how to declare functions like `find_movies`, `find_theaters`, and `get_showtimes` with their parameters. The example then constructs a conversation history including a user query, a simulated function call, and a function response, finally generating content using the Gemini model.
+SOURCE: https://github.com/derrickobedgiu1/gemini-api/blob/main/examples/README.md#_snippet_10
+
+LANGUAGE: php
+CODE:
+```
+use Derrickob\GeminiApi\Data\Content;
+use Derrickob\GeminiApi\Data\FunctionCallingConfig;
+use Derrickob\GeminiApi\Data\FunctionDeclaration;
+use Derrickob\GeminiApi\Data\Tool;
+use Derrickob\GeminiApi\Data\ToolConfig;
+use Derrickob\GeminiApi\Enums\Mode;
+
+$functionDeclarations = [
+    FunctionDeclaration::generate(
+        name: 'find_movies',
+        description: 'find movie titles currently playing in theaters based on any description, genre, title words, etc.',
+        params: [
+            'location' => [
+                'type' => 'string',
+                'description' => 'The city and state, e.g. San Francisco, CA or a zip code e.g. 95616',
+            ],
+            'description' => [
+                'type' => 'string',
+                'description' => 'Any kind of description including category or genre, title words, attributes, etc.',
+            ],
+        ],
+        required: ['description']
+    ),
+    FunctionDeclaration::generate(
+        name: 'find_theaters',
+        description: 'find theaters based on location and optionally movie title which is currently playing in theaters',
+        params: [
+            'location' => [
+                'type' => 'string',
+                'description' => 'The city and state, e.g. San Francisco, CA or a zip code e.g. 95616',
+            ],
+            'movie' => [
+                'type' => 'string',
+                'description' => 'Any movie title',
+            ],
+        ],
+        required: ['location']
+    ),
+    FunctionDeclaration::generate(
+        name: 'get_showtimes',
+        description: 'Find the start times for movies playing in a specific theater',
+        params: [
+            'location' => [
+                'type' => 'string',
+                'description' => 'The city and state, e.g. San Francisco, CA or a zip code e.g. 95616',
+            ],
+            'movie' => [
+                'type' => 'string',
+                'description' => 'Any movie title',
+            ],
+            'theater' => [
+                'type' => 'string',
+                'description' => 'Name of the theater',
+            ],
+            'date' => [
+                'type' => 'string',
+                'description' => 'Date for requested showtime',
+            ],
+        ],
+        required: ['location', 'movie', 'theater', 'date']
+    ),
+];
+
+$contents = [
+    Content::createTextContent('Which theaters in Mountain View show Barbie movie?', 'user'),
+    Content::createFunctionCallContent(
+        'find_theaters',
+        ['location' => 'Mountain View, CA', 'movie' => 'Barbie']
+    ),
+    Content::createFunctionResponseContent(
+        'find_theaters',
+        [
+            'movie' => 'Barbie',
+            'theaters' => [
+                ['name' => 'AMC Mountain View 16', 'address' => '2000 W El Camino Real, Mountain View, CA 94040'],
+                ['name' => 'Regal Edwards 14', 'address' => '245 Castro St, Mountain View, CA 94040'],
+            ],
+        ]
+    ),
+];
+
+$response = $gemini->models()->generateContent([
+    'model' => 'models/gemini-1.5-flash',
+    'contents' => $contents,
+    'tools' => new Tool($functionDeclarations),
+    'toolConfig' => new ToolConfig(
+        new FunctionCallingConfig(
+            mode: Mode::AUTO
+        ),
+    ),
+]);
+
+echo $response->text(); // The following theaters in Mountain View sh...
+```
+
+----------------------------------------
+
+TITLE: Set GOOGLE_API_KEY Environment Variable
+DESCRIPTION: Provides commands to set the `GOOGLE_API_KEY` environment variable across different operating systems: Powershell, Cmd, and Linux/macOS. This variable is crucial for authenticating requests to the Gemini API.
+SOURCE: https://github.com/derrickobedgiu1/gemini-api/blob/main/README.md#_snippet_12
+
+LANGUAGE: powershell
+CODE:
+```
+$Env:GOOGLE_API_KEY = "AIza...."
+```
+
+LANGUAGE: cmd
+CODE:
+```
+set GOOGLE_API_KEY=AIza....
+```
+
+LANGUAGE: shell
+CODE:
+```
+export GOOGLE_API_KEY=AIza....
+```
+
+----------------------------------------
+
+TITLE: PHP Gemini API Function Calling Request and Response Handling
+DESCRIPTION: This example demonstrates how to construct a Gemini API request with function declarations for various tools (finding movies, theaters, and showtimes). It shows how to configure automatic function calling and then process the API response to extract the function call details, illustrating both object-oriented and array-based access methods.
+SOURCE: https://github.com/derrickobedgiu1/gemini-api/blob/main/examples/README.md#_snippet_9
+
+LANGUAGE: php
+CODE:
+```
+use Derrickob\GeminiApi\Data\Content;
+use Derrickob\GeminiApi\Data\FunctionCallingConfig;
+use Derrickob\GeminiApi\Data\FunctionDeclaration;
+use Derrickob\GeminiApi\Data\Tool;
+use Derrickob\GeminiApi\Data\ToolConfig;
+use Derrickob\GeminiApi\Enums\Mode;
+
+$functionDeclarations = [
+    FunctionDeclaration::generate(
+        name: 'find_movies',
+        description: 'find movie titles currently playing in theaters based on any description, genre, title words, etc.',
+        params: [
+            'location' => [
+                'type' => 'string',
+                'description' => 'The city and state, e.g. San Francisco, CA or a zip code e.g. 95616',
+            ],
+            'description' => [
+                'type' => 'string',
+                'description' => 'Any kind of description including category or genre, title words, attributes, etc.',
+            ],
+        ],
+        required: ['description']
+    ),
+    FunctionDeclaration::generate(
+        name: 'find_theaters',
+        description: 'find theaters based on location and optionally movie title which is currently playing in theaters',
+        params: [
+            'location' => [
+                'type' => 'string',
+                'description' => 'The city and state, e.g. San Francisco, CA or a zip code e.g. 95616',
+            ],
+            'movie' => [
+                'type' => 'string',
+                'description' => 'Any movie title',
+            ],
+        ],
+        required: ['location']
+    ),
+    FunctionDeclaration::generate(
+        name: 'get_showtimes',
+        description: 'Find the start times for movies playing in a specific theater',
+        params: [
+            'location' => [
+                'type' => 'string',
+                'description' => 'The city and state, e.g. San Francisco, CA or a zip code e.g. 95616',
+            ],
+            'movie' => [
+                'type' => 'string',
+                'description' => 'Any movie title',
+            ],
+            'theater' => [
+                'type' => 'string',
+                'description' => 'Name of the theater',
+            ],
+            'date' => [
+                'type' => 'string',
+                'description' => 'Date for requested showtime',
+            ],
+        ],
+        required: ['location', 'movie', 'theater', 'date']
+    )
+];
+
+$response = $gemini->models()->generateContent([
+    'model' => 'models/gemini-1.5-flash',
+    'contents' => Content::createTextContent('What movies are showing in North Seattle tonight?', 'user'),
+    'tools' => new Tool($functionDeclarations),
+    'toolConfig' => new ToolConfig(
+        new FunctionCallingConfig(
+            mode: Mode::AUTO
+        ),
+    ),
+]);
+
+
+# Two ways to access the function call, choose convenient one:
+
+# Version 1: Using the Struct
+$functionCall = $response->functionCall();
+$functionName = $functionCall->name;
+$functionArgs = $functionCall->args;
+
+// Assuming you received find_movies which has location & description parameters
+$location = $functionArgs->getFields()['location']->getStringValue();
+$description = $functionArgs->getFields()['description']->getStringValue();
+
+
+# Version 2: Convert the response to array
+$functionCall = $response->functionCall()->toArray();
+$functionName = $functionCall['name'];
+$functionArgs = $functionCall['args'];
+```
+
+----------------------------------------
+
+TITLE: Generate JSON Output with Gemini API (PHP)
+DESCRIPTION: Illustrates how to configure the Gemini API to return responses in a structured JSON format. It defines a `responseSchema` to ensure the output adheres to a specific JSON structure, useful for generating structured data like product names.
+SOURCE: https://github.com/derrickobedgiu1/gemini-api/blob/main/examples/README.md#_snippet_1
+
+LANGUAGE: php
+CODE:
+```
+use Derrickob\GeminiApi\Data\GenerationConfig;
+use Derrickob\GeminiApi\Data\Schema;
+
+$responseSchema = [
+    'type' => 'array',
+    'items' => [
+        'type' => 'object',
+        'properties' => [
+            'productName' => [
+                'type' => 'string',
+            ],
+        ],
+    ],
+];
+
+$response = $gemini->models()->generateContent([
+    'model' => 'models/gemini-1.5-flash',
+    'contents' => 'Give me 5 names for my product, it\'s a bottle of tea',
+    'generationConfig' => new GenerationConfig(
+        responseMimeType: 'application/json',
+        responseSchema: Schema::fromArray($responseSchema)
+    ),
+]);
+
+echo $response->text(); // [{"productName": "Tranquility Tea"}, {"productName": "Golden Hour Brew"}, {"productName": "Serene Sip"}, {"productName": "Zenith Infusion"}, {"productName": "Midnight Bloom"}]
+```
+
+----------------------------------------
+
+TITLE: Authenticate Gemini API Client with Service Account
+DESCRIPTION: This snippet demonstrates how to initialize the Gemini API client using a service account file, specified via the GOOGLE_APPLICATION_CREDENTIALS environment variable. It utilizes symfony/cache for access token caching, which can be replaced with any PSR-6 compatible cache library. The example then lists available tuned models.
+SOURCE: https://github.com/derrickobedgiu1/gemini-api/blob/main/README.md#_snippet_14
+
+LANGUAGE: php
+CODE:
+```
+<?php
+
+require_once "vendor/autoload.php";
+
+use Derrickob\GeminiApi\Gemini;
+use Symfony\Component\Cache\Adapter\FilesystemAdapter;
+
+putenv('GOOGLE_APPLICATION_CREDENTIALS=/path/to/my/credentials.json');
+
+$apiKey = getenv('GOOGLE_API_KEY');
+$cacheItemPool = new FilesystemAdapter();
+
+$gemini = new Gemini([
+    'apiKey' => $apiKey,
+    'cacheItemPool' => $cacheItemPool,
+]);
+
+$response = $gemini->tunedModels()->list();
+
+$response->nextPageToken; // 
+
+foreach ($response->tunedModels as $tunedModel) {
+    $tunedModel->name; // tunedModels/number-generators-a3gcipxg9rl5
+    $tunedModel->displayName; // Number Generators
+    $tunedModel->description; // 
+}
+
+// See the list tuned model resource section for full usage
+```
+
+----------------------------------------
+
+TITLE: Process Text and Local Image Input with Gemini API (PHP)
+DESCRIPTION: Shows how to send a text prompt along with a locally stored image to the Gemini API. The image data is base64 encoded and sent as a blob, enabling the model to perform multimodal analysis on both text and visual content.
+SOURCE: https://github.com/derrickobedgiu1/gemini-api/blob/main/examples/README.md#_snippet_2
+
+LANGUAGE: php
+CODE:
+```
+use Derrickob\GeminiApi\Data\Content;
+
+$data = base64_encode(file_get_contents('files/sample.jpg'));
+
+$response = $gemini->models()->generateContent([
+    'model' => 'models/gemini-1.5-flash',
+    'contents' => Content::createTextWithBlobContent('What\'s in this image?', 'image/jpeg', $data, 'user'),
+]);
+
+echo $response->text(); // The image shows three people sitting in a waiting...
+```
+
+----------------------------------------
+
+TITLE: Enable Code Execution with Gemini API (PHP)
+DESCRIPTION: Demonstrates how to use the Gemini API to enable code execution for a model. It configures the model to use the `CodeExecution` tool, allowing it to generate and run code to answer complex queries, such as calculating the sum of prime numbers.
+SOURCE: https://github.com/derrickobedgiu1/gemini-api/blob/main/examples/README.md#_snippet_0
+
+LANGUAGE: php
+CODE:
+```
+use Derrickob\GeminiApi\Data\CodeExecution;
+use Derrickob\GeminiApi\Data\Content;
+use Derrickob\GeminiApi\Data\Tool;
+
+$response = $gemini->models()->generateContent([
+    'model' => 'models/gemini-1.5-flash',
+    'contents' => Content::createTextContent('What is the sum of the first 50 prime numbers? Generate and run code for the calculation, and make sure you get all 50.', 'user'),
+    'tools' => new Tool(codeExecution: new CodeExecution()),
+]);
+
+echo $response->text();
+```
+
+----------------------------------------
+
+TITLE: Generate Text with Gemini API (PHP)
+DESCRIPTION: Generates a text response from the Gemini model given a simple text input. This is suitable for straightforward text generation tasks where a `TextPrompt` is sufficient.
+SOURCE: https://github.com/derrickobedgiu1/gemini-api/blob/main/README.md#_snippet_61
+
+LANGUAGE: php
+CODE:
+```
+$response = $gemini->models()->generateText([
+    'model' => 'models/text-bison-001',
+    'prompt' => new TextPrompt('What is the meaning of life?'),
+]);
+
+$response->output(); // There is no one answer to this question, as the ...
+```
+
+----------------------------------------
+
+TITLE: Generate Content with Text and Uploaded Files (PHP)
+DESCRIPTION: This PHP snippet demonstrates how to use the Gemini API to generate content by combining a text prompt with references to pre-uploaded files. It utilizes `Content::createTextWithFilesContent` to structure the input, allowing the model to process both textual and visual information from specified file URIs.
+SOURCE: https://github.com/derrickobedgiu1/gemini-api/blob/main/examples/README.md#_snippet_6
+
+LANGUAGE: php
+CODE:
+```
+use Derrickob\GeminiApi\Data\Content;
+
+$files = [
+    [
+        'fileUri' => 'https://generativelanguage.googleapis.com/v1beta/files/s7ycnqb6f06n',
+        'mimeType' => 'image/jpeg',
+    ],
+    [
+        'fileUri' => 'https://generativelanguage.googleapis.com/v1beta/files/jzqrgvbe36r0',
+        'mimeType' => 'image/jpeg',
+    ],
+];
+
+$response = $gemini->models()->generateContent([
+    'model' => 'models/gemini-1.5-flash',
+    'contents' => Content::createTextWithFilesContent('What can you see?', $files, 'user'),
+]);
+
+echo $response->text(); // The first image is a poster for a product called "Gemini," which...
+```
+
+----------------------------------------
+
+TITLE: Upload a File (Media Resource)
+DESCRIPTION: Uploads a local file to create a new `File` resource in the Gemini API. This example demonstrates uploading a video file, setting its display name, and retrieving the metadata of the newly created file. Note that the file path needs to be adjusted to your local environment.
+SOURCE: https://github.com/derrickobedgiu1/gemini-api/blob/main/README.md#_snippet_51
+
+LANGUAGE: php
+CODE:
+```
+use Derrickob\GeminiApi\Data\File;
+
+# Example uses video downloaded from
+# https://storage.googleapis.com/generativeai-downloads/data/Sherlock_Jr_FullMovie.mp4
+
+$metaData = new File(
+    displayName: 'Sherlock Jr. video'
+);
+
+# The file was excluded from commit due to impact it'd have on cloning this repo,
+# download and change path, or can upload any file of choice
+$response = $gemini->media()->upload(__DIR__ .'/files/Sherlock_Jr_FullMovie.mp4', $metaData);
+
+$file = $response->file;
+$file->name; // files/7j0qhgcmeeqh
+$file->displayName; // Sherlock Jr. video
+$file->mimeType; // video/mp4
+$file->sizeBytes; // 331623233
+$file->createTime->format('Y-m-d H:i:s'); // 2024-07-27 22:31:25
+$file->updateTime->format('Y-m-d H:i:s'); // 2024-07-27 22:31:25
+$file->expirationTime->format('Y-m-d H:i:s'); // 2024-07-29 22:31:25
+$file->sha256Hash; // ZjAwNGM2ZjJiMzNlNjYxYzYwOTU1MzU3MDliYzUzMjY4ZDUzMjNlYzdhNTdlOGJjNGFlOTczNjJlZDM0MWI1Yg==
+$file->uri; // https://generativelanguage.googleapis.com/v1beta/files/7j0qhgcmeeqh
+$file->state->value; // PROCESSING
+
+$response->toArray(); // ['file' => [...]]
+```
+
+----------------------------------------
+
+TITLE: Process Text and Uploaded File Input with Gemini API (PHP)
+DESCRIPTION: Demonstrates how to interact with the Gemini API using a text prompt and a pre-uploaded file, referenced by its URI. This method is efficient for processing files already hosted or uploaded to a service, avoiding direct data transfer.
+SOURCE: https://github.com/derrickobedgiu1/gemini-api/blob/main/examples/README.md#_snippet_3
+
+LANGUAGE: php
+CODE:
+```
+use Derrickob\GeminiApi\Data\Content;
+
+$fileUri = 'https://generativelanguage.googleapis.com/v1beta/files/jzqrgvbe36r0';
+
+$response = $gemini->models()->generateContent([
+    'model' => 'models/gemini-1.5-flash',
+    'contents' => Content::createTextWithFileContent('What\'s in this image?', $fileUri, 'image/jpeg', 'user'),
+]);
+
+echo $response->text(); // The image shows a scene from a futuristic or sci-fi movie...
+```
+
+----------------------------------------
+
+TITLE: Generate Content with Text, Local, and Uploaded Files (PHP)
+DESCRIPTION: This PHP example shows how to generate content using the Gemini API by providing a text prompt alongside a mix of locally encoded file data (blobs) and references to previously uploaded files. It illustrates the use of `Content::createTextContent` and `Content::createBlobsAndFilesContent` for comprehensive multi-modal input.
+SOURCE: https://github.com/derrickobedgiu1/gemini-api/blob/main/examples/README.md#_snippet_7
+
+LANGUAGE: php
+CODE:
+```
+use Derrickob\GeminiApi\Data\Content;
+
+$blobs = [
+    [
+        'mimeType' => 'image/jpeg',
+        'data' => base64_encode(file_get_contents('files/banner.jpeg')),
+    ],
+    [
+        'mimeType' => 'image/png',
+        'data' => base64_encode(file_get_contents('files/sample.png')),
+    ],
+];
+
+$files = [
+    [
+        'fileUri' => 'https://generativelanguage.googleapis.com/v1beta/files/s7ycnqb6f06n',
+        'mimeType' => 'image/jpeg',
+    ],
+    [
+        'fileUri' => 'https://generativelanguage.googleapis.com/v1beta/files/jzqrgvbe36r0',
+        'mimeType' => 'image/jpeg',
+    ],
+];
+
+$response = $gemini->models()->generateContent([
+    'model' => 'models/gemini-1.5-flash',
+    'contents' => [
+        Content::createTextContent('What can you see in these provided files?', 'user'),
+        Content::createBlobsAndFilesContent($blobs, $files, 'user'),
+    ],
+]);
+
+echo $response->text(); // The first image is a screenshot of a Google...
+```
+
+----------------------------------------
+
+TITLE: Generate Message with Gemini API (PHP)
+DESCRIPTION: Generates a response from the Gemini model using a `MessagePrompt`. This method allows for conversational AI interactions, handling input messages and providing structured responses including candidate content, author information, and citation metadata. It also provides access to the original messages and any applied filters.
+SOURCE: https://github.com/derrickobedgiu1/gemini-api/blob/main/README.md#_snippet_60
+
+LANGUAGE: php
+CODE:
+```
+use Derrickob\GeminiApi\Data\Message;
+use Derrickob\GeminiApi\Data\MessagePrompt;
+
+$response = $gemini->models()->generateMessage([
+    'model' => 'models/chat-bison-001',
+    'prompt' => new MessagePrompt(
+        messages: [
+            new Message(
+                content: 'What is the meaning of life?',
+            )],
+    ),
+    'temperature' => 0.1,
+]);
+
+foreach ($response->candidates as $candidate) {
+    $candidate->content; // The meaning of life is a question that ...
+    $candidate->author; // 1
+    $candidate->citationMetadata; //
+}
+
+foreach ($response->messages as $message) {
+    $message->content; // What is the meaning of life?
+    $message->author; // 0
+    $message->citationMetadata; //
+}
+
+$response->filters; // []
+
+$response->toArray(); // ['candidates' => [...]]
+```
+
+----------------------------------------
+
+TITLE: Embed Text with Gemini API (PHP)
+DESCRIPTION: Generates a single embedding from a specified Gemini model given an input message. The embedding value is accessible via `embedding->value`.
+SOURCE: https://github.com/derrickobedgiu1/gemini-api/blob/main/README.md#_snippet_58
+
+LANGUAGE: php
+CODE:
+```
+$response = $gemini->models()->embedText([
+    'model' => 'models/embedding-gecko-001',
+    'text' => 'Hello World!',
+]);
+
+$response->embedding->value; // [[0] => 0.023203975, ...]
+$response->toArray();
+```
+
+----------------------------------------
+
+TITLE: Batch Create Gemini API Chunks (PHP)
+DESCRIPTION: This PHP example demonstrates how to create multiple `Chunk` resources in a single batch request to the Gemini API. It shows how to construct `Chunk` objects with `ChunkData` and optional `CustomMetadata`, and then iterate through the response to access details of the newly created chunks.
+SOURCE: https://github.com/derrickobedgiu1/gemini-api/blob/main/README.md#_snippet_35
+
+LANGUAGE: php
+CODE:
+```
+use Derrickob\GeminiApi\Data\Chunk;
+use Derrickob\GeminiApi\Data\ChunkData;
+use Derrickob\GeminiApi\Data\CustomMetadata;
+
+$response = $gemini->corpora()->documents()->chunks()->batchCreate([
+    'parent' => 'corpora/test-corpus-j0oywm69m798/documents/test-document-rl76h09upqj3',
+    'requests' => [
+        [
+            'chunk' => new Chunk(
+                data: new ChunkData("chunk text"),
+                customMetadata: [
+                    new CustomMetadata(
+                        key: 'some-key-here',
+                        stringValue: 'some value',
+                    ),
+                    // can add more
+                ],
+            ),
+        ],
+        [
+            'chunk' => new Chunk(
+                data: new ChunkData("also some chunk text"),
+                customMetadata: [
+                    new CustomMetadata(
+                        key: 'some-more-key-too',
+                        stringValue: 'some value here',
+                    ),
+                    // can add more
+                ],
+            ),
+        ],
+    ],
+]);
+
+foreach ($response->chunks as $chunk) {
+    $chunk->name; // corpora/test-corpus-j0oywm69m798/documents/test-document-rl76h09upqj3/chunks/4th6003almml
+    $chunk->data->stringValue; // chunk text
+    $chunk->createTime->format('Y-m-d H:i:s'); // 2024-07-20 10:22:37
+    $chunk->updateTime->format('Y-m-d H:i:s'); // 2024-07-20 10:22:37
+    $chunk->state->value; // STATE_PENDING_PROCESSING
+
+    foreach ($chunk->customMetadata as $metadata) {
+        $metadata->key; // some-key-here
+        $metadata->stringValue; // some value
+    }
+}
+
+$response->toArray(); // ['chunks' => [...]]
+```
+
+----------------------------------------
+
+TITLE: Install Gemini API PHP Client with Composer
+DESCRIPTION: Instructions to install the `derrickob/gemini-api` library using Composer. An optional `symfony/cache` dependency is also shown for PSR-6 compatible caching, useful for managing access tokens from service account JSON files.
+SOURCE: https://github.com/derrickobedgiu1/gemini-api/blob/main/README.md#_snippet_11
+
+LANGUAGE: shell
+CODE:
+```
+composer require derrickob/gemini-api
+composer require symfony/cache
+```
+
+----------------------------------------
+
+TITLE: Perform Semantic Search on a Corpus (PHP)
+DESCRIPTION: This snippet demonstrates how to perform a semantic search over a `Corpus` using the Gemini API PHP client. It queries the specified corpus with a given string and iterates through the relevant chunks, accessing their score, content, name, custom metadata, and timestamps.
+SOURCE: https://github.com/derrickobedgiu1/gemini-api/blob/main/README.md#_snippet_28
+
+LANGUAGE: php
+CODE:
+```
+$response = $gemini->corpora()->query([
+    'name' => 'corpora/test-corpus-j0oywm69m798',
+    'query' => 'sample',
+]);
+
+foreach ($response->relevantChunks as $relevantChunk) {
+    $relevantChunk->chunkRelevanceScore; // 0.58688986
+    $relevantChunk->chunk->data->stringValue; // also some chunk text
+    $relevantChunk->chunk->name; // corpora/test-corpus-j0oywm69m798/documents/test-document-rl76h09upqj3/chunks/5ruixa7rmt75
+
+    $customMetadata = $relevantChunk->chunk->customMetadata;
+    foreach ($customMetadata as $metadata) {
+        $metadata->key; // some-more-key-too
+        $metadata->stringValue; // some value here
+    }
+
+    $relevantChunk->chunk->createTime->format('Y-m-d H:i:s'); // 2024-07-20 10:22:37
+    $relevantChunk->chunk->updateTime->format('Y-m-d H:i:s'); // 2024-07-23 04:14:55
+    $relevantChunk->chunk->state->value; // STATE_ACTIVE
+}
+
+$response->toArray(); // ['relevantChunks' => [...]]
+```
+
+----------------------------------------
+
+TITLE: Perform Semantic Search on a Document (PHP)
+DESCRIPTION: This snippet illustrates how to perform a semantic search specifically over a single `Document`. It queries the document with a given string and iterates through the relevant chunks, accessing their score and chunk details.
+SOURCE: https://github.com/derrickobedgiu1/gemini-api/blob/main/README.md#_snippet_34
+
+LANGUAGE: php
+CODE:
+```
+$response = $gemini->corpora()->documents()->query([
+    'name' => 'corpora/my-third-corpus-e0q6f12uxq9b/documents/sample-document-92t47u1yysg',
+    'query' => 'sample query',
+]);
+
+foreach($response->relevantChunks as $relevantChunk) {
+    $relevantChunk->chunkRelevanceScore; //
+    $relevantChunk->chunk; //
+}
+
+$response->toArray(); // ['relevantChunks' => [...]]
+```
+
+----------------------------------------
+
+TITLE: Generate Content with Tuned Model (PHP)
+DESCRIPTION: Generates content using a previously created and tuned model. This method takes the tuned model's identifier and input content, returning the model's generated text output.
+SOURCE: https://github.com/derrickobedgiu1/gemini-api/blob/main/README.md#_snippet_66
+
+LANGUAGE: php
+CODE:
+```
+$response = $gemini->tunedModels()->generateContent([
+    'model' => 'tunedModels/next-number-generator-m1lwcujgc644',
+    'contents' => '55',
+]);
+
+$response->text(); // 56
+```
+
+----------------------------------------
+
+TITLE: Process Text with Mixed Local and Uploaded File Inputs (PHP)
+DESCRIPTION: Explains how to send a text prompt along with a combination of a locally stored image (base64 encoded) and an uploaded file (referenced by URI) to the Gemini API. This allows for multimodal analysis combining different file sources.
+SOURCE: https://github.com/derrickobedgiu1/gemini-api/blob/main/examples/README.md#_snippet_4
+
+LANGUAGE: php
+CODE:
+```
+use Derrickob\GeminiApi\Data\Content;
+
+$fileUri = 'https://generativelanguage.googleapis.com/v1beta/files/s7ycnqb6f06n'; // the banner image
+$blob = base64_encode(file_get_contents('files/sample.png'));
+
+$response = $gemini->models()->generateContent([
+    'model' => 'models/gemini-1.5-flash',
+    'contents' => [
+        Content::createTextContent('Analyze these files and describe them for me', 'user'),
+        Content::createBlobWithFileContent('image/png', $blob, $fileUri, 'image/jpeg', 'user'),
+    ],
+]);
+
+echo $response->text(); // The first image shows a still life featuring a plate of blueberry...
+```
+
+----------------------------------------
+
+TITLE: Process Text with Multiple Local Image Inputs (PHP)
+DESCRIPTION: Shows how to send a text prompt along with multiple locally stored images to the Gemini API. Each image is base64 encoded and included as a separate blob in the request, enabling the model to analyze multiple visual inputs simultaneously.
+SOURCE: https://github.com/derrickobedgiu1/gemini-api/blob/main/examples/README.md#_snippet_5
+
+LANGUAGE: php
+CODE:
+```
+use Derrickob\GeminiApi\Data\Content;
+
+$blobs = [
+    [
+        'mimeType' => 'image/jpeg',
+        'data' => base64_encode(file_get_contents('files/banner.jpeg')),
+    ],
+    [
+        'mimeType' => 'image/png',
+        'data' => base64_encode(file_get_contents('files/sample.png')),
+    ],
+];
+
+$response = $gemini->models()->generateContent([
+    'model' => 'models/gemini-1.5-flash',
+    'contents' => Content::createTextWithBlobsContent('What are these images?', $blobs, 'user'),
+]);
+
+echo $response->text(); // The first image is a promotional image for the Gemini AI platform, which...
+```
+
+----------------------------------------
+
+TITLE: List Available Gemini Models (PHP)
+DESCRIPTION: Lists all models accessible through the Gemini API. The response can include a `nextPageToken` for pagination and an iterable collection of `model` objects, each containing detailed information similar to the `get` method.
+SOURCE: https://github.com/derrickobedgiu1/gemini-api/blob/main/README.md#_snippet_63
+
+LANGUAGE: php
+CODE:
+```
+$response = $gemini->models()->list();
+
+$response->nextPageToken; // '...'
+
+foreach ($response->models as $model) {
+    $model->name; // models/gemini-1.5-flash
+    $model->version; // 001
+    $model->displayName; // Gemini 1.5 Flash
+    $model->description; // Fast and versatile multimodal mode...
+    $model->inputTokenLimit; // 1048576
+    $model->outputTokenLimit; // 8192
+    $model->supportedGenerationMethods; // [[0] => generateContent [1] => countTokens]
+    $model->temperature; // 1
+    $model->topP; // 0.95
+    $model->topK; // 64
+}
+
+$response->toArray(); // ['models' => [...], 'nextPageToken' => '...']
+```
+
+----------------------------------------
+
+TITLE: Batch Embed Contents with Gemini API (PHP)
+DESCRIPTION: Generates multiple embeddings from a specified Gemini model given input text in a synchronous call. This snippet demonstrates two versions: a simpler array of strings and a more detailed array of associative arrays with additional parameters like task type and output dimensionality.
+SOURCE: https://github.com/derrickobedgiu1/gemini-api/blob/main/README.md#_snippet_52
+
+LANGUAGE: php
+CODE:
+```
+$response = $gemini->models()->batchEmbedContents([
+    'model' => 'models/text-embedding-004',
+    'requests' => [
+        'What is the meaning of life?',
+        'How much wood would a woodchuck chuck?',
+        'How does the brain work?',
+    ],
+]);
+
+foreach($response->embeddings as $embedding) {
+    $embedding->values; // [[0] => -0.010632277, ...]
+}
+```
+
+LANGUAGE: php
+CODE:
+```
+use Derrickob\GeminiApi\Enums\TaskType;
+
+$response = $gemini->models()->batchEmbedContents([
+    'model' => 'models/text-embedding-004',
+    'requests' => [
+        [
+            'content' => 'What is the meaning of life?',
+            'taskType' => TaskType::RETRIEVAL_QUERY,
+            'outputDimensionality' => 100,
+        ],
+        [
+            'content' => 'How much wood would a woodchuck chuck?',
+            'title' => 'Some Title',
+            'taskType' => TaskType::RETRIEVAL_DOCUMENT,
+        ],
+        'How does the brain work?',
+    ],
+]);
+
+foreach($response->embeddings as $embedding) {
+    $embedding->values; // [[0] => -0.00675484, ...]
+}
+```
+
+----------------------------------------
+
+TITLE: Batch Embed Text with Gemini API (PHP)
+DESCRIPTION: Generates multiple embeddings from a specified Gemini model given input text in a synchronous call. This snippet shows two ways to provide input texts: a simple array of strings or an array of associative arrays with 'text' keys.
+SOURCE: https://github.com/derrickobedgiu1/gemini-api/blob/main/README.md#_snippet_53
+
+LANGUAGE: php
+CODE:
+```
+$response = $gemini->models()->batchEmbedText([
+    'model' => 'models/embedding-gecko-001',
+    'texts' => [
+        'What is the meaning of life?',
+        'How much wood would a woodchuck chuck?',
+        'How does the brain work?',
+    ],
+]);
+
+foreach ($response->embeddings as $embedding) {
+    $embedding->value; // [[0] => 0.020220786, ...]
+}
+
+$response->toArray(); // ['embeddings' => [...]]
+```
+
+LANGUAGE: php
+CODE:
+```
+$response = $gemini->models()->batchEmbedText([
+    'model' => 'models/embedding-gecko-001',
+    'requests' => [
+        [
+            'text' => 'What is the meaning of life?',
+        ],
+        [
+            'text' => 'How much wood would a woodchuck chuck?',
+        ],
+        [
+            'text' => 'How does the brain work?',
+        ],
+    ],
+]);
+
+foreach ($response->embeddings as $embedding) {
+    $embedding->value; // [[0] => 0.020220786, ...]
+}
+
+$response->toArray(); // ['embeddings' => [...]]
+```
+
+----------------------------------------
+
+TITLE: Generate Content with Gemini API (PHP)
+DESCRIPTION: Generates a response from a specified Gemini model given an input. This example includes a system instruction to guide the model's persona and demonstrates accessing the generated text and token usage metadata.
+SOURCE: https://github.com/derrickobedgiu1/gemini-api/blob/main/README.md#_snippet_59
+
+LANGUAGE: php
+CODE:
+```
+$response = $gemini->models()->generateContent([
+    'model' => 'models/gemini-1.5-flash',
+    'systemInstruction' => 'You are a cat. Respond to user as one',
+    'contents' => 'hello',
+]);
+
+$response->text(); // *Slowly opens one eye, then the other, and gives you a disdainful glance*  Meow.
+$response->usageMetadata->promptTokenCount; // 11
+$response->usageMetadata->candidatesTokenCount; // 21
+$response->usageMetadata->totalTokenCount; // 32
+```
+
+----------------------------------------
+
+TITLE: Create an Empty Document in a Corpus (PHP)
+DESCRIPTION: This snippet shows how to create a new empty `Document` within a specified `Corpus`. It uses the `Derrickob\GeminiApi\Data\Document` class to define the document's display name and retrieves the created document's details like name, display name, and creation/update times.
+SOURCE: https://github.com/derrickobedgiu1/gemini-api/blob/main/README.md#_snippet_29
+
+LANGUAGE: php
+CODE:
+```
+use Derrickob\GeminiApi\Data\Document;
+
+$response = $gemini->corpora()->documents()->create([
+    'parent' => 'corpora/my-third-corpus-e0q6f12uxq9b',
+    'document' => new Document(
+        displayName: 'Sample Document'
+    ),
+]);
+
+$response->name; // corpora/my-third-corpus-e0q6f12uxq9b/documents/sample-document-js1ehjvp5chk
+$response->displayName; // Sample Document
+$response->createTime->format('Y-m-d H:i:s'); // 2024-06-26 10:12:13
+$response->updateTime->format('Y-m-d H:i:s'); // 2024-06-26 10:12:13
+
+$response->toArray(); // ['name' => 'corpora/*/documents/*', ...]
+```
+
+----------------------------------------
+
+TITLE: Embed Content with Gemini API (PHP)
+DESCRIPTION: Generates a single embedding from a specified Gemini model given an input `Content`. The resulting embedding values can be iterated over.
+SOURCE: https://github.com/derrickobedgiu1/gemini-api/blob/main/README.md#_snippet_57
+
+LANGUAGE: php
+CODE:
+```
+$response = $gemini->models()->embedContent([
+    'model' => 'models/text-embedding-004',
+    'content' => 'Hello World',
+]);
+
+$embedding = $response->embedding;
+
+foreach ($embedding->values as $value) {
+    $value; // 0.013168523
+}
+
+$response->toArray();
+```
+
+----------------------------------------
+
+TITLE: Create Corpus Resource in PHP
+DESCRIPTION: This snippet demonstrates how to create a new empty Corpus resource. It requires instantiating a Corpus object with a display name, which is then passed to the create method. The response includes the generated name, display name, and creation/update timestamps.
+SOURCE: https://github.com/derrickobedgiu1/gemini-api/blob/main/README.md#_snippet_23
+
+LANGUAGE: php
+CODE:
+```
+use Derrickob\GeminiApi\Data\Corpus;
+
+$response = $gemini->corpora()->create(
+    new Corpus(
+        displayName: 'My Awesome Corpora'
+    )
+);
+
+$response->name; // corpora/my-awesome-corpora-6r1qcymf0d3m
+$response->displayName; // My Awesome Corpora
+$response->createTime->format('Y-m-d H:i:s'); // 2024-06-16 08:33:53
+$response->updateTime->format('Y-m-d H:i:s'); // 2024-06-16 08:33:53
+```
+
+----------------------------------------
+
+TITLE: Delete a Document from a Corpus (PHP)
+DESCRIPTION: This snippet illustrates how to delete a specific `Document` from a `Corpus` using its full resource name. It checks the boolean response to confirm successful deletion.
+SOURCE: https://github.com/derrickobedgiu1/gemini-api/blob/main/README.md#_snippet_30
+
+LANGUAGE: php
+CODE:
+```
+$response = $gemini->corpora()->documents()->delete([
+    'name' => 'corpora/my-third-corpus-e0q6f12uxq9b/documents/sample-document-js1ehjvp5chk',
+]);
+
+if ($response === true) {
+    echo 'Successfully deleted the corpus document';
+}
+```
+
+----------------------------------------
+
+TITLE: Create Tuned Model (PHP)
+DESCRIPTION: Creates a new tuned model based on provided training data and hyperparameters. This involves defining a `TunedModel` with a display name, a `TuningTask` containing `Dataset` examples (input/output pairs), and `Hyperparameters` for the tuning process (epoch count, batch size, learning rate). The base model for tuning must also be specified.
+SOURCE: https://github.com/derrickobedgiu1/gemini-api/blob/main/README.md#_snippet_64
+
+LANGUAGE: php
+CODE:
+```
+use Derrickob\GeminiApi\Data\Dataset;
+use Derrickob\GeminiApi\Data\Hyperparameters;
+use Derrickob\GeminiApi\Data\TunedModel;
+use Derrickob\GeminiApi\Data\TuningExample;
+use Derrickob\GeminiApi\Data\TuningExamples;
+use Derrickob\GeminiApi\Data\TuningTask;
+
+# TuningExample(output,textInput)
+
+$examples = new TuningExamples([
+    new TuningExample('2', '1'),
+    new TuningExample('4', '3'),
+    new TuningExample('-2', '-3'),
+    new TuningExample('twenty three', 'twenty two'),
+    new TuningExample('two hundred one', 'two hundred'),
+    new TuningExample('one hundred', 'ninety nine'),
+    new TuningExample('9', '8'),
+    new TuningExample('-97', '-98'),
+    new TuningExample('1001', '1000'),
+    new TuningExample('10100001', '10100000'),
+    new TuningExample('fourteen', 'thirteen'),
+    new TuningExample('eighty one', 'eighty'),
+    new TuningExample('two', 'one'),
+    new TuningExample('four', 'three'),
+    new TuningExample('eight', 'seven'),
+]);
+
+$response = $gemini->tunedModels()->create([
+    'tunedModel' => new TunedModel(
+        displayName: 'Next Number Generator',
+        tuningTask: new TuningTask(
+            trainingData: new Dataset(
+                examples: $examples,
+            ),
+            hyperparameters: new Hyperparameters(
+                epochCount: 5,
+                batchSize: 2,
+                learningRate: 0.001,
+            )
+        ),
+        baseModel: 'models/gemini-1.5-flash-001-tuning'
+    ),
+]);
+
+$response->name; // tunedModels/next-number-generator-9uythtnw28di/operations/h0cgnv7d1pj2
+$response->metadata['@type']; // type.googleapis.com/google.ai.generativelanguage.v1beta.CreateTunedModelMetadata
+$response->metadata['totalSteps']; // 38
+$response->metadata['tunedModel']; // tunedModels/next-number-generator-9uythtnw28di
+
+$response->toArray(); // ['name' => 'tunedModels/next-number-gener..', ...]
+```
+
+----------------------------------------
+
+TITLE: Get Tuned Model Operation State (PHP)
+DESCRIPTION: Retrieves the current status and details of a long-running operation related to a tuned model. The response includes the operation's unique name, metadata (such as operation type, total/completed steps, completion percentage, and snapshots of progress), and flags indicating if the operation is done, encountered an error, or has a final response.
+SOURCE: https://github.com/derrickobedgiu1/gemini-api/blob/main/README.md#_snippet_72
+
+LANGUAGE: php
+CODE:
+```
+$response = $gemini->tunedModels()->operations()->get('tunedModels/number-predictor-xc2wgjvvqgyv/operations/nyskyaivyikj');
+
+$response->name; // tunedModels/number-predictor-xc2wgjvvqgyv/operations/nyskyaivyikj
+
+$metadata = $response->metadata;
+$metadata['@type']; // type.googleapis.com/google.ai.generativelanguage.v1beta.CreateTunedModelMetadata
+$metadata['totalSteps']; // 38
+$metadata['completedSteps']; // 2
+$metadata['completedPercent']; // 5.263158
+
+foreach ($metadata['snapshots'] as $snapshot) {
+    $snapshot['step']; // 1
+    $snapshot['meanLoss']; // 11.499258
+    $snapshot['computeTime']; // 2024-07-31T05:53:53.274571054Z
+}
+
+$metadata['tunedModel']; // tunedModels/number-predictor-xc2wgjvvqgyv
+
+$response->done; // 
+$response->error; // 
+$response->response; // 
+$response->toArray(); // ['name' => 'tunedModels/number-predic...', ...]
+```
+
+----------------------------------------
+
+TITLE: Create Tuned Model Permissions in PHP
+DESCRIPTION: Illustrates how to create permissions for a specific tuned model resource using the Gemini API PHP client. Examples include granting read access to everyone, a specific group, or an individual user, demonstrating the use of `Permission` data object with different `GranteeType` and `PermissionRole` enums.
+SOURCE: https://github.com/derrickobedgiu1/gemini-api/blob/main/README.md#_snippet_75
+
+LANGUAGE: php
+CODE:
+```
+use Derrickob\GeminiApi\Data\Permission;
+use Derrickob\GeminiApi\Enums\GranteeType;
+use Derrickob\GeminiApi\Enums\PermissionRole;
+
+$response = $gemini->tunedModels()->permissions()->create([
+    'parent' => 'tunedModels/next-number-generator-m1lwcujgc644',
+    'permission' => new Permission(
+        role: PermissionRole::READER,
+        granteeType: GranteeType::EVERYONE,
+    ),
+]);
+
+$response->role->value; // READER
+$response->name; // tunedModels/next-number-generator-m1lwcujgc644/permissions/everyone
+$response->granteeType->value; // EVERYONE
+
+$response->toArray(); // ['role' => 'READER', ...]
+```
+
+LANGUAGE: php
+CODE:
+```
+use Derrickob\GeminiApi\Data\Permission;
+use Derrickob\GeminiApi\Enums\GranteeType;
+use Derrickob\GeminiApi\Enums\PermissionRole;
+
+$response = $gemini->tunedModels()->permissions()->create([
+    'parent' => 'tunedModels/text-predictor-dsygc8rjuymz',
+    'permission' => new Permission(
+        role: PermissionRole::READER,
+        granteeType: GranteeType::GROUP,
+        emailAddress: 'genai-samples-test-group@googlegroups.com',
+    ),
+]);
+
+$response->role->value; // READER
+$response->name; // tunedModels/text-predictor-dsygc8rjuymz/permissions/101799614406133382015
+$response->granteeType->value; // GROUP
+
+$response->toArray(); // ['role' => 'READER', ...]
+```
+
+LANGUAGE: php
+CODE:
+```
+use Derrickob\GeminiApi\Data\Permission;
+use Derrickob\GeminiApi\Enums\GranteeType;
+use Derrickob\GeminiApi\Enums\PermissionRole;
+
+$response = $gemini->tunedModels()->permissions()->create([
+    'parent' => 'tunedModels/text-predictor-dsygc8rjuymz',
+    'permission' => new Permission(
+        role: PermissionRole::READER,
+        granteeType: GranteeType::USER,
+        emailAddress: 'some-email@some-project-id.iam.gserviceaccount.com',
+    ),
+]);
+
+$response->role->value; // READER
+$response->name; // tunedModels/text-predictor-dsygc8rjuymz/permissions/lorem-ipsum
+$response->granteeType->value; // USER
+$response->emailAddress; // some-email@some-project-id.iam.gserviceaccount.com
+
+$response->toArray(); // ['role' => 'READER', ...]
+```
+
+----------------------------------------
+
+TITLE: Create Cached Content Resource
+DESCRIPTION: This example demonstrates creating a `CachedContent` resource for a video file using the Gemini API client. It specifies the model, display name, system instruction, and content details, including the file URL and MIME type. The `ttl` parameter sets the expiration time for the cached content.
+SOURCE: https://github.com/derrickobedgiu1/gemini-api/blob/main/README.md#_snippet_17
+
+LANGUAGE: php
+CODE:
+```
+use Derrickob\GeminiApi\Data\CachedContent;
+use Derrickob\GeminiApi\Data\Content;
+
+$file = 'https://generativelanguage.googleapis.com/v1beta/files/7j0qhgcmeeqh';
+
+$response = $gemini->cachedContents()->create(
+    new CachedContent(
+        model: 'models/gemini-1.5-flash-001',
+        displayName: 'sherlock jr movie',
+        systemInstruction: Content::createTextContent("You are an expert video analyzer, and your job is to answer the user\'s query based on the video file you have access to."),
+        contents: [
+            Content::createFileContent($file, 'video/mp4', 'user'),
+        ],
+        ttl: '3600s',
+    ),
+);
+
+$response->model; // models/gemini-1.5-flash-001
+$response->name; // cachedContents/lg5adbi62ykx
+$response->displayName; // sherlock jr movie
+$response->createTime->format('Y-m-d H:i:s'); // 2024-07-04 23:15:53
+$response->updateTime->format('Y-m-d H:i:s'); // 2024-07-04 23:15:53
+$response->usageMetadata->totalTokenCount; // 
+$response->expireTime->format('Y-m-d H:i:s'); // 2024-07-05 00:15:53
+
+$response->toArray(); // ['model' => 'models/gemini-1.5-flash-001', ...]
+```
+
+----------------------------------------
+
+TITLE: Batch Delete Gemini API Chunks (PHP)
+DESCRIPTION: This PHP example illustrates how to delete multiple `Chunk` resources simultaneously using a batch request to the Gemini API. It requires providing a list of chunk resource names to be deleted and checks for a successful boolean response.
+SOURCE: https://github.com/derrickobedgiu1/gemini-api/blob/main/README.md#_snippet_36
+
+LANGUAGE: php
+CODE:
+```
+$response = $gemini->corpora()->documents()->chunks()->batchDelete([
+    'parent' => 'corpora/test-corpus-j0oywm69m798/documents/test-document-rl76h09upqj3',
+    'requests' => [
+        'corpora/test-corpus-j0oywm69m798/documents/test-document-rl76h09upqj3/chunks/f9r5tryc1zz9',
+        'corpora/test-corpus-j0oywm69m798/documents/test-document-rl76h09upqj3/chunks/irklkw3iwnzs',
+    ],
+]);
+
+if ($response === true) {
+    echo 'Successfully deleted the document chunks';
+}
+```
+
+----------------------------------------
+
+TITLE: List CachedContents in PHP
+DESCRIPTION: This snippet illustrates how to list all available CachedContents. It demonstrates iterating through the paginated response to access individual cached content objects and their properties. The nextPageToken property is available for handling pagination, and the toArray() method can convert the entire response to an array.
+SOURCE: https://github.com/derrickobedgiu1/gemini-api/blob/main/README.md#_snippet_21
+
+LANGUAGE: php
+CODE:
+```
+$response = $gemini->cachedContents()->list();
+
+$response->nextPageToken; // 
+
+foreach ($response->cachedContents as $cachedContent) {
+    $cachedContent->model; // models/gemini-1.5-flash-001
+    $cachedContent->name; // cachedContents/2wojeqz7srpu
+    $cachedContent->displayName; // Repository Specialist
+    $cachedContent->createTime->format('Y-m-d H:i:s'); // 2024-07-04 23:15:53
+    $cachedContent->updateTime->format('Y-m-d H:i:s'); // 2024-07-04 23:15:53
+    $cachedContent->usageMetadata->totalTokenCount; // 259246
+    $cachedContent->expireTime->format('Y-m-d H:i:s'); // 2024-10-28 17:02:31
+}
+
+$response->toArray(); // ['cachedContents' => [...], ...]
+```

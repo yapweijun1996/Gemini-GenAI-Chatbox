@@ -1,0 +1,1234 @@
+TITLE: Generating Text with Fine-tuned Gemma Model and TextStreamer
+DESCRIPTION: This code demonstrates how to generate a response from the reloaded fine-tuned Gemma model using a sample prompt. It prepares input IDs with the tokenizer and uses model.generate() with a TextStreamer for real-time token display during continuous inference.
+SOURCE: https://github.com/google-gemini/gemma-cookbook/blob/main/Gemma/[Gemma_2]Finetune_with_Unsloth.ipynb#_snippet_18
+
+LANGUAGE: python
+CODE:
+```
+from transformers import TextStreamer
+
+inputs = tokenizer(
+[
+    alpaca_prompt_template.format(
+        "Continue the fibonnaci sequence.", # instruction
+        "1, 1, 2, 3, 5, 8", # input
+        "", # output - leave this blank for generation!
+    )
+], return_tensors = "pt").to("cuda")
+
+text_streamer = TextStreamer(tokenizer)
+_ = model.generate(**inputs, streamer = text_streamer, max_new_tokens = 128)
+```
+
+----------------------------------------
+
+TITLE: Python Function: get_completion for Gemma 2 AI Interaction
+DESCRIPTION: This Python function, `get_completion`, facilitates communication with an AI language model's completion API. It constructs and sends a POST request with a user-defined prompt, system prompt, and configurable parameters like `temperature`, `n_predict`, and `stop` sequences. The function includes error handling for network requests and returns the API's HTTP response.
+SOURCE: https://github.com/google-gemini/gemma-cookbook/blob/main/Gemma/[Gemma_2]Using_with_Llamafile.ipynb#_snippet_10
+
+LANGUAGE: python
+CODE:
+```
+import requests
+import json
+import time
+
+def get_completion(prompt, stream=False, n_predict=128, temperature=0.7,
+                   stop=["User:", "Assistant:"],
+                   url='http://localhost:8081/completion'):
+    """
+    Sends a POST request to the AI completion API with the given parameters.
+
+    Args:
+        prompt: The prompt or question to send to the API.
+        stream (bool): Whether to stream the response.
+        n_predict (int): Number of tokens to predict.
+        temperature (float): Controls the randomness of the predictions.
+        stop (list): List of stop sequences.
+        url (str): The API endpoint URL.
+
+    Returns:
+        requests.Response: The HTTP response object from the API,
+        or None if an error occurs.
+    """
+    headers = {
+        'Content-Type': 'application/json'
+    }
+
+    payload = {
+        "system_prompt": {
+            "prompt": "You are an AI assistant. Don't make things up.",
+            "anti_prompt": "User:",
+            "assistant_name": "Assistant:"
+        },
+        "stream": stream,
+        "n_predict": n_predict,
+        "temperature": temperature,
+        "stop": stop,
+        "prompt": prompt
+    }
+
+    try:
+        response = requests.post(url, headers=headers, json=payload)
+        # Raises HTTPError for bad responses (4xx or 5xx)
+        response.raise_for_status()
+        return response
+    except requests.exceptions.RequestException as e:
+        print(f"An error occurred while making the request: {e}")
+        return None
+```
+
+----------------------------------------
+
+TITLE: Perform Chain-of-Thought Reasoning with Gemma and Langfun
+DESCRIPTION: This example illustrates the application of Chain-of-Thought (CoT) reasoning to solve complex problems by breaking them into logical steps. It defines `Step` and `Solution` PyGlove objects to structure the reasoning process and the final answer. The `lf.query` call uses a formatted puzzle question, the `Solution` schema, and a `LlamaCppRemote` language model to systematically reason through the problem and derive a structured solution.
+SOURCE: https://github.com/google-gemini/gemma-cookbook/blob/main/Gemma/[Gemma_2]Using_with_Langfun_and_LlamaCpp.ipynb#_snippet_17
+
+LANGUAGE: python
+CODE:
+```
+from typing import Optional, List
+
+class Step(pg.Object):
+  description: str
+  step_output: float
+
+class Solution(pg.Object):
+  question: str
+  steps: list[Step]
+  final_answer: int
+
+
+# Puzzle question
+question = (
+  'Janet’s ducks lay 16 eggs per day. She eats three for breakfast every morning and bakes muffins for her friends every day with four. '
+  'She sells the remainder at the farmers\' market daily for $2 per fresh duck egg. '
+  'How much in dollars does she make every day at the farmers\' market? '
+)
+
+# Assume gemma2_llm is your initialized Gemma 9b model
+result = lf.query(
+    prompt=format_gemma_prompt(question),
+    schema=Solution,
+    lm=lf.llms.LlamaCppRemote("http://0.0.0.0:8000")
+)
+print(result)
+```
+
+----------------------------------------
+
+TITLE: Performing Chain-of-Thought Reasoning with Langfun and Gemma
+DESCRIPTION: This example demonstrates the model's capability in performing Chain-of-Thought (CoT) reasoning by breaking down a complex puzzle into logical steps. By defining `Step` and `Solution` schemas, Langfun guides the model to systematically reason through each component, enhancing its ability to solve intricate tasks and represent the solution in a structured format.
+SOURCE: https://github.com/google-gemini/gemma-cookbook/blob/main/Gemma/[Gemma_2]Using_with_Langfun_and_LlamaCpp_Python_Bindings.ipynb#_snippet_16
+
+LANGUAGE: python
+CODE:
+```
+from typing import Optional, List
+
+class Step(pg.Object):
+  description: str
+  step_output: float
+
+class Solution(pg.Object):
+  question: str
+  steps: list[Step]
+  final_answer: int
+
+
+# Puzzle question
+question = (
+  'Janet’s ducks lay 16 eggs per day. She eats three for breakfast every morning and bakes muffins for her friends every day with four. '
+  'She sells the remainder at the farmers\' market daily for $2 per fresh duck egg. '
+  'How much in dollars does she make every day at the farmers\' market? '
+  'Solve the puzzle and use Solution to represent it'
+)
+
+# Assume gemma2_llm is your initialized Gemma 9b model
+result = lf.query(
+    prompt=format_gemma_prompt(question),
+    schema=Solution,
+    lm=LlamaCppPythonRemote("http://0.0.0.0:8000/v1")
+)
+print(result)
+```
+
+----------------------------------------
+
+TITLE: Define Function to Extract and Execute Tool Calls (Python)
+DESCRIPTION: This Python function `extract_tool_call` is designed to parse the LLM's response for tool call patterns (e.g., ````tool_code````). If a tool call is found, it extracts the Python code, executes it using `eval()`, and captures its output. This function is critical for bridging the LLM's generated tool call with actual function execution in the application.
+SOURCE: https://github.com/google-gemini/gemma-cookbook/blob/main/Gemma/[Gemma_3]Function_Calling_with_HF.ipynb#_snippet_17
+
+LANGUAGE: python
+CODE:
+```
+def extract_tool_call(text):
+    import io
+    from contextlib import redirect_stdout
+
+    pattern = r"```tool_code\s*(.*?)\s*```"
+    match = re.search(pattern, text, re.DOTALL)
+    if match:
+        code = match.group(1).strip()
+        # Capture stdout in a string buffer
+        f = io.StringIO()
+        with redirect_stdout(f):
+            result = eval(code)
+        output = f.getvalue()
+        r = result if output == '' else output
+        return f'```tool_output\n{r}\n```'''
+    return None
+```
+
+----------------------------------------
+
+TITLE: Example Prompt Structure Sent to LLM
+DESCRIPTION: This snippet illustrates the final structure of the prompt sent to the Large Language Model (LLM) after context injection. It shows how retrieved chunks are combined with the user's question within a predefined template to guide the LLM's response generation.
+SOURCE: https://github.com/google-gemini/gemma-cookbook/blob/main/Gemma/[Gemma_2]RAG_LlamaIndex.ipynb#_snippet_14
+
+LANGUAGE: text
+CODE:
+```
+Text:
+<chunk #1>
+<chunk #2>
+<chunk #3>
+According to the text answer the query: <question>
+```
+
+----------------------------------------
+
+TITLE: Define ReAct System Prompt and Initial Gemma Generation
+DESCRIPTION: This snippet defines the system prompt for an AI Historian agent, outlining its role, available tools (get_historical_events, get_person_info, get_location_info), and the expected ReAct interaction format. It then demonstrates a basic interaction where the agent is prompted to 'Write a book' and its response is generated using `gemma_lm.generate`.
+SOURCE: https://github.com/google-gemini/gemma-cookbook/blob/main/Gemma/[Gemma_2]Agentic_AI.ipynb#_snippet_2
+
+LANGUAGE: python
+CODE:
+```
+__SYSTEM__ = """You are an AI Historian in a game. Your goal is to create books, poems, and songs found in the game world so that the player's choices meaningfully impact the unfolding of events.
+
+You have access to the following tools:
+
+* `get_historical_events(year, location=None, keyword=None)`: Retrieves a list of historical events within a specific year.
+* `get_person_info(name)`: Retrieves information about a historical figure.
+* `get_location_info(location_name)`: Retrieves information about a location.
+
+Use the following multi-step conversation:
+
+Thought: I need to do something...
+Action: I should use the tool `tool_name` with input `tool_input`
+
+Wait user to get the result of the tool is `tool_output`
+
+And finally answer the Content of books, poems, or songs.
+"""
+
+__START_TURN_USER__ = "<start_of_turn>user\n"
+__START_TURN_MODEL__ = "<start_of_turn>model\n"
+__END_TURN__ = "<end_of_turn>\n"
+
+test_prompt = __START_TURN_USER__ + __SYSTEM__ + "Write a book." + __END_TURN__ + __START_TURN_MODEL__
+response = gemma_lm.generate(test_prompt, max_length=8192)
+print(response)
+```
+
+----------------------------------------
+
+TITLE: Configure and Compile Gemma Model for Fine-tuning
+DESCRIPTION: Configures the Gemma model's preprocessor to limit sequence length, initializes the AdamW optimizer with specific learning rate and weight decay, excluding bias and scale terms from decay. It then compiles the model with SparseCategoricalCrossentropy loss and SparseCategoricalAccuracy metrics, and fits it to the data.
+SOURCE: https://github.com/google-gemini/gemma-cookbook/blob/main/Demos/business-email-assistant/model-tuning/notebook/bakery_inquiry_model_tuned_with_gemma.ipynb#_snippet_11
+
+LANGUAGE: python
+CODE:
+```
+# for weight_decay in [.009, .0001, ]
+  # Generate Examples
+
+# Limit the input sequence length to 256 (to control memory usage).
+gemma_lm.preprocessor.sequence_length = 256
+# Use AdamW (a common optimizer for transformer models).
+optimizer = keras.optimizers.AdamW(
+    learning_rate=9e-4,
+    weight_decay=0.004,
+)
+# Exclude layernorm and bias terms from decay.
+optimizer.exclude_from_weight_decay(var_names=["bias", "scale"])
+
+gemma_lm.compile(
+    loss=keras.losses.SparseCategoricalCrossentropy(from_logits=True),
+    optimizer=optimizer,
+    weighted_metrics=[keras.metrics.SparseCategoricalAccuracy()],
+)
+gemma_lm.fit(data, epochs=3, batch_size=1)
+```
+
+----------------------------------------
+
+TITLE: Generate Response from Gemma Model
+DESCRIPTION: Calls the `model.generate` method with the prepared inputs to produce a response from the Gemma language model. `max_new_tokens` limits the length of the generated output.
+SOURCE: https://github.com/google-gemini/gemma-cookbook/blob/main/Gemma/[Gemma_3]Function_Calling_with_HF_document_summarizer.ipynb#_snippet_12
+
+LANGUAGE: Python
+CODE:
+```
+outputs = model.generate(**inputs, max_new_tokens=512)
+```
+
+----------------------------------------
+
+TITLE: Implement JSON Structure with Guidance and Execute Generation
+DESCRIPTION: This snippet defines the `simple_json` function, which constructs a complete JSON schema using previously defined `guidance` functions (`string_exp`, `position`, `number`, `world_cup`) and `commit_point`s. It then initializes the Gemma 2 model with a prompt and applies the `simple_json` function to guide the model in generating a structured JSON output for football player statistics.
+SOURCE: https://github.com/google-gemini/gemma-cookbook/blob/main/Gemma/[Gemma_2]Constrained_generation.ipynb#_snippet_10
+
+LANGUAGE: Python
+CODE:
+```
+# `commit_point`s are just ways of stopping functions once you hit a point.
+# For eg: commit_point(",") stops string_exp() once you hit `,`.
+@guidance(stateless=True)
+def simple_json(lm):
+    lm += ('{\n' +
+     '"name": ' + string_exp() + commit_point(',') + '\n'
+     '"country": ' + string_exp() + commit_point(',') + '\n'
+     '"position": ' + position() + commit_point(',') + '\n'
+     '"stats": {\n' +
+     '         "goals":'+ number() + commit_point(',') + '\n'
+     '         "assists": ' + number() + commit_point(',') + '\n'
+     '         "height": ' + number() +'.' + number() + commit_point(',') + '\n'
+     '         "world-cup": ' + world_cup() + commit_point(',') + '\n'
+     + commit_point('}')
+     + commit_point('}'))
+    return lm
+
+# Initialize the query.
+lm = gemma2 + """Using JSON, describe these Football players:
+Lionel Messi
+"""
+
+# Call the simple_json function and implement the JSON structure.
+lm += simple_json()
+```
+
+----------------------------------------
+
+TITLE: Define LangChain RAG Chain for Gemma
+DESCRIPTION: This Python code defines the Retrieval-Augmented Generation (RAG) chain using LangChain Expression Language (LCEL). It orchestrates document retrieval, context formatting, question passing, prompt filling, LLM inference with Gemma via Ollama, and final output parsing to generate an informed answer.
+SOURCE: https://github.com/google-gemini/gemma-cookbook/blob/main/Gemma/[Gemma_2]Using_with_Elasticsearch_and_LangChain.ipynb#_snippet_29
+
+LANGUAGE: python
+CODE:
+```
+# Create an actual chain
+
+rag_chain = (
+    # First you need retrieve documents that are relevant to the
+    # given query
+    {"context": retriever | format_docs, "question": RunnablePassthrough()}
+    # The `context` and `question` are then passed to the prompt
+    | prompt
+    # The whole prompt will all the information is passed the LLM
+    | llm
+    # The answer of the LLM is parsed by the class defined above
+    | GemmaOutputParser()
+)
+```
+
+----------------------------------------
+
+TITLE: Configure and Apply LoRA for Gemma Model Fine-tuning
+DESCRIPTION: This Python snippet demonstrates how to set up and apply LoRA (Low-Rank Adaptation) for fine-tuning a Gemma language model using the `peft` library. It configures `LoraConfig` with a specified rank, applies it to the `gemma_lm` model to enable parameter-efficient fine-tuning, sets a token limit for the tokenizer, and initializes an `AdamW` optimizer, excluding bias and LayerNorm weights from weight decay.
+SOURCE: https://github.com/google-gemini/gemma-cookbook/blob/main/Workshops/Workshop_How_to_Fine_tuning_Gemma_Transformers_Edition.ipynb#_snippet_9
+
+LANGUAGE: python
+CODE:
+```
+!pip install peft
+from peft import get_peft_model, LoraConfig, TaskType
+import torch.nn as nn
+
+lora_config = LoraConfig(
+    task_type=TaskType.CAUSAL_LM,
+    r=lora_rank,   # Using your predefined lora_rank
+    lora_alpha=32,
+    lora_dropout=0.1
+)
+gemma_lm = get_peft_model(gemma_lm, lora_config)  # Enable LoRA for the model
+
+print(gemma_lm)  # Hugging Face models don't have a summary method; use print() instead
+
+tokenizer.model_max_length = token_limit  # Set token limit in the tokenizer
+
+from transformers import AdamW
+
+optimizer_grouped_parameters = [
+    {'params': [p for n, p in gemma_lm.named_parameters() if not any(nd in n for nd in ["bias", "LayerNorm.weight"])], 'weight_decay': 0.01},
+```
+
+----------------------------------------
+
+TITLE: Parsing Customer Feedback with Langfun and Gemma
+DESCRIPTION: This example demonstrates how to extract valuable insights from customer feedback using Langfun's `query` function. By defining a `Feedback` schema, the model can systematically parse unstructured text, enabling identification of well-received features and areas requiring attention for product improvement.
+SOURCE: https://github.com/google-gemini/gemma-cookbook/blob/main/Gemma/[Gemma_2]Using_with_Langfun_and_LlamaCpp_Python_Bindings.ipynb#_snippet_14
+
+LANGUAGE: python
+CODE:
+```
+result = lf.query(
+    prompt=format_gemma_prompt(context),
+    schema=Feedback,
+    lm=LlamaCppPythonRemote("http://0.0.0.0:8000/v1")
+)
+print(result)
+```
+
+----------------------------------------
+
+TITLE: Define Prompt Template and Format Cake Inquiry
+DESCRIPTION: Defines a flexible prompt template with instruction and response placeholders. It then formats a specific prompt to extract structured information (inquiry type, filling, flavor, size, pickup location) from a cake order request into a JSON format, intended for an untuned model.
+SOURCE: https://github.com/google-gemini/gemma-cookbook/blob/main/Demos/business-email-assistant/model-tuning/notebook/bakery_inquiry_model_tuned_with_gemma.ipynb#_snippet_6
+
+LANGUAGE: python
+CODE:
+```
+template = "{instruction}\n{response}"
+
+prompt = template.format(
+    instruction="""From the following get the type of inquiry, (order or request for information), filling, flavor, size, and pickup location and put it into a json\nHi,\nI'd like to order a red velvet cake with custard filling. Please make it 8 inch round""",
+    response="",
+)
+# sampler = keras_nlp.samplers.TopKSampler(k=5, seed=2)
+# For our use case greedy is best
+```
+
+----------------------------------------
+
+TITLE: Generate Text Description from Image using Ollama Chat
+DESCRIPTION: Performs image-to-text inference using the Ollama `chat` function. It sends an image and a prompt to the `gemma3:4b` model and prints the generated textual description.
+SOURCE: https://github.com/google-gemini/gemma-cookbook/blob/main/Gemma/[Gemma_3]Using_with_Ollama_Python_Inference_with_Images.ipynb#_snippet_8
+
+LANGUAGE: python
+CODE:
+```
+import ollama
+
+res = ollama.chat(
+	model="gemma3:4b",
+	messages=[
+		{
+			'role': 'user',
+			'content': 'Describe this image:',
+			'images': ['./pexels-adria-masi-461420600-27372369.jpg']
+		}
+	]
+)
+
+print(res['message']['content'])
+```
+
+----------------------------------------
+
+TITLE: Classify Support Tickets with Gemma and Langfun
+DESCRIPTION: This snippet demonstrates how to automatically classify customer service tickets using Langfun and a Gemma model. It shows a `lf.query` call that takes a formatted prompt, a `Ticket` schema (presumably for the output structure), and a `LlamaCppRemote` language model to process the input context and return a structured result. This process helps in categorizing and prioritizing support tickets for efficient handling.
+SOURCE: https://github.com/google-gemini/gemma-cookbook/blob/main/Gemma/[Gemma_2]Using_with_Langfun_and_LlamaCpp.ipynb#_snippet_16
+
+LANGUAGE: python
+CODE:
+```
+result = lf.query(
+    prompt=format_gemma_prompt(context),
+    schema=Ticket,
+    lm=lf.llms.LlamaCppRemote("http://0.0.0.0:8000")
+)
+print(result)
+```
+
+----------------------------------------
+
+TITLE: Assemble RAG Prompt with User Question and Context
+DESCRIPTION: Constructs a prompt template for a Retrieval Augmented Generation (RAG) system, incorporating the original user question and the retrieved relevant context passages. This structured prompt guides the language model to generate a focused answer.
+SOURCE: https://github.com/google-gemini/gemma-cookbook/blob/main/Gemma/[Gemma_1]Minimal_RAG.ipynb#_snippet_6
+
+LANGUAGE: python
+CODE:
+```
+prompt_template = """You are an expert in answering user questions. You always understand user questions well, and then provide high-quality answers based on the information provided in the context.
+
+If the provided context does not contain relevant information, just respond "I could not find the answer based on the context you provided."
+
+User question: {}
+
+Context:
+{}
+"""
+
+context = "\n".join(
+    [f"{i+1}. {passage}" for i, passage in enumerate(top_3_targets.iloc[:].tolist())]
+)
+prompt = f"{prompt_template.format(user_question, context)}"
+```
+
+----------------------------------------
+
+TITLE: Configure LoRA and Optimizer for Gemma Model Fine-tuning
+DESCRIPTION: This Python snippet demonstrates how to enable Low-Rank Adaptation (LoRA) on a Gemma language model's backbone, set its rank, and configure the preprocessor's sequence length to manage memory usage. It also initializes the AdamW optimizer with a specified learning rate and weight decay, which are common settings for transformer model training. LoRA helps reduce the number of trainable parameters, making fine-tuning more efficient and accessible.
+SOURCE: https://github.com/google-gemini/gemma-cookbook/blob/main/Workshops/Workshop_How_to_Fine_tuning_Gemma.ipynb#_snippet_7
+
+LANGUAGE: python
+CODE:
+```
+# Enable LoRA for the model and set the LoRA rank to 4.
+gemma_lm.backbone.enable_lora(rank=lora_rank)
+gemma_lm.summary()
+
+# Limit the input sequence length (to control memory usage).
+gemma_lm.preprocessor.sequence_length = token_limit
+# Use AdamW (a common optimizer for transformer models).
+optimizer = keras.optimizers.AdamW(
+    learning_rate=lr_value,
+    weight_decay=0.01,
+)
+```
+
+----------------------------------------
+
+TITLE: Implementing a RAG Chatbot Flow with Firestore, Genkit, and Google AI
+DESCRIPTION: This TypeScript code defines the `chatbotFlow` using Genkit, integrating a Firestore retriever and a prompt reference. The flow retrieves relevant documents from a 'merch' collection based on user questions, uses an embedding model (`textEmbeddingGecko001`) and cosine similarity for document matching, and incorporates chat history. It generates responses by combining retrieved data with the user's question and historical context, then saves the updated conversation history.
+SOURCE: https://github.com/google-gemini/gemma-cookbook/blob/main/Gemma/[Gemma_2]Using_with_Firebase_Genkit_and_Ollama.ipynb#_snippet_17
+
+LANGUAGE: typescript
+CODE:
+```
+import { defineFlow, run } from '@genkit-ai/flow';
+import { defineFirestoreRetriever } from '@genkit-ai/firebase';
+import { retrieve } from '@genkit-ai/ai/retriever';
+import { textEmbeddingGecko001 } from '@genkit-ai/googleai';
+import { z } from 'zod';
+
+import { firestore } from './config';
+import { inMemoryStore } from './memory.js';
+
+import { promptRef } from '@genkit-ai/dotprompt';
+
+// Define Firestore retriever
+const retrieverRef = defineFirestoreRetriever({
+  name: "merchRetriever",
+  firestore,
+  collection: "merch",  // Collection containing merchandise data
+  contentField: "text",  // Field for product descriptions
+  vectorField: "embedding", // Field for embeddings
+  embedder: textEmbeddingGecko001, // Embedding model
+  distanceMeasure: "COSINE" // Similarity metric
+});
+
+// Define the prompt reference
+const assistantPrompt = promptRef('assistant');
+
+// To store the chat history
+const historyStore = inMemoryStore();
+
+// Define chatbot flow
+export const chatbotFlow = defineFlow(
+  {
+    name: "chatbotFlow",
+    inputSchema: z.string(),
+    outputSchema: z.string()
+  },
+  async (question) => {
+    const conversationId = '0';
+
+    // Retrieve conversation history.
+    const history = await run(
+      'retrieve-history',
+      conversationId,
+      async () => {
+        return (await historyStore?.load(conversationId)) || [];
+      }
+    );
+
+    // Retrieve relevant documents
+    const docs = await retrieve({
+      retriever: retrieverRef,
+      query: question,
+      options: { limit: 5 }
+    });
+
+    // Run the prompt
+    const mainResp = await assistantPrompt.generate({
+      history: history,
+      input: {
+        data: docs.map((doc) => doc.content[0].text || ""),
+        question: question
+      }
+    });
+
+    // Save history.
+    await run(
+      'save-history',
+      {
+        conversationId: conversationId,
+        history: mainResp.toHistory()
+      },
+      async () => {
+        await historyStore?.save(conversationId, mainResp.toHistory());
+      }
+    );
+
+    // Handle the response from the model API. In this sample, we just convert
+    // it to a string, but more complicated flows might coerce the response into
+    // structured output or chain the response into another LLM call, etc.
+    return mainResp.text();
+  }
+)
+```
+
+----------------------------------------
+
+TITLE: Python Function to Extract and Execute Tool Calls
+DESCRIPTION: Defines `extract_tool_call`, a utility function that uses regular expressions to find and extract Python code wrapped in ````tool_code```` blocks from a given text. It then executes this code using `exec` and captures its standard output, returning the output formatted as a ````tool_output```` block.
+SOURCE: https://github.com/google-gemini/gemma-cookbook/blob/main/Gemma/[Gemma_3]Function_Calling_with_HF_document_summarizer.ipynb#_snippet_16
+
+LANGUAGE: Python
+CODE:
+```
+import re
+import io
+from contextlib import redirect_stdout
+
+def extract_tool_call(text):
+    pattern = r"```tool_code\s*(.*?)\s*```"
+    match = re.search(pattern, text, re.DOTALL)
+    if match:
+        code = match.group(1).strip()
+        # Capture stdout in a string buffer
+        f = io.StringIO()
+        with redirect_stdout(f):
+            # result = eval(code)
+            result = exec(code, globals())
+        output = f.getvalue()
+        r = result if output == '' else output
+        return f'```tool_output\n{r}\n```'
+    return None
+```
+
+----------------------------------------
+
+TITLE: Perform Step-by-Step Reasoning with Gemma in Python
+DESCRIPTION: This example shows how to prompt the Gemma model to perform step-by-step reasoning before providing an explanation. It encourages the model to 'think' aloud.
+SOURCE: https://github.com/google-gemini/gemma-cookbook/blob/main/Gemma/[Gemma_1]Common_use_cases.ipynb#_snippet_6
+
+LANGUAGE: python
+CODE:
+```
+prompt = """<start_of_turn>user
+Think and write your step-by-step reasoning before responding.
+
+Explain why the sky is blue.<end_of_turn>
+<start_of_turn>model"""
+
+response = gemma.generate(prompt, max_length=1024)
+display(Markdown(response[len(prompt) :]))
+```
+
+----------------------------------------
+
+TITLE: Python Class for Agentic-Tx Therapeutics Agent
+DESCRIPTION: The `AgenticTx` class defines a therapeutics agent that orchestrates multiple tools and uses a Gemini model for reasoning. It manages a multi-step process, including thoughts, actions, and observations, to solve complex problems like drug preference analysis. The class includes methods for initialization, resetting, generating system prompts, managing prior information, and executing a multi-step reasoning process.
+SOURCE: https://github.com/google-gemini/gemma-cookbook/blob/main/TxGemma/[TxGemma]Agentic_Demo_with_Hugging_Face.ipynb#_snippet_16
+
+LANGUAGE: python
+CODE:
+```
+# This class defines our Agentic-Tx, wrapping together all of our tools and the orchestrator
+class AgenticTx:
+  def __init__(self, tool_manager, model_str, num_steps=5):
+    self.curr_steps = 0
+    self.num_steps = num_steps
+    self.model_str = model_str
+    self.tool_manager = tool_manager
+    self.thoughts = list()
+    self.actions  = list()
+    self.observations = list()
+
+  def reset(self):
+    # Reset the number of steps taken
+    self.curr_steps = 0
+
+  def system_prompt(self, use_tools=True):
+    # These are the system instructions for AgenticTx
+    role_prompt = "You are an expert therapeutic agent. You answer accurately and thoroughly."
+    prev_actions = f"You can perform a maximum of {self.num_steps} actions. You have performed {self.curr_steps} and have {self.num_steps - self.curr_steps - 1} left."
+    if use_tools: tool_prompt = "You can use tools to solve problems and answer questions. " + self.tool_manager.tool_prompt()
+    else: tool_prompt = "You cannot use any tools right now."
+    return f"{role_prompt} {prev_actions} {tool_prompt}"
+
+  def prior_information(self, query):
+      info_txt = f"Question: {query}\n" if query is not None else ""
+      for _i in range(self.curr_steps):
+          info_txt += f"### Thought {_i + 1}: {self.thoughts[_i]}\n"
+          info_txt += f"### Action {_i + 1}: {self.actions[_i]}\n"
+          info_txt += f"### Observation {_i + 1}: {self.observations[_i]}\n\n"
+          info_txt += "@"*20
+      return info_txt
+
+  def step(self, question):
+    for _i in range(self.num_steps):
+      if self.curr_steps == self.num_steps-1:
+        return inference_gemini(
+            model_str=self.model_str,
+            prompt=f"{self.prior_information(question)}\nYou must now provide an answer to this question {question}",
+            system_prompt=self.system_prompt(use_tools=False))
+      else:
+        # Provide a thought step, planning for the model
+        thought = inference_gemini(
+            model_str=self.model_str,
+            prompt=f"{self.prior_information(question)}\nYou cannot currently use tools but you can think about the problem and what tools you want to use. This was the question, think about plans for how to use tools to answer this {question}. Let's think step by step (respond with only 1-2 sentences).\nThought: ",
+            system_prompt=self.system_prompt(use_tools=False))
+        # Provide a took action for the model
+        action = inference_gemini(
+            model_str=self.model_str,
+            prompt=f"{self.prior_information(question)}\n{thought}\nNow you must use tools to answer the following user query [{question}], closely following the tool instructions. Tool",
+            system_prompt=self.system_prompt(use_tools=True))
+        obs = self.tool_manager.use_tool(action)
+
+        print("Thought:", thought)
+        print("Action:",  action)
+        print("Observation:",  obs)
+
+        self.thoughts.append(thought)
+        self.actions.append(action)
+        self.observations.append(obs)
+
+        self.curr_steps += 1
+
+
+agentictx = AgenticTx(tool_manager=tools, model_str="gemini-2.0-pro")
+# The model should select CC(=O)OC1=CC=CC=C1C(=O)O because O=C(CCCCCCC(=O)Nc1ccccc1)NO is toxic
+response = agentictx.step("Which of the following drugs is preferred for further development? 1. CC(=O)OC1=CC=CC=C1C(=O)O or 2. O=C(CCCCCCC(=O)Nc1ccccc1)NO")
+print("\nFinal Response:", response)
+```
+
+----------------------------------------
+
+TITLE: Define Weather Tool Function
+DESCRIPTION: Defines a Python function `get_current_weather_tool` that simulates fetching current weather information. It parses the input string to extract location and unit (Celsius/Fahrenheit) and returns a formatted weather string.
+SOURCE: https://github.com/google-gemini/gemma-cookbook/blob/main/Gemma/[Gemma_2]Function_Calling_with_Groq_Langchain.ipynb#_snippet_3
+
+LANGUAGE: python
+CODE:
+```
+from langchain.tools import Tool
+from langchain_groq import ChatGroq
+from langchain.agents import initialize_agent
+import re
+
+# Define a single-input weather tool
+def get_current_weather_tool(input_str: str) -> str:
+    """Get the current weather in a location."""
+    # Naive parsing: look for location and optional unit
+    match = re.search(r"in (\w+)", input_str.lower())
+    unit_match = re.search(r"(celsius|fahrenheit)", input_str.lower())
+
+    location = match.group(1) if match else "unknown"
+    unit = unit_match.group(1) if unit_match else "fahrenheit"
+    return f"Final Answer: The weather in {location.title()} is 72° {unit.title()} and sunny."
+```
+
+----------------------------------------
+
+TITLE: Extract and Tokenize Text from PDF Files in Python
+DESCRIPTION: This snippet provides two core functions: `extract_text_from_pdf` reads all text content from a specified PDF file using PyPDF2, handling potential errors during file access. `split_text_into_chunks` takes a large block of text and breaks it down into smaller, manageable chunks based on sentence boundaries and a maximum chunk size, ensuring that each chunk is suitable for embedding and processing.
+SOURCE: https://github.com/google-gemini/gemma-cookbook/blob/main/Gemma/[Gemma_2]RAG_PDF_Search_in_multiple_documents_on_Colab.ipynb#_snippet_4
+
+LANGUAGE: python
+CODE:
+```
+def extract_text_from_pdf(pdf_path):
+    try:
+        with open(pdf_path, 'rb') as file:
+            reader = PyPDF2.PdfReader(file)
+            text = "".join([page.extract_text() for page in reader.pages])
+        return text
+    except Exception as e:
+        print(f"Error reading {pdf_path}: {e}")
+        return ""
+
+def split_text_into_chunks(text, max_chunk_size=1000):
+    sentences = sent_tokenize(text)
+    chunks = []
+    current_chunk = ""
+
+    for sentence in sentences:
+        if len(current_chunk) + len(sentence) <= max_chunk_size:
+            current_chunk += sentence + " "
+        else:
+            chunks.append(current_chunk.strip())
+            current_chunk = sentence + " "
+
+    if current_chunk:
+        chunks.append(current_chunk.strip())
+
+    return chunks
+```
+
+----------------------------------------
+
+TITLE: Define SGLang Function for JSON Generation with Regex Schema
+DESCRIPTION: This Python snippet defines a regular expression for a JSON schema to enforce structured output for animal information. It then defines an SGLang function `animal_gen` that uses this regex with `sglang.gen` to generate JSON output about a given animal, ensuring the model adheres to the specified schema.
+SOURCE: https://github.com/google-gemini/gemma-cookbook/blob/main/Gemma/[Gemma_2]Using_with_SGLang.ipynb#_snippet_18
+
+LANGUAGE: python
+CODE:
+```
+character_regex = (
+    r"""{\n"""
+    + r"""    \"name\": \"[\\w\\d\\s]{1,16}\",\\n"""
+    + r"""    \"type\": \"(Mammals|Birds|Fish|Reptiles|Amphibians|Invertebrates)\",\\n"""
+    + r"""    \"reproduction\": \"(Sexual|Asexual)\",\\n"""
+    + r"""    \"life expectancy\": \"[0-9]{1,2}\",\\n"""
+    + r"""}"""
+)
+
+@function
+def animal_gen(s, name):
+    s += name + " is an animal. Please fill in the following information about this animal.\n"
+    s += gen("json_output", max_tokens=256, regex=character_regex)
+```
+
+----------------------------------------
+
+TITLE: Construct LangChain RAG Chain with LCEL
+DESCRIPTION: This snippet builds the complete RAG chain using LangChain Expression Language (LCEL). It defines the flow from retrieving context, passing it to a prompt, invoking the LLM, and finally parsing the output using the custom `GemmaOutputParser`.
+SOURCE: https://github.com/google-gemini/gemma-cookbook/blob/main/Gemma/[Gemma_2]Using_with_LangChain.ipynb#_snippet_11
+
+LANGUAGE: python
+CODE:
+```
+# Create an actual chain
+
+rag_chain = (
+    # First you need retrieve documents that are relevant to the
+    # given query
+    {"context": retriever | format_docs, "question": RunnablePassthrough()}
+    # The output is passed the prompt and fills fields like `{question}`
+    # and `{context}`
+    | prompt
+    # The whole prompt will all the information is passed the LLM
+    | llm
+    # The answer of the LLM is parsed by the class defined above
+    | GemmaOutputParser()
+)
+```
+
+----------------------------------------
+
+TITLE: Prompt Chaining for Multi-step LLM Tasks
+DESCRIPTION: Explains how to break down complex tasks into smaller, more manageable subtasks using prompt chaining. The output from one prompt feeds into the next, enhancing LLM effectiveness, transparency, and debugging for conversational assistants and personalized experiences.
+SOURCE: https://github.com/google-gemini/gemma-cookbook/blob/main/Gemma/[Gemma_1]Advanced_Prompting_Techniques.ipynb#_snippet_13
+
+LANGUAGE: python
+CODE:
+```
+prompt_1 = """
+Extract all city names from the following text:
+
+The aroma of fresh bread wafted through the Paris market, tempting Amelia
+as she hurried to catch her flight to Tokyo. She dreamt of indulging in steaming
+ramen after a whirlwind tour of ancient temples. Back home in Chicago,
+she'd recount her adventures, photos filled with Eiffel Tower selfies
+and neon-lit Tokyo nights.
+"""
+prompt_1 = convert_message_to_prompt(prompt_1)
+prompt_1_response = gemma.generate(prompt_1, max_length=512)
+
+print("--- After first prompt: ---")
+display(Markdown(prompt_1_response[len(prompt_1) :]))
+```
+
+LANGUAGE: python
+CODE:
+```
+previous_response = {prompt_1_response[len(prompt_1) :]}
+
+prompt_2 = f"""Convert the following cities into a valid Python list.
+Make it uppercase and remove all unecessary characters:\n{previous_response}"""
+prompt_2 = convert_message_to_prompt(prompt_2)
+prompt_2_response = gemma.generate(prompt_2, max_length=512)
+
+print("--- After second prompt: ---")
+display(Markdown(prompt_2_response[len(prompt_2) :]))
+```
+
+----------------------------------------
+
+TITLE: Prepare Final Conversation Inputs for LLM (Python)
+DESCRIPTION: Similar to the initial input preparation, this line uses `processor.apply_chat_template` to process the `prompt` that now includes the tool call results. This prepares the updated conversation for the language model, enabling it to generate a final, informed response.
+SOURCE: https://github.com/google-gemini/gemma-cookbook/blob/main/Gemma/[Gemma_3]Function_Calling_with_HF.ipynb#_snippet_21
+
+LANGUAGE: python
+CODE:
+```
+final_prompt = processor.apply_chat_template(
+            prompt,
+            tools=tools,
+            add_generation_prompt=True,
+            return_dict=True,
+            tokenize=True,
+            return_tensors="pt",
+).to(model.device, dtype=torch.bfloat16)
+```
+
+----------------------------------------
+
+TITLE: Load and Quantize Gemma Model
+DESCRIPTION: Loads the Gemma model using `AutoModelForCausalLM.from_pretrained` with 4-bit quantization enabled via `BitsAndBytesConfig`. This configuration significantly reduces the model's memory footprint and speeds up inference, making it suitable for environments with limited resources like Colab GPUs. The model is mapped to the first available CUDA device.
+SOURCE: https://github.com/google-gemini/gemma-cookbook/blob/main/Gemma/[Gemma_1]Basics_with_HF.ipynb#_snippet_6
+
+LANGUAGE: python
+CODE:
+```
+import torch
+from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
+
+# Let's quantize the model to reduce its weight
+bnb_config = BitsAndBytesConfig(
+    load_in_4bit=True, bnb_4bit_quant_type="nf4", bnb_4bit_compute_dtype=torch.bfloat16
+)
+
+# Let's load the final model
+model = AutoModelForCausalLM.from_pretrained(
+    model_id, quantization_config=bnb_config, device_map={"": 0}
+)
+```
+
+----------------------------------------
+
+TITLE: Define Custom LangChain LLM for Gemma Model
+DESCRIPTION: This Python class `Gemma2_2B_LLM` extends LangChain's `LLM` base class to integrate the custom Gemma model. It implements the `_call` method to process prompts using the Gemma sampler and defines identifying parameters and the LLM type.
+SOURCE: https://github.com/google-gemini/gemma-cookbook/blob/main/Gemma/[Gemma_2]LangChain_chaining.ipynb#_snippet_5
+
+LANGUAGE: python
+CODE:
+```
+class Gemma2_2B_LLM(LLM):
+
+    sampler: Any = None
+
+    def _call(
+        self,
+        prompt: str,
+        stop: Optional[List[str]] = None,
+        run_manager: Optional[CallbackManagerForLLMRun] = None,
+        **kwargs: Any,
+    ) -> str:
+
+        reply = self.sampler(input_strings=[prompt],
+                        total_generation_steps=128,
+                        )
+        return reply.text[0]
+
+    @property
+    def _identifying_params(self) -> Dict[str, Any]:
+
+        return {
+            "model_name": "Gemma2-2B-IT",
+        }
+
+    @property
+    def _llm_type(self) -> str:
+
+        return "Gemma2-2B-IT LLM"
+
+```
+
+----------------------------------------
+
+TITLE: ToolManager Class Definition and API Reference
+DESCRIPTION: This Python class acts as a central orchestrator for multiple tools, allowing an agent to access and utilize them. It provides methods to generate prompts for available tools, provide usage instructions, and dynamically select and execute the correct tool based on an agent's query.
+SOURCE: https://github.com/google-gemini/gemma-cookbook/blob/main/TxGemma/[TxGemma]Agentic_Demo_with_Hugging_Face.ipynb#_snippet_14
+
+LANGUAGE: python
+CODE:
+```
+# The tool manager will hold all of the tools, and provide an interface for the agent
+class ToolManager:
+    def __init__(self, toolset):
+        self.toolset = toolset
+
+    def tool_prompt(self):
+        # This will let the agent know what tools it has access to
+        tool_names = ", ".join([tool.tool_name for tool in self.toolset])
+        return f"You have access to the following tools: {tool_names}\n{self.tool_instructions()}. You can only use one tool at a time. These are the only tools you have access to nothing else."
+
+    def tool_instructions(self):
+        # This allows the agent to know how to use the tools
+        tool_instr = "\n".join([tool.instructions() for tool in self.toolset])
+        return f"The following is a set of instructions on how to use each tool.\n{tool_instr}"
+
+    def use_tool(self, query):
+        # This will iterate through all of the tools
+        # and find the correct tool that the agent requested
+        for tool in self.toolset:
+            if tool.tool_is_used(query):
+                # use the tool and return the output
+                return tool.use_tool(tool.process_query(query))
+        return f"No tool match for search: {query}"
+
+if USE_CHAT:
+    tools = ToolManager([TxGemmaChatTool(), ClinicalTox(), PubMedSearch()])
+else:
+    tools = ToolManager([ClinicalTox(), PubMedSearch()])
+```
+
+LANGUAGE: APIDOC
+CODE:
+```
+class ToolManager:
+  __init__(toolset: list):
+    Initializes the ToolManager with a list of tools.
+    Parameters:
+      toolset (list): A list of tool objects, each expected to have tool_name, instructions, tool_is_used, process_query, and use_tool methods.
+
+  tool_prompt():
+    Generates a prompt string informing the agent about available tools.
+    Returns:
+      str: A string listing tool names and general instructions.
+
+  tool_instructions():
+    Aggregates and returns instructions for all managed tools.
+    Returns:
+      str: A multi-line string containing detailed instructions for each tool.
+
+  use_tool(query: str):
+    Identifies and uses the appropriate tool based on the query.
+    Parameters:
+      query (str): The agent's query string.
+    Returns:
+      str: The output from the selected tool's use_tool method, or an error message if no tool matches the query.
+```
+
+----------------------------------------
+
+TITLE: Execute Model Training with SFTTrainer
+DESCRIPTION: This Python snippet initiates the fine-tuning process by calling `trainer.train()`. This method leverages the `SFTTrainer` to manage the entire training loop, including data handling, forward/backward passes, and optimizer steps, based on the configured training arguments.
+SOURCE: https://github.com/google-gemini/gemma-cookbook/blob/main/Gemma/[Gemma_2]Finetune_with_Unsloth.ipynb#_snippet_12
+
+LANGUAGE: python
+CODE:
+```
+trainer_stats = trainer.train()
+```
+
+----------------------------------------
+
+TITLE: Launch Interactive Chat Interface with Gradio
+DESCRIPTION: This Python snippet uses Gradio's 'ChatInterface' to create a web-based interactive chat application. It integrates the 'chat_with_gemma' function to handle backend logic, allowing users to interact with the Gemma 2 chatbot through a user-friendly interface.
+SOURCE: https://github.com/google-gemini/gemma-cookbook/blob/main/Gemma/[Gemma_2]Gradio_Chatbot.ipynb#_snippet_6
+
+LANGUAGE: python
+CODE:
+```
+import gradio as gr
+
+gr.ChatInterface(
+    fn=chat_with_gemma,
+    type="messages"
+).launch()
+```
+
+----------------------------------------
+
+TITLE: Define Training Arguments and Hyperparameters
+DESCRIPTION: Configures essential training arguments including output directory, number of epochs, batch sizes, gradient accumulation, gradient clipping, learning rate, optimizer, and learning rate scheduler. These settings control the overall training process and resource utilization for model optimization.
+SOURCE: https://github.com/google-gemini/gemma-cookbook/blob/main/Gemma/[Gemma_2]Finetune_with_Torch_XLA.ipynb#_snippet_17
+
+LANGUAGE: python
+CODE:
+```
+# Output directory where the model predictions and checkpoints will be stored
+output_dir = "./results"
+# Number of training epochs
+num_train_epochs = 5
+# Batch size per TPU core for training
+per_device_train_batch_size = 32
+# Batch size per TPU core for evaluation
+per_device_eval_batch_size = 32
+# Number of update steps to accumulate the gradients for
+gradient_accumulation_steps = 1
+# Maximum gradient normal (gradient clipping)
+max_grad_norm = 0.3
+# Initial learning rate (adafactor optimizer)
+learning_rate = 0.0001
+# Optimizer to use
+optim = "adafactor"
+# Learning rate schedule (constant a bit better than cosine)
+lr_scheduler_type = "constant"
+# Number of training steps (overrides num_train_epochs)
+max_steps = -1
+# Ratio of steps for a linear warmup (from 0 to learning rate)
+warmup_ratio = 0.03
+# Enable bfloat16 precision
+bf16 = True
+# Log every X updates steps
+logging_steps = 1
+```
+
+----------------------------------------
+
+TITLE: Define Function to Format Retrieved Documents
+DESCRIPTION: This Python function `format_docs` takes a list of document objects as input and concatenates their `page_content` attributes into a single string. Each document's content is separated by two newline characters, preparing the retrieved context for input into an LLM.
+SOURCE: https://github.com/google-gemini/gemma-cookbook/blob/main/Gemma/[Gemma_2]Using_with_Elasticsearch_and_LangChain.ipynb#_snippet_27
+
+LANGUAGE: python
+CODE:
+```
+def format_docs(docs):
+    return "\n\n".join([doc.page_content for doc in docs])
+```
+
+----------------------------------------
+
+TITLE: Implement Few-Shot Prompting for Hashtag Generation
+DESCRIPTION: Illustrates few-shot prompting by providing the Gemma model with examples of hashtag generation for different topics. The model then uses these examples to generate hashtags for a new topic, demonstrating its ability to learn from in-context examples without explicit training.
+SOURCE: https://github.com/google-gemini/gemma-cookbook/blob/main/Gemma/[Gemma_1]Advanced_Prompting_Techniques.ipynb#_snippet_8
+
+LANGUAGE: Python
+CODE:
+```
+prompt = """Generate a single line of hashtags for the given topic by in the same style as the following examples:
+
+Topic: Books
+#BooksLover #Books #MyBooks #BestBook #BookOfTheYear
+
+Topic: Games
+#GamesLover #Games #MyGames #BestGame #GameOfTheYear
+
+Topic: Movies
+"""
+
+prompt = convert_message_to_prompt(prompt)
+response = gemma.generate(prompt, max_length=128)
+print(response[len(prompt) :])
+```
+
+----------------------------------------
+
+TITLE: Generate Image Caption with PaliGemma (Keras)
+DESCRIPTION: This Python snippet demonstrates how to use the loaded PaliGemma model to generate a caption for a prepared image. It constructs a prompt, passes the image and prompt to the model's `generate` method, and then post-processes the output to remove the initial prompt, yielding a clean image description.
+SOURCE: https://github.com/google-gemini/gemma-cookbook/blob/main/PaliGemma/[PaliGemma_1]Image_captioning.ipynb#_snippet_5
+
+LANGUAGE: python
+CODE:
+```
+# define prompt separately so we can measure its length later
+prompt = "Caption the image:"
+
+# pass images and prompts to paligemma
+response = pali_gemma_lm.generate({"images": [img_tensor], "prompts": [prompt]})
+
+# we're not using an instruction-trained model so we have to cut the prompt off
+# the front of our output
+filtered = response[0][len(prompt) :]
+print(filtered)
+```
+
+----------------------------------------
+
+TITLE: Configure AdamW Optimizer and Compile Gemma Model
+DESCRIPTION: This snippet demonstrates how to initialize the `AdamW` optimizer from Keras, specifying a learning rate and weight decay. It also shows how to exclude specific variables like 'bias' and 'scale' from weight decay. Finally, it compiles the `gemma_lm` model using `SparseCategoricalCrossentropy` loss and `SparseCategoricalAccuracy` as a weighted metric, preparing it for training.
+SOURCE: https://github.com/google-gemini/gemma-cookbook/blob/main/Demos/spoken-language-tasks/k-gemma-it/spoken_language_tasks_with_gemma.ipynb#_snippet_6
+
+LANGUAGE: python
+CODE:
+```
+optimizer = keras.optimizers.AdamW(
+    learning_rate=lr_value,
+    weight_decay=0.01,
+)
+# Exclude layernorm and bias terms from decay.
+optimizer.exclude_from_weight_decay(var_names=["bias", "scale"])
+
+gemma_lm.compile(
+    loss=keras.losses.SparseCategoricalCrossentropy(from_logits=True),
+    optimizer=optimizer,
+    weighted_metrics=[keras.metrics.SparseCategoricalAccuracy()],
+)
+```
+
+----------------------------------------
+
+TITLE: Load Gemma Model with Hugging Face Transformers
+DESCRIPTION: Installs necessary libraries (bitsandbytes, accelerate) and loads the Gemma 7B-IT model from Hugging Face Transformers. The model is configured for 4-bit quantization to optimize memory usage and enable efficient inference.
+SOURCE: https://github.com/google-gemini/gemma-cookbook/blob/main/Gemma/[Gemma_1]Minimal_RAG.ipynb#_snippet_8
+
+LANGUAGE: python
+CODE:
+```
+!pip install bitsandbytes accelerate
+from transformers import AutoTokenizer
+import transformers
+import torch
+import bitsandbytes, accelerate
+
+model = "google/gemma-7b-it"
+
+tokenizer = AutoTokenizer.from_pretrained(model)
+pipeline = transformers.pipeline(
+    "text-generation",
+    model=model,
+    model_kwargs={
+        "torch_dtype": torch.float16,
+        "quantization_config": {"load_in_4bit": True}
+    }
+)
+```
+
+----------------------------------------
+
+TITLE: Define Function Calling Prompt for Gemma
+DESCRIPTION: This code defines a multi-turn input prompt string for the fine-tuned Gemma model. It includes a function definition for 'calculate_median' with its schema and a user query, designed to elicit a function call response from the model.
+SOURCE: https://github.com/google-gemini/gemma-cookbook/blob/main/Gemma/[Gemma_2]Finetune_with_Function_Calling.ipynb#_snippet_20
+
+LANGUAGE: python
+CODE:
+```
+input_text = """\n<start_of_turn>user\nYou are a helpful assistant with access to the following functions. Use them if required -\n{\n    \"name\": \"calculate_median\",\n    \"description\": \"Calculate the median of a list of numbers\",\n    \"parameters\": {\n        \"type\": \"object\",\n        \"properties\": {\n             \"numbers\": {\n                 \"type\": \"array\",\n                 \"items\": {\n                     \"type\": \"number\"\n                 },\n                 \"description\": \"The list of numbers\"\n             }\n        }\n        \"required\": [\n            \"numbers\"\n        ]\n    }\n}\nTo use these functions respond with:\n<functioncall> {\"name\": \"function_name\", \"arguments\": {\"arg_1\": \"value_1\", \"arg_1\": \"value_1\", ...}} </functioncall>\n\nThen finally respond with:\nAnswer:\n\n<end_of_turn>\n<start_of_turn>user\nUSER: Hi, I have a list of numbers and I need to find the median. The numbers are [5, 2, 9, 1, 7, 4, 6, 3, 8]\n<end_of_turn>\n<start_of_turn>model\n<functioncall>\n"""
+```
+
+----------------------------------------
+
+TITLE: Apply Data Formatting and Tokenization to Dataset (Python)
+DESCRIPTION: This Python snippet applies the previously defined `formatting_func` and `tokenize_function` to the loaded dataset in a batched manner. This step transforms the raw text questions and SQL queries into token IDs and labels, making the dataset suitable for training a language model.
+SOURCE: https://github.com/google-gemini/gemma-cookbook/blob/main/CodeGemma/[CodeGemma_1]Finetune_with_SQL.ipynb#_snippet_8
+
+LANGUAGE: python
+CODE:
+```
+# Apply the formatting function to the dataset
+data = data.map(formatting_func, batched=True)
+
+# Apply the tokenization function to the formatted data
+data = data.map(tokenize_function, batched=True)
+```
+
+----------------------------------------
+
+TITLE: Generate Text with Gemma Model Sampler
+DESCRIPTION: This code demonstrates how to use the configured Gemma sampler to generate text. It provides an input prompt, sets the maximum generation steps, and then prints the original prompt along with the model's generated answer, showcasing the model's inference capabilities.
+SOURCE: https://github.com/google-gemini/gemma-cookbook/blob/main/Gemma/[Gemma_1]Inference_on_TPU.ipynb#_snippet_9
+
+LANGUAGE: Python
+CODE:
+```
+input_batch = [
+    "\n Explain the phenomenon of a solar eclipse.",
+  ]
+
+out_data = sampler(
+    input_strings=input_batch,
+    total_generation_steps=300,
+  )
+
+for input_string, out_string in zip(input_batch, out_data.text):
+  print(f"Prompt:\n{input_string}\n Answer:\n{out_string}")
+  print()
+```
