@@ -1,0 +1,301 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gemini AI Search Chat</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        html, body {
+            height: 100%;
+            overflow: hidden;
+        }
+        body {
+            display: flex;
+            flex-direction: column;
+        }
+        /* For custom scrollbars */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #1f2937; /* bg-gray-800 */
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #4b5563; /* bg-gray-600 */
+            border-radius: 3px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #6b7280; /* bg-gray-500 */
+        }
+        /* Simple spinner animation */
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        .animate-spin {
+            animation: spin 1s linear infinite;
+        }
+        /* Ensure textarea grows */
+        .chat-input textarea {
+            min-height: 44px; /* Matches button height */
+            height: 44px;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white font-sans">
+
+    <header class="p-4 border-b border-gray-700 shadow-lg bg-gray-800 flex-shrink-0">
+        <h1 class="text-xl font-bold text-center text-teal-400">Gemini AI Search Chat</h1>
+    </header>
+
+    <main id="chat-container" class="flex-1 overflow-y-auto p-6 custom-scrollbar">
+        <div id="chat-content" class="max-w-3xl mx-auto">
+            <!-- Messages will be injected here by JavaScript -->
+        </div>
+    </main>
+
+    <footer class="p-4 border-t border-gray-700 bg-gray-800 flex-shrink-0">
+        <div class="max-w-3xl mx-auto">
+            <div id="error-display" class="text-red-500 text-sm mb-2 text-center"></div>
+            <div class="flex items-start bg-gray-700 rounded-lg p-2 chat-input">
+                <textarea
+                    id="user-input"
+                    class="flex-1 bg-transparent text-gray-200 placeholder-gray-400 focus:outline-none resize-none px-2"
+                    placeholder="Ask a question..."
+                    rows="1"
+                ></textarea>
+                <button
+                    id="send-button"
+                    class="p-2 w-11 h-11 flex items-center justify-center rounded-full bg-teal-500 hover:bg-teal-600 disabled:bg-gray-500 disabled:cursor-not-allowed transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-teal-500"
+                >
+                    <!-- Icon will be injected here -->
+                </button>
+            </div>
+        </div>
+    </footer>
+
+    <script type="module">
+        import { GoogleGenAI } from 'https://esm.sh/@google/genai@^1.10.0';
+
+        // --- DOM Elements ---
+        const chatContainer = document.getElementById('chat-container');
+        const chatContent = document.getElementById('chat-content');
+        const userInput = document.getElementById('user-input');
+        const sendButton = document.getElementById('send-button');
+        const errorDisplay = document.getElementById('error-display');
+
+        // --- State ---
+        let isLoading = false;
+        let chatSession;
+
+        // --- Icons ---
+        const SendIcon = `<svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" /></svg>`;
+        const SpinnerIcon = `<div class="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>`;
+        const UserIcon = `<svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" /></svg>`;
+        const BotIcon = `<svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-8 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm5.5-9.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm-7 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM12 8c-2.21 0-4-1.79-4-4h8c0 2.21-1.79 4-4 4z" /></svg>`;
+        const SearchIcon = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg>`;
+
+        // --- Gemini API Setup ---
+        function initializeChat() {
+            try {
+                if (!process.env.API_KEY) {
+                    throw new Error("API_KEY environment variable not set.");
+                }
+                const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+                chatSession = ai.chats.create({
+                    model: 'gemini-2.5-flash',
+                    config: {
+                        tools: [{ googleSearch: {} }],
+                        systemInstruction: "You are a helpful AI assistant with access to Google Search. When the user asks for information that may be recent or requires up-to-date knowledge (like current events, specific product details, or exchange rates), you MUST use the Google Search tool to find the answer. Do not tell the user what you *would* find; perform the search and provide the information directly, citing your sources when available.",
+                    }
+                });
+                // Add initial welcome message
+                addMessageToChat('model', "Hello! I'm a helpful AI assistant with access to Google Search. I can answer questions about recent events, find up-to-date information, and more. Just ask your question directly!");
+            } catch (e) {
+                console.error(e);
+                setError(`Initialization failed: ${e.message}`);
+            }
+        }
+        
+        function addMessageToChat(role, text, groundingChunks = []) {
+            const messageId = `msg-${Date.now()}`;
+            const isModel = role === 'model';
+            
+            const messageWrapper = document.createElement('div');
+            messageWrapper.className = `flex items-start gap-3 my-4 ${isModel ? 'justify-start' : 'justify-end'}`;
+            messageWrapper.id = messageId;
+
+            const iconContainer = document.createElement('div');
+            iconContainer.className = `flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-white ${isModel ? 'bg-teal-500' : 'bg-gray-600'}`;
+            iconContainer.innerHTML = isModel ? BotIcon : UserIcon;
+
+            const messageBubble = document.createElement('div');
+            messageBubble.className = `max-w-xl p-4 rounded-xl shadow-md ${isModel ? 'bg-gray-700 text-gray-200 rounded-tl-none' : 'bg-blue-600 text-white rounded-br-none'}`;
+
+            const messageText = document.createElement('p');
+            messageText.className = 'whitespace-pre-wrap';
+            messageText.id = `text-${messageId}`;
+            messageText.textContent = text;
+            messageBubble.appendChild(messageText);
+            
+            if (isModel && groundingChunks.length > 0) {
+                 const sourcesContainer = createSourcesElement(groundingChunks, messageId);
+                 messageBubble.appendChild(sourcesContainer);
+            }
+
+            if (isModel) {
+                messageWrapper.appendChild(iconContainer);
+                messageWrapper.appendChild(messageBubble);
+            } else {
+                messageWrapper.appendChild(messageBubble);
+                messageWrapper.appendChild(iconContainer);
+            }
+            
+            chatContent.appendChild(messageWrapper);
+            scrollToBottom();
+            return messageId;
+        }
+
+        function createSourcesElement(chunks, parentId) {
+            const sourcesContainer = document.createElement('div');
+            sourcesContainer.className = 'mt-4 pt-3 border-t border-gray-600';
+            sourcesContainer.id = `sources-${parentId}`;
+
+            const sourcesHeader = document.createElement('h4');
+            sourcesHeader.className = 'text-xs font-semibold text-gray-400 mb-2 flex items-center gap-1.5';
+            sourcesHeader.innerHTML = `${SearchIcon} Sources`;
+            sourcesContainer.appendChild(sourcesHeader);
+            
+            const sourcesList = document.createElement('ul');
+            sourcesList.className = 'space-y-1.5';
+            chunks.forEach(chunk => {
+                if (chunk.web?.uri) {
+                    const listItem = document.createElement('li');
+                    const link = document.createElement('a');
+                    link.href = chunk.web.uri;
+                    link.target = '_blank';
+                    link.rel = 'noopener noreferrer';
+                    link.className = 'text-xs text-teal-400 hover:text-teal-300 hover:underline break-all';
+                    link.textContent = chunk.web.title || chunk.web.uri;
+                    listItem.appendChild(link);
+                    sourcesList.appendChild(listItem);
+                }
+            });
+            sourcesContainer.appendChild(sourcesList);
+            return sourcesContainer;
+        }
+
+        function updateLastMessage(messageId, newText, groundingChunks = []) {
+             const messageText = document.getElementById(`text-${messageId}`);
+             if (messageText) {
+                 messageText.textContent = newText;
+             }
+
+             const messageBubble = messageText.parentElement;
+             let sourcesContainer = document.getElementById(`sources-${messageId}`);
+             
+             if (groundingChunks.length > 0) {
+                 if (!sourcesContainer) {
+                     sourcesContainer = createSourcesElement(groundingChunks, messageId);
+                     messageBubble.appendChild(sourcesContainer);
+                 } else {
+                     // Just rebuild the list for simplicity
+                     const newList = createSourcesElement(groundingChunks, messageId);
+                     sourcesContainer.replaceWith(newList);
+                 }
+             }
+        }
+
+        // --- UI & Event Handlers ---
+        function toggleLoading(state) {
+            isLoading = state;
+            userInput.disabled = state;
+            sendButton.disabled = state;
+            sendButton.innerHTML = state ? SpinnerIcon : SendIcon;
+            if(!state) {
+              userInput.focus();
+              autoGrowTextarea({ target: userInput });
+            }
+        }
+        
+        function setError(message) {
+            errorDisplay.textContent = message;
+        }
+
+        function scrollToBottom() {
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        function autoGrowTextarea(event) {
+            const el = event.target;
+            el.style.height = 'auto'; // Reset height
+            el.style.height = (el.scrollHeight) + 'px'; // Set to content height
+        }
+
+        async function handleSendMessage() {
+            const messageText = userInput.value.trim();
+            if (!messageText || isLoading) return;
+            
+            setError('');
+            addMessageToChat('user', messageText);
+            userInput.value = '';
+            autoGrowTextarea({target: userInput}); // Reset textarea height
+            toggleLoading(true);
+
+            const thinkingMessageId = addMessageToChat('model', '...');
+            
+            try {
+                if (!chatSession) throw new Error('Chat session not initialized.');
+                const stream = await chatSession.sendMessageStream({ message: messageText });
+
+                let fullResponseText = '';
+                const collectedChunks = [];
+
+                for await (const chunk of stream) {
+                    const chunkText = chunk.text;
+                    fullResponseText += chunkText;
+
+                    const newChunks = chunk.candidates?.[0]?.groundingMetadata?.groundingChunks ?? [];
+                    if (newChunks.length > 0) {
+                        newChunks.forEach(newChunk => {
+                            if (newChunk.web?.uri && !collectedChunks.some(c => c.web.uri === newChunk.web.uri)) {
+                                collectedChunks.push(newChunk);
+                            }
+                        });
+                    }
+                    updateLastMessage(thinkingMessageId, fullResponseText || '...', collectedChunks);
+                    scrollToBottom();
+                }
+
+            } catch (e) {
+                console.error("Error during sendMessageStream:", e);
+                const errorMessage = e.message || "An unexpected error occurred.";
+                updateLastMessage(thinkingMessageId, `Sorry, I ran into an error: ${errorMessage}`);
+                setError(errorMessage);
+            } finally {
+                toggleLoading(false);
+            }
+        }
+
+        // --- Initialization ---
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeChat();
+            toggleLoading(false); // Set initial button icon
+
+            sendButton.addEventListener('click', handleSendMessage);
+            userInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSendMessage();
+                }
+            });
+            userInput.addEventListener('input', autoGrowTextarea);
+            autoGrowTextarea({target: userInput});
+        });
+
+    </script>
+</body>
+</html>
