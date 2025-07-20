@@ -27,4 +27,8 @@ This is a single-file, serverless chat application built with vanilla HTML, CSS,
 
 ## Project Structure
 
-The entire application is self-contained in `index.html`. There are no external CSS or JavaScript files. This design choice emphasizes simplicity and portability.
+The entire application is self-contained in `index.html`. This project is intended to be a single-file application and does not recommend separating the logic into different files for the final output.
+
+## Development
+
+While the final output must be a single `index.html` file, developers can use tools like Vite during development for a better experience (e.g., live reloading, module management). A build process can be configured to bundle all JavaScript and CSS into the final `index.html` file, maintaining the single-file distribution requirement.
