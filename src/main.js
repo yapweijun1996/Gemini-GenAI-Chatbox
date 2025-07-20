@@ -1315,9 +1315,10 @@ async function V_t(e) {
   console.log("Consolidating memories...");
   const o=`
         You are a memory consolidation agent. Your task is to review the following list of memories and consolidate them into a more concise, organized, and coherent set of facts.
-        - Merge related facts. For example, "User likes dogs" and "User has a golden retriever" should become "User has a golden retriever dog."
-        - Remove redundant or outdated information.
-        - Rephrase memories to be clearer and more objective.
+        - **Merge related facts aggressively.** For example, "User likes dogs" and "User has a golden retriever" must become "User has a golden retriever dog."
+        - **Remove redundant or outdated information.** If a memory is a less specific version of another, delete it.
+        - **Eliminate meta-commentary.** Remove memories about the AI's own limitations or capabilities (e.g., "I cannot access personal information").
+        - **Rephrase memories to be clearer and more objective.**
         - Return ONLY the consolidated information as a valid JSON object with a single key "consolidated_memories" which contains an array of strings.
 
         Memories to consolidate:
@@ -1357,8 +1358,10 @@ async function Pt(e, n) {
   if(s.length===0)return[];
   const i=`
         You are a retrieval agent. Your task is to select the most relevant memories from the following list to help answer the user's query.
-        Return ONLY the most relevant memories as a valid JSON object with a single key "relevant_memories" which contains an array of strings.
-        Do not return more than 5 memories.
+        - Analyze the user's query to understand its intent, even if it is vague. For example, a query like "what about my car" should be interpreted as a request for any stored information about their car.
+        - Return ONLY the most relevant memories as a valid JSON object with a single key "relevant_memories" which contains an array of strings.
+        - If no memories are relevant, or if the query is a simple greeting, return an empty array.
+        - Do not return more than 5 memories.
 
         Memories:
         ${JSON.stringify(s.map(r=>r.text))}
@@ -1432,20 +1435,24 @@ async function Kt(e, n=null, t, o, s) {
       Je=new Date,
       We=Intl.DateTimeFormat().resolvedOptions().timeZone,
       ze=Je.toLocaleString(),
-      Xe=await Pt(a, e),
-      Qe=`You are a helpful and friendly conversational AI. Your name is Gemini.
-            When the user asks for information that may be recent or requires up-to-date knowledge (like current events, specific product details, or exchange rates), you MUST use the Google Search tool to find the answer. Do not tell the user what you *would* find; perform the search and provide the information directly, citing your sources when available.
-            Current user context:
-            - OS: ${C}
-            - Browser: ${Ve}
-            - Current Time: ${ze}
-            - Timezone: ${We}
-            
-            Here are some relevant memories from past conversations:
-            ${Xe.join(`
-`)}
+      Xe=await Pt(a, e);
+      let memoryContext = "";
+      if (Xe.length > 0) {
+           memoryContext = `Here are some relevant memories from past conversations:
+           ${Xe.join(`
+`)}`
+      }
+      const Qe=`You are a helpful and friendly conversational AI. Your name is Gemini.
+           When the user asks for information that may be recent or requires up-to-date knowledge (like current events, specific product details, or exchange rates), you MUST use the Google Search tool to find the answer. Do not tell the user what you *would* find; perform the search and provide the information directly, citing your sources when available.
+           Current user context:
+           - OS: ${C}
+           - Browser: ${Ve}
+           - Current Time: ${ze}
+           - Timezone: ${We}
+           
+           ${memoryContext}
 
-            Always format your responses using Markdown. For code, use language-specific code blocks.`,
+           Always format your responses using Markdown. For code, use language-specific code blocks.`,
       Ze=c.getGenerativeModel( {
         model:f, systemInstruction:Qe, tools:[ {
           googleSearch: {
@@ -1553,6 +1560,7 @@ xe,
 zt,
 nn,
 on,
+sn,
 X=[],
 Ye=0,
 I=null;
@@ -1667,6 +1675,7 @@ async function tn() {
     zt=document.getElementById("close-memory-modal-button"),
     nn=document.getElementById("import-memory-button"),
     on=document.getElementById("export-memory-button"),
+    sn=document.getElementById("optimize-memory-button"),
     await st(),
     ee.addEventListener("submit", Zt),
     Le.addEventListener("click", ()=>D.click()),
@@ -1775,6 +1784,25 @@ async function tn() {
 , t.click();
           break
         }
+        case "optimize-memory-button":
+            const optimizeButton = document.getElementById("optimize-memory-button");
+            const originalButtonText = optimizeButton.innerHTML;
+            optimizeButton.disabled = true;
+            optimizeButton.innerHTML = `<svg class="animate-spin h-5 w-5 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+</svg> Optimizing...`;
+            try {
+                await V_t(X[Ye]);
+                alert("AI memory has been optimized.");
+            } catch (t) {
+                alert("An error occurred during memory optimization.");
+                console.error("Memory optimization error:", t);
+            } finally {
+                optimizeButton.disabled = false;
+                optimizeButton.innerHTML = originalButtonText;
+            }
+            break;
       }
     }
     ),
