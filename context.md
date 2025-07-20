@@ -7,7 +7,7 @@ This is a single-file, serverless chat application built with vanilla HTML, CSS,
 *   **All-in-One `index.html`:** The entire application—structure (HTML), styling (Tailwind CSS via CDN and inline styles), and logic (JavaScript)—is contained in a single file.
 *   **Direct Gemini API Integration:** The application communicates directly with the Google Gemini API from the client-side.
 *   **Persistent Chat History:** Chat history is stored locally in the user's browser using IndexedDB, allowing conversations to be saved between sessions.
-*   **Settings Configuration:** A modal allows users to configure their Gemini API key and select the AI model to use.
+*   **Settings Configuration:** A modal allows users to configure their Gemini API key and select the AI model to use. Available models are `gemini-2.5-flash` and `gemini-2.5-pro`.
 *   **Markdown Rendering:** The chat log renders Markdown, including syntax highlighting for code blocks.
 *   **Image Uploads:** Users can attach and send images to the AI, which supports vision-enabled models.
 *   **Responsive Design:** The interface is styled with Tailwind CSS for a modern and responsive layout.
