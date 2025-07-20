@@ -1,30 +1,44 @@
 # Project: Gemini AI Chatbox
 
-This is a single-file, serverless chat application built with vanilla HTML, CSS, and JavaScript. The entire application is contained within a single `index.html` file, making it highly portable and easy to run. It allows users to interact with the Google Gemini AI.
+This is a sophisticated chat application built within a **Vite development environment** that produces a **single-file `index.html` for production**. It uses vanilla HTML, CSS, and JavaScript to interact with the Google Gemini AI, augmented by a powerful multi-agent memory system and Google Search integration.
 
 ## Key Features
 
-*   **All-in-One `index.html`:** The entire application—structure (HTML), styling (Tailwind CSS via CDN and inline styles), and logic (JavaScript)—is contained in a single file.
-*   **Direct Gemini API Integration:** The application communicates directly with the Google Gemini API from the client-side.
-*   **Persistent Chat History:** Chat history is stored locally in the user's browser using IndexedDB, allowing conversations to be saved between sessions.
-*   **Settings Configuration:** A modal allows users to configure their Gemini API key and select the AI model to use. Available models are `gemini-2.5-flash` and `gemini-2.5-pro`.
-*   **Markdown Rendering:** The chat log renders Markdown, including syntax highlighting for code blocks.
-*   **Image Uploads:** Users can attach and send images to the AI, which supports vision-enabled models.
-*   **Responsive Design:** The interface is styled with Tailwind CSS for a modern and responsive layout.
+*   **Vite Development Environment:** Developed using Vite for a fast, modern development experience with features like Hot Module Replacement (HMR).
+*   **Single-File Production Build:** Uses `vite-plugin-singlefile` to bundle the entire application into one `index.html` file for ultimate portability.
+*   **RAG Memory System:** Implements a Retrieval-Augmented Generation (RAG) architecture with three specialized AI agents for long-term memory management:
+    *   **Extraction Agent (`Ut`):** Extracts key facts from conversations to form new memories.
+    *   **Retrieval Agent (`Pt`):** Searches the memory database to find the most relevant facts related to the current user query, providing context to the main AI.
+    *   **Consolidation Agent (`V_t`):** Periodically and manually refines, de-duplicates, and merges memories to maintain accuracy and efficiency.
+*   **Google Search Integration:** The AI can use Google Search as a tool to answer questions about recent events or to find information outside of its training data, providing source links for its claims.
+*   **Persistent Storage:** Chat history and the AI's memories are stored locally in the user's browser using **IndexedDB**.
+*   **Manual Memory Management:**
+    *   **Optimize Memory:** A button in the settings allows the user to manually trigger the Consolidation Agent.
+    *   **Import/Export:** Users can export the AI's memory to a JSON file for backup and import it back into the application.
+*   **Advanced UI/UX:**
+    *   **Markdown Rendering:** The chat log renders Markdown with syntax highlighting.
+    *   **Image Uploads:** Supports vision-enabled models by allowing users to upload images.
+    *   **Loading Indicators:** Provides visual feedback (e.g., spinners) for asynchronous operations like memory optimization.
+    *   **Responsive Design:** Styled with Tailwind CSS for a modern and responsive layout.
 
 ## Technology Stack
 
-*   **HTML:** The structure of the application.
-*   **CSS (Tailwind CSS):** For styling the user interface, included via a CDN.
-*   **JavaScript (Vanilla):** For all client-side logic, embedded directly within the `index.html` file inside a `<script type="module">` tag.
-*   **IndexedDB:** For client-side storage of chat history and settings.
-*   **Google Gemini API:** The AI service that powers the chat functionality.
-*   **External Libraries (via CDN):**
-    *   [Tailwind CSS](https://tailwindcss.com/)
+*   **Build Tool:** [Vite](https://vitejs.dev/)
+*   **Bundling Plugin:** [vite-plugin-singlefile](https://github.com/richardtallent/vite-plugin-singlefile)
+*   **HTML:** The application's structure.
+*   **CSS (Tailwind CSS):** For styling the user interface.
+*   **JavaScript (Vanilla):** For all client-side logic.
+*   **Client-Side Database:** IndexedDB for storing chat history and AI memories.
+*   **AI Service:** Google Gemini API with the Google Search tool enabled.
+*   **External Libraries:**
     *   [marked.js](https://marked.js.org/) for Markdown parsing.
     *   [highlight.js](https://highlightjs.org/) for syntax highlighting.
     *   [ua-parser-js](https://github.com/faisalman/ua-parser-js) for user-agent parsing.
 
 ## Project Structure
 
-The entire application is self-contained in `index.html`. There are no external CSS or JavaScript files. This design choice emphasizes simplicity and portability.
+*   **`index.html`:** The main entry point of the application.
+*   **`src/main.js`:** Contains all the JavaScript logic, including the AI agents, API calls, and UI interactions.
+*   **`src/style.css`:** Contains the Tailwind CSS directives and any custom styles.
+*   **`vite.config.js`:** Configuration file for Vite and its plugins.
+*   **`dist/index.html`:** The final, bundled single-file output after running the build command.
