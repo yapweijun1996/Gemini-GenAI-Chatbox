@@ -4,7 +4,7 @@ import { viteSingleFile } from 'vite-plugin-singlefile'
 export default defineConfig(({ command }) => {
   if (command === 'build') {
     return {
-      plugins: [viteSingleFile()],
+      plugins: [viteSingleFile({ removeViteModuleLoader: true, inlinePattern: ['!manifest.json'] })],
     }
   }
   return {
